@@ -2,31 +2,61 @@
 import chalk from 'chalk'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
-import { ask_email, ask_password } from './ui'
+import { ask_list, ask_email, ask_password } from './ui'
 
 const CONFIG_FILE = __dirname + '/.cli_data.json'
 
-type ConfigType = { email?: string; password?: string; save_password?: boolean }
+type ConfigType = { email: string; password: string; save_password: boolean }
 
 export const run = async () => {
 	let config = open_config()
+	let choice
+
 	console.log(chalk.red(`   ___  ___ __     _______   ____`))
 	console.log(chalk.green(`  / _ )/ (_) /    / ___/ /  /  _/`))
 	console.log(chalk.blueBright(` / _  / / / _ \\  / /__/ /___/ /`))
 	console.log(chalk.yellow(`/____/_/_/_//_/  \\___/____/___/\n`))
-	if (!config.email) {
-		config.email = await ask_email()
+	const api = await login(config)
+	while (1) {
+		choice = await ask_list(['Repo manage', 'Key manage', 'Option', 'Exit'], "Let's do some works")
+		api
+		if (choice === 'Exit') {
+			break
+		}
 	}
-	print_message('Login with: ' + config.email, '', 'message')
-	if (!config.password) {
-		config.password = await ask_password()
-	}
-	try {
-		const api = new BlihApi({ email: 'theo.cousinet@epitech.eu', token: '' })
-		const repo = await api.listRepositories()
-		console.log(repo)
-	} catch (err) {}
 	write_config(config)
+}
+
+async function login(config: ConfigType) {
+	let api: BlihApi = new BlihApi({ email: '1', password: '1' })
+	let error = false
+
+	try {
+		print_message('Blih server up: ' + (await api.ping()) + 'ms', '', 'message')
+	} catch (err) {
+		print_message('Blih server down', '', 'fail')
+		process.exit(2)
+	}
+	do {
+		if (!config.email) {
+			config.email = await ask_email()
+		}
+		print_message('Login with: ' + config.email, '', 'message')
+		if (!config.password) {
+			config.password = await ask_password()
+		}
+		try {
+			api = new BlihApi({ email: config.email, password: config.password })
+			await api.listKeys()
+			error = false
+		} catch (err) {
+			print_message('Fail to login', err, 'fail')
+			config.email = ''
+			config.password = ''
+			error = true
+		}
+	} while (error)
+	return api
 }
 
 function open_config() {
@@ -46,11 +76,8 @@ function open_config() {
 
 function parse_config(config: any) {
 	const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})')
-	const parse_config: ConfigType = {} as any
+	const parse_config: ConfigType = { email: '', password: '', save_password: false }
 
-	parse_config.email = ''
-	parse_config.password = ''
-	parse_config.save_password = false
 	if (config.email && regex_email.test(config.email)) {
 		parse_config.email = config.email
 	}
@@ -81,8 +108,12 @@ function print_message(title: string, message: string, level: 'message' | 'fail'
 		console.error(chalk.redBright.bold(title))
 		throw new Error(chalk.redBright(message))
 	} else if (level == 'fail') {
-		console.error(chalk.redBright.bold(title))
-		console.error(chalk.redBright(message))
+		if (message) {
+			console.error(chalk.redBright.bold(title))
+			console.error(chalk.redBright(message))
+		} else {
+			console.error(chalk.redBright.bold(title))
+		}
 	} else {
 		if (message) {
 			console.log(chalk.greenBright.bold(title))

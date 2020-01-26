@@ -12,7 +12,7 @@ export async function ask_list(choices: string[], message?: string) {
 			pageSize: 10,
 		},
 	])
-	return prompted.prompted
+	return prompted.prompted as string
 }
 
 export async function ask_password() {
@@ -23,7 +23,7 @@ export async function ask_password() {
 			mask: '*',
 		},
 	])
-	return password.password
+	return password.password as string
 }
 
 export async function ask_email() {
@@ -39,5 +39,5 @@ export async function ask_email() {
 		])
 	} while (!regex_email.test(email.email))
 
-	return email.email
+	return email.email as string
 }

@@ -50,7 +50,6 @@ export class BlihApi {
 		} else if (!credentials.password && !credentials.token) {
 			throw 'A password or token is needed to authenticate'
 		}
-
 		this._email = credentials.email
 		if (credentials.token) {
 			this._token = credentials.token
@@ -231,7 +230,7 @@ export class BlihApi {
 	 * Ping the Blih server
 	 * @return {Promise} the response time in milliseconds
 	 */
-	static async ping(): Promise<number> {
+	async ping(): Promise<number> {
 		const api = axios.create(options)
 
 		// Add timestamps to requests and responses
