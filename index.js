@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
-const main = require('./build/index.js').run;
+const main = require('./build/index.js').run
 
-main();
+main().catch(err => {
+	console.error(err)
+})

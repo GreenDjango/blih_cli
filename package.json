@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/inquirer": "^6.5.0",
+    "axios": "^0.19.1",
+    "inquirer": "^7.0.3",
     "tslint": "^5.20.1",
     "typescript": "^3.7.5"
   },
@@ -14,5 +17,5 @@
     "start": "node lib/src/index.js"
   },
   "author": "Theo",
-  "license": "ISC"
+  "license": "MIT"
 }
