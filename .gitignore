@@ -5,8 +5,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# CLI save file
+.cli_data.json
+
 # Build folder
 build/
+prod/
 
 # Runtime data
 pids

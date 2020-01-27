@@ -54,10 +54,7 @@ export class BlihApi {
 		if (credentials.token) {
 			this._token = credentials.token
 		} else if (credentials.password) {
-			this._token = crypto
-				.createHash('sha512')
-				.update(credentials.password)
-				.digest('hex')
+			this._token = this.hashPassword(credentials.password)
 		} else {
 			throw 'A password or token is needed to authenticate'
 		}
@@ -69,14 +66,12 @@ export class BlihApi {
 	/**
 	 * Create a repository
 	 * @param  {String} repository Name of the new repository
-	 * @param  {String} description A short description of the repository
 	 * @return {Promise} description
 	 */
-	async createRepository(repository: string, description: string): Promise<string> {
+	async createRepository(repository: string): Promise<string> {
 		const data = {
 			name: repository,
 			type: 'git',
-			description,
 		}
 
 		return (await this.call('post', '/repositories', data)).data.message
@@ -89,8 +84,8 @@ export class BlihApi {
 	 * @return {Promise} description
 	 */
 	async deleteRepository(repository: string): Promise<string> {
-		repository = encodeURIComponent(repository)
-		return (await this.call('delete', `/repository/${repository}`)).data.message
+		const encode_repo = encodeURIComponent(repository)
+		return (await this.call('delete', `/repository/${encode_repo}`)).data.message
 	}
 
 	/**
@@ -126,9 +121,9 @@ export class BlihApi {
 		description: string
 		public: boolean
 	}> {
-		repository = encodeURIComponent(repository)
-		const info = (await this.call('get', `/repository/${repository}`)).data.message
-		info.name = repository
+		const encode_repo = encodeURIComponent(repository)
+		const info = (await this.call('get', `/repository/${encode_repo}`)).data.message
+		info.name = encode_repo
 		info.creation_time = Number(info.creation_time)
 		info.public = info.public !== 'False'
 		return info
@@ -141,9 +136,9 @@ export class BlihApi {
 	 * @return {Promise} the collaborators on this repository
 	 */
 	async getACL(repository: string): Promise<{ name: string; rights: string }[]> {
-		repository = encodeURIComponent(repository)
+		const encode_repo = encodeURIComponent(repository)
 		try {
-			const acl = (await this.call('get', `/repository/${repository}/acls`)).data
+			const acl = (await this.call('get', `/repository/${encode_repo}/acls`)).data
 			return Object.keys(acl)
 				.filter(c => c.length && acl[c].length)
 				.sort()
@@ -173,9 +168,9 @@ export class BlihApi {
 			acl,
 			user,
 		}
+        const encode_repo = encodeURIComponent(repository)
 
-		repository = encodeURIComponent(repository)
-		return (await this.call('post', `/repository/${repository}/acls`, data)).data.message
+		return (await this.call('post', `/repository/${encode_repo}/acls`, data)).data.message
 	}
 
 	/**
@@ -192,13 +187,15 @@ export class BlihApi {
 	}
 
 	/**
-	 * Delete an SSH key
-	 * @param  {String} key - name of the key (usually corresponds to the key comment)
-	 * @return {Promise} a message confirming deletion
+	 * Hash password to token
+	 * @param  {String} password - password to hash
+	 * @return {String} a new token
 	 */
-	async deleteKey(key: string): Promise<string> {
-		key = encodeURIComponent(key)
-		return (await this.call('delete', `/sshkey/${key}`)).data.message
+	hashPassword(password: string): string {
+		return crypto
+			.createHash('sha512')
+			.update(password)
+			.digest('hex')
 	}
 
 	/**
@@ -224,6 +221,16 @@ export class BlihApi {
 	 */
 	async whoami(): Promise<string> {
 		return (await this.call('get', '/whoami')).data.message
+	}
+
+	/**
+	 * Delete an SSH key
+	 * @param  {String} key - name of the key (usually corresponds to the key comment)
+	 * @return {Promise} a message confirming deletion
+	 */
+	async deleteKey(key: string): Promise<string> {
+		const encode_key = encodeURIComponent(key)
+		return (await this.call('delete', `/sshkey/${encode_key}`)).data.message
 	}
 
 	/**

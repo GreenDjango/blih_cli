@@ -41,3 +41,26 @@ export async function ask_email() {
 
 	return email.email as string
 }
+
+export async function ask_question(message?: string) {
+	const bool: any = await inquirer.prompt([
+		{
+			type: 'confirm',
+			name: 'prompted',
+			message: message || '>',
+		},
+	])
+	return bool.prompted
+}
+
+export async function ask_input(message: string) {
+	let input: any
+
+	input = await inquirer.prompt([
+		{
+			type: 'input',
+			name: message,
+		},
+	])
+	return input[message] as string
+}
