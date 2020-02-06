@@ -7,6 +7,7 @@ This project is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Comman
 4. `cd blih_cli/`
 5. `npm install`
 6. `npm run build`
+7. `./index.js`
 
 ### Lint
 ```
