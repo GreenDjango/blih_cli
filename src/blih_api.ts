@@ -168,7 +168,7 @@ export class BlihApi {
 			acl,
 			user,
 		}
-        const encode_repo = encodeURIComponent(repository)
+		const encode_repo = encodeURIComponent(repository)
 
 		return (await this.call('post', `/repository/${encode_repo}/acls`, data)).data.message
 	}
@@ -184,18 +184,6 @@ export class BlihApi {
 		}
 
 		return (await this.call('post', '/sshkeys', data)).data.message
-	}
-
-	/**
-	 * Hash password to token
-	 * @param  {String} password - password to hash
-	 * @return {String} a new token
-	 */
-	hashPassword(password: string): string {
-		return crypto
-			.createHash('sha512')
-			.update(password)
-			.digest('hex')
 	}
 
 	/**
@@ -231,6 +219,18 @@ export class BlihApi {
 	async deleteKey(key: string): Promise<string> {
 		const encode_key = encodeURIComponent(key)
 		return (await this.call('delete', `/sshkey/${encode_key}`)).data.message
+	}
+
+	/**
+	 * Hash password to token
+	 * @param  {String} password - password to hash
+	 * @return {String} a new token
+	 */
+	hashPassword(password: string): string {
+		return crypto
+			.createHash('sha512')
+			.update(password)
+			.digest('hex')
 	}
 
 	/**

@@ -8,6 +8,7 @@
     "axios": "^0.19.1",
     "chalk": "^3.0.0",
     "inquirer": "^7.0.3",
+    "inquirer-autocomplete-prompt": "^1.0.1",
     "ora": "^4.0.3",
     "tslint": "^5.20.1",
     "typescript": "^3.7.5"

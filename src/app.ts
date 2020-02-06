@@ -1,18 +1,9 @@
 import ora from 'ora'
 import chalk from 'chalk'
-import fs from 'fs'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_email, ask_password, ask_question, ask_input } from './ui'
-
-const CONFIG_FILE = __dirname + '/.cli_data.json'
-
-type ConfigType = {
-	email: string
-	token: string
-	save_token: boolean
-	contact: string[]
-	repo: string[]
-}
+import { ask_list, ask_email, ask_password, ask_question } from './ui'
+import { ConfigType, open_config, write_config, print_message } from './utils'
+import { repo_menu } from './repository_menu'
 
 export const run = async () => {
 	const config = open_config()
@@ -90,46 +81,6 @@ async function login(config: ConfigType) {
 	return api
 }
 
-async function repo_menu(api: BlihApi, config: ConfigType) {
-	let should_quit = false
-
-	while (!should_quit) {
-		const choices = ['↵ Back', 'Create repository', 'Delete repository']
-		const choice = await ask_list(choices, 'Repository')
-		switch (choice) {
-			case choices[1]:
-				const input = await ask_input('Repository name')
-				const spinner = ora().start(chalk.green('Process...'))
-				try {
-					const res = await api.createRepository(input)
-					config.repo.push(input)
-					spinner.succeed(chalk.green(res))
-				} catch (err) {
-					spinner.fail(chalk.red(err))
-				}
-				break
-			case choices[2]:
-				const to_delete = await ask_list(config.repo)
-				const valid = await ask_question(`Delete ${to_delete} ?`)
-				if (valid) {
-					const spinner = ora().start(chalk.green('Process...'))
-					try {
-						const res = await api.deleteRepository(to_delete)
-						config.repo = config.repo.filter(value => value !== to_delete)
-						spinner.succeed(chalk.green(res))
-					} catch (err) {
-						spinner.fail(chalk.red(err))
-					}
-					spinner.stop()
-				}
-				break
-			case choices[0]:
-			default:
-				should_quit = true
-		}
-	}
-}
-
 async function show_contact(config: ConfigType) {
 	let should_quit = false
 
@@ -164,6 +115,7 @@ async function option_menu(config: ConfigType) {
 		const choices = [
 			'↵ Back',
 			`Remember password: ${config.save_token ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
+			`Auto Ramassage-tek ACL: ${config.auto_acl ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
 			'Reset all contact',
 		]
 		const choice = await ask_list(choices, 'You want options ?')
@@ -172,81 +124,15 @@ async function option_menu(config: ConfigType) {
 				config.save_token = !config.save_token
 				break
 			case choices[2]:
+				config.auto_acl = !config.auto_acl
+				break
+			case choices[3]:
 				const valid = await ask_question(`Are you sure ?`)
 				if (valid) config.contact = []
 				break
 			case choices[0]:
 			default:
 				should_quit = true
-		}
-	}
-}
-
-function open_config() {
-	let config
-	try {
-		if (fs.existsSync(CONFIG_FILE)) {
-			const config_file = fs.readFileSync(CONFIG_FILE, 'utf8')
-			config = JSON.parse(config_file)
-		} else {
-			config = {}
-		}
-	} catch (err) {
-		print_message('Fail to open config file', err, 'error')
-	}
-	return parse_config(config)
-}
-
-function parse_config(config: any) {
-	const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})')
-	const new_config: ConfigType = { email: '', token: '', save_token: false, contact: [], repo: [] }
-
-	if (config.email && regex_email.test(config.email)) {
-		new_config.email = config.email
-	}
-	if (config.token) {
-		new_config.token = config.token
-	}
-	if (config.save_token) {
-		new_config.save_token = true
-	}
-	if (config.contact) {
-		new_config.contact = config.contact
-	}
-
-	return new_config
-}
-
-function write_config(config: ConfigType) {
-	if (!config.save_token) {
-		config.token = undefined as any
-	}
-	config.repo = undefined as any
-	try {
-		const config_json = JSON.stringify(config, undefined, 4)
-		fs.writeFileSync(CONFIG_FILE, config_json, 'utf8')
-	} catch (err) {
-		print_message('Fail to save config file', err, 'error')
-	}
-}
-
-function print_message(title: string, message: string, level: 'message' | 'fail' | 'error') {
-	if (level === 'error') {
-		console.error(chalk.redBright.bold(title))
-		throw new Error(chalk.redBright(message))
-	} else if (level === 'fail') {
-		if (message) {
-			console.error(chalk.redBright.bold(title))
-			console.error(chalk.redBright(message))
-		} else {
-			console.error(chalk.redBright.bold(title))
-		}
-	} else {
-		if (message) {
-			console.log(chalk.greenBright.bold(title))
-			console.log(chalk.greenBright(message))
-		} else {
-			console.log(chalk.green(title))
 		}
 	}
 }
