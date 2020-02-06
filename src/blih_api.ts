@@ -1,8 +1,7 @@
 // MIT https://www.npmjs.com/package/blih
 
-import axios from 'axios'
 import crypto from 'crypto'
-import { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 
 const options = {
 	baseURL: 'https://blih.epitech.eu/',
@@ -180,7 +179,7 @@ export class BlihApi {
 	 */
 	async uploadKey(key: string): Promise<string> {
 		const data = {
-			sshkey: key,
+			sshkey: encodeURIComponent(key),
 		}
 
 		return (await this.call('post', '/sshkeys', data)).data.message
@@ -202,16 +201,6 @@ export class BlihApi {
 	}
 
 	/**
-	 * Get your legacy identity
-	 * This is only useful for accounts created prior to 2016 that used the old login format
-	 * For newer users, this will simply return their email.
-	 * @return {Promise} the public keys associated with your account
-	 */
-	async whoami(): Promise<string> {
-		return (await this.call('get', '/whoami')).data.message
-	}
-
-	/**
 	 * Delete an SSH key
 	 * @param  {String} key - name of the key (usually corresponds to the key comment)
 	 * @return {Promise} a message confirming deletion
@@ -219,6 +208,16 @@ export class BlihApi {
 	async deleteKey(key: string): Promise<string> {
 		const encode_key = encodeURIComponent(key)
 		return (await this.call('delete', `/sshkey/${encode_key}`)).data.message
+	}
+
+	/**
+	 * Get your legacy identity
+	 * This is only useful for accounts created prior to 2016 that used the old login format
+	 * For newer users, this will simply return their email.
+	 * @return {Promise} the public keys associated with your account
+	 */
+	async whoami(): Promise<string> {
+		return (await this.call('get', '/whoami')).data.message
 	}
 
 	/**

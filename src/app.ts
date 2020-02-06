@@ -4,6 +4,7 @@ import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
 import { ConfigType, open_config, write_config, print_message } from './utils'
 import { repo_menu } from './repository_menu'
+import { key_menu } from './key_menu'
 
 export const run = async () => {
 	const config = open_config()
@@ -26,6 +27,7 @@ export const run = async () => {
 				await repo_menu(api, config)
 				break
 			case 'Key management':
+				await key_menu(api, config)
 				break
 			case 'Contact':
 				await show_contact(config)

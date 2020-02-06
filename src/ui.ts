@@ -1,46 +1,49 @@
-//import ora from 'ora'
-//import chalk from 'chalk'
 import * as inquirer from 'inquirer'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
+inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
 
-export async function ask_list(choices: string[], message?: string) {
+export async function ask_list(choices: string[], message?: string, return_index?: boolean) {
 	const prompted: any = await inquirer.prompt([
 		{
 			type: 'list',
 			choices: choices,
-			name: 'prompted',
+			name: 'list',
 			message: message || '>',
 			pageSize: 10,
 		},
 	])
-	return prompted.prompted as string
+	if (return_index) {
+		const idx = choices.findIndex(value => value === prompted.list)
+		if (idx >= 0) return idx.toString()
+	}
+	return prompted.list as string
 }
 
 export async function ask_password() {
-	const password: any = await inquirer.prompt([
+	const prompted: any = await inquirer.prompt([
 		{
 			type: 'password',
 			name: 'password',
 			mask: '*',
 		},
 	])
-	return password.password as string
+	return prompted.password as string
 }
 
 export async function ask_email() {
 	const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})')
-	let email: any
+	let prompted: any
 
 	do {
-		email = await inquirer.prompt([
+		prompted = await inquirer.prompt([
 			{
 				type: 'input',
 				name: 'email',
 			},
 		])
-	} while (!regex_email.test(email.email))
+	} while (!regex_email.test(prompted.email))
 
-	return email.email as string
+	return prompted.email as string
 }
 
 export async function ask_qcm(
@@ -56,33 +59,33 @@ export async function ask_qcm(
 		{
 			type: 'checkbox',
 			choices: choices_bis,
-			name: 'prompted',
+			name: 'checkbox',
 			message: message || '>',
 		},
 	])
-	return prompted.prompted as string[]
+	return prompted.checkbox as string[]
 }
 
 export async function ask_question(message?: string) {
-	const bool: any = await inquirer.prompt([
+	const prompted: any = await inquirer.prompt([
 		{
 			type: 'confirm',
-			name: 'prompted',
+			name: 'confirm',
 			message: message || '>',
 		},
 	])
-	return bool.prompted
+	return prompted.confirm as boolean
 }
 
-export async function ask_autocomplete(message: string, source: string[]) {
-	let input: any
+export async function ask_autocomplete(source: string[], message?: string) {
+	let prompted: any
 
 	do {
-		input = await inquirer.prompt([
+		prompted = await inquirer.prompt([
 			{
 				type: 'autocomplete',
-				name: 'from',
-				message: message,
+				name: 'autocomplete',
+				message: message || '>',
 				suggestOnly: true,
 				source: async (answer: any, input: any) => {
 					const regex_input = RegExp(input)
@@ -90,18 +93,45 @@ export async function ask_autocomplete(message: string, source: string[]) {
 				},
 			},
 		])
-	} while (!input.from)
-	return input.from as string
+	} while (!prompted.autocomplete)
+	return prompted.autocomplete as string
+}
+
+export async function ask_path(message?: string, filter?: string, path?: string) {
+	let prompted: any
+
+	do {
+		prompted = await inquirer.prompt([
+			{
+				type: 'fuzzypath',
+				name: 'fuzzypath',
+				message: message,
+				itemType: 'file',
+				depthLimit: 4,
+				rootPath: path ? path : undefined,
+				suggestOnly: true,
+				excludePath: (nodePath: string) => {
+					const regex_input = RegExp('node_modules|\\.git|\\.cache')
+					return regex_input.test(nodePath)
+				},
+				excludeFilter: (nodePath: string) => {
+					if (!filter) return false
+					const regex_input = RegExp(filter)
+					return !regex_input.test(nodePath)
+				},
+			},
+		])
+	} while (!prompted.fuzzypath)
+	return prompted.fuzzypath as string
 }
 
 export async function ask_input(message: string) {
-	let input: any
-
-	input = await inquirer.prompt([
+	const prompted = await inquirer.prompt([
 		{
 			type: 'input',
-			name: message,
+			name: 'input',
+			message: message || '>',
 		},
 	])
-	return input[message] as string
+	return prompted.input as string
 }

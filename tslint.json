@@ -60,7 +60,7 @@
     "no-invalid-this": true,
 
     // Do not allow strings to be thrown because they will not include stack traces. Throw Errors instead.
-    "no-string-throw": true,
+    "no-string-throw": false,
 
     // Disallow control flow statements, such as return, continue, break, and throw in finally blocks.
     "no-unsafe-finally": true,

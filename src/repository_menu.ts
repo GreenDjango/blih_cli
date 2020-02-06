@@ -15,7 +15,7 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 			'Create repository',
 			'Delete repository',
 			'Change ACL',
-			'Repositories list',
+			'Show repositories list',
 		]
 		const choice = await ask_list(choices, 'Repository')
 		switch (choice) {
@@ -29,7 +29,7 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 				await change_acl(api, config)
 				break
 			case choices[4]:
-				await show_repo(config)
+				await show_repo(api, config)
 				break
 			case choices[0]:
 			default:
@@ -45,7 +45,7 @@ async function create_repo(api: BlihApi, config: ConfigType) {
 		let res = await api.createRepository(input)
 		config.repo.push(input)
 		spinner.succeed(chalk.green(res))
-		const acl_list: ACLType[] = []
+		let acl_list: ACLType[] = []
 		if (config.auto_acl) {
 			spinner.start(chalk.green('Process...'))
 			res = await api.setACL(input, 'ramassage-tek', 'r')
@@ -56,6 +56,7 @@ async function create_repo(api: BlihApi, config: ConfigType) {
 		while (to_change.length) {
 			spinner.start(chalk.green('Process...'))
 			const res2 = await api.setACL(input, to_change[0], to_change[1])
+			acl_list = await api.getACL(input)
 			spinner.succeed(
 				chalk.green(res2) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] })
 			)
@@ -85,12 +86,13 @@ async function change_acl(api: BlihApi, config: ConfigType) {
 	const to_acl = await ask_list(config.repo)
 	const spinner = ora().start(chalk.green('Process...'))
 	try {
-		const acl_list = await api.getACL(to_acl)
+		let acl_list = await api.getACL(to_acl)
 		spinner.stop()
 		let to_change = await acl_menu(acl_list, config)
 		while (to_change.length) {
 			spinner.start(chalk.green('Process...'))
 			const res = await api.setACL(to_acl, to_change[0], to_change[1])
+			acl_list = await api.getACL(to_acl)
 			spinner.succeed(
 				chalk.green(res) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] })
 			)
@@ -113,24 +115,20 @@ async function acl_menu(acl_list: ACLType[], config: ConfigType) {
 		return res
 	}
 	const idx = acl_list.findIndex(value => value.name === user)
-	const to_change = (await ask_qcm(
-		['Read', 'Write', 'Admin'],
-		['r', 'w', 'a'],
-		acl_to_bool(acl_list[idx]),
-		user
-	)).join('')
+	const to_change = (
+		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl_list[idx]), user)
+	).join('')
 	acl_list[idx].rights = to_change
 	return [user, to_change]
 }
 
 async function ask_acl(config: ConfigType) {
-	const user = await ask_autocomplete('Enter new email', ['ramassage-tek', ...config.contact])
-	const rights = (await ask_qcm(
-		['Read', 'Write', 'Admin'],
-		['r', 'w', 'a'],
-		[false, false, false],
-		user
-	)).join('')
+	const user = await ask_autocomplete(['ramassage-tek', ...config.contact], 'Enter new email')
+	const rights = (
+		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)
+	).join('')
+	if (user !== 'ramassage-tek' && !config.contact.some(value => value === user))
+		config.contact.push(user)
 	return [user, rights]
 }
 
@@ -148,6 +146,25 @@ function acl_to_bool(acl: ACLType) {
 	return rights
 }
 
-async function show_repo(config: ConfigType) {
-	await ask_list(config.repo)
+async function show_repo(api: BlihApi, config: ConfigType) {
+	const repo = await ask_list(['↵ Back', ...config.repo])
+	if (repo === '↵ Back') return
+	const spinner = ora().start(chalk.green('Process...'))
+
+	try {
+		const repo_info = await api.repositoryInfo(repo)
+		const creation_date = new Date(0)
+		creation_date.setUTCSeconds(repo_info.creation_time)
+		spinner.info(
+			chalk.blue(
+				`Name:		${repo_info.name}` +
+					`\n  Uuid:		${repo_info.uuid}` +
+					`\n  Url:		${repo_info.url}` +
+					`\n  Creation:	${creation_date.toLocaleString()}` +
+					`\n  Public:	${repo_info.public}`
+			)
+		)
+	} catch (err) {
+		spinner.fail(chalk.red(err))
+	}
 }

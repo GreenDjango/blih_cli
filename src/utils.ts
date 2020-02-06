@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import fs from 'fs'
+import { exec } from 'child_process'
 
 const CONFIG_FILE = __dirname + '/.cli_data.json'
 
@@ -89,4 +90,13 @@ export function print_message(title: string, message: string, level: 'message' |
 			console.log(chalk.green(title))
 		}
 	}
+}
+
+export async function sh(cmd: string): Promise<{ stdout: string; stderr: string }> {
+	return new Promise(function(resolve, reject) {
+		exec(cmd, (err, stdout, stderr) => {
+			if (err) reject(err)
+			else resolve({ stdout, stderr })
+		})
+	})
 }
