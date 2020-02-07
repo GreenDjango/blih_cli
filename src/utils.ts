@@ -3,6 +3,8 @@ import fs from 'fs'
 import { exec } from 'child_process'
 
 const CONFIG_FILE = __dirname + '/.cli_data.json'
+export const APP_VERSION = '0.1.0'
+export const WAIT_MSG = 'Process...'
 
 export type ConfigType = {
 	email: string

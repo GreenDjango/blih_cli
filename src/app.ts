@@ -2,32 +2,35 @@ import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
-import { ConfigType, open_config, write_config, print_message } from './utils'
-import { repo_menu } from './repository_menu'
+import { ConfigType, APP_VERSION, open_config, write_config, print_message } from './utils'
+import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
 
 export const run = async () => {
 	const config = open_config()
 	let choice
 	let should_quit = false
-
-	console.log(chalk.red(`   ___  ___ __     _______   ____`))
-	console.log(chalk.green(`  / _ )/ (_) /    / ___/ /  /  _/`))
-	console.log(chalk.blueBright(` / _  / / / _ \\  / /__/ /___/ /`))
-	console.log(chalk.yellow(`/____/_/_/_//_/  \\___/____/___/\n`))
+	if (process.argv.length < 3) {
+		console.log(chalk.red(`   ___  ___ __     _______   ____`))
+		console.log(chalk.green(`  / _ )/ (_) /    / ___/ /  /  _/`))
+		console.log(chalk.blueBright(` / _  / / / _ \\  / /__/ /___/ /`))
+		console.log(
+			chalk.yellow(`/____/_/_/_//_/  \\___/____/___/`) + chalk.grey.italic(`  v${APP_VERSION}\n`)
+		)
+	}
 	const api = await login(config)
+	if (process.argv.length > 2) await parse_arg(api, config)
 	while (!should_quit) {
 		choice = await ask_list(
 			['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'],
 			"Let's do some works"
 		)
-		api
 		switch (choice) {
 			case 'Repositories management':
 				await repo_menu(api, config)
 				break
 			case 'Key management':
-				await key_menu(api, config)
+				await key_menu(api)
 				break
 			case 'Contact':
 				await show_contact(config)
@@ -137,4 +140,23 @@ async function option_menu(config: ConfigType) {
 				should_quit = true
 		}
 	}
+}
+
+async function parse_arg(api: BlihApi, config: ConfigType) {
+	if (process.argv[2] === '-c' || process.argv[2] === '--create') {
+		await create_repo(api, config, process.argv[3])
+	} else if (process.argv[2] === '-a' || process.argv[2].substr(0, 6) === '--acl=') {
+		if (process.argv[2] === '-a') await change_acl(api, config, process.argv[3])
+		else await change_acl(api, config, process.argv[2].substr(6))
+	} else show_help()
+}
+
+function show_help() {
+	ora().info(
+		chalk.blue(
+			'Invalid option\n  Usage blih_cli -[ca] [OPTION]...' +
+				'\n    -c, --create		create new repository' +
+				'\n    -a [REPO], --acl=REPO	change repository acl'
+		)
+	)
 }

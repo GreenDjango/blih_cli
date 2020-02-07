@@ -4,11 +4,11 @@ import { homedir } from 'os'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_question, ask_path, ask_input } from './ui'
-import { ConfigType, sh } from './utils'
+import { WAIT_MSG, sh } from './utils'
 
 const HOME_DIR = homedir()
 
-export async function key_menu(api: BlihApi, config: ConfigType) {
+export async function key_menu(api: BlihApi) {
 	let should_quit = false
 
 	while (!should_quit) {
@@ -19,7 +19,7 @@ export async function key_menu(api: BlihApi, config: ConfigType) {
 				await add_key(api)
 				break
 			case choices[2]:
-				await delete_key(api, config)
+				await delete_key(api)
 				break
 			case choices[3]:
 				await show_key(api)
@@ -48,7 +48,7 @@ async function add_key(api: BlihApi) {
 			if (!fs.existsSync(`${HOME_DIR}/.ssh`)) {
 				fs.mkdirSync(`${HOME_DIR}/.ssh`)
 			}
-			spinner.start(chalk.green('Process...'))
+			spinner.start(chalk.green(WAIT_MSG))
 			await sh(`ssh-keygen -f ${HOME_DIR}/.ssh/${name} -N ""`)
 			await sh(`ssh-add ${HOME_DIR}/.ssh/${name}`)
 			path = `${HOME_DIR}/.ssh/${name}.pub`
@@ -56,7 +56,7 @@ async function add_key(api: BlihApi) {
 			const input = await ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`)
 			spinner.info(chalk.blue('Use `ssh-add ' + input + '` for enable the key'))
 			path = input
-			spinner.start(chalk.green('Process...'))
+			spinner.start(chalk.green(WAIT_MSG))
 		}
 		let key = fs.readFileSync(path, 'utf8')
 		key = key.replace('\n', '')
@@ -67,8 +67,8 @@ async function add_key(api: BlihApi) {
 	}
 }
 
-async function delete_key(api: BlihApi, config: ConfigType) {
-	const spinner = ora().start(chalk.green('Process...'))
+async function delete_key(api: BlihApi) {
+	const spinner = ora().start(chalk.green(WAIT_MSG))
 	spinner.color = 'blue'
 
 	try {
@@ -79,7 +79,7 @@ async function delete_key(api: BlihApi, config: ConfigType) {
 			'Select a key'
 		)
 		const key = choice.split(' ')[0]
-		spinner.start(chalk.green('Process...'))
+		spinner.start(chalk.green(WAIT_MSG))
 		const res = await api.deleteKey(key)
 		spinner.succeed(chalk.green(res))
 	} catch (err) {
@@ -88,7 +88,7 @@ async function delete_key(api: BlihApi, config: ConfigType) {
 }
 
 async function show_key(api: BlihApi) {
-	const spinner = ora().start(chalk.green('Process...'))
+	const spinner = ora().start(chalk.green(WAIT_MSG))
 	spinner.color = 'blue'
 
 	try {
@@ -99,6 +99,7 @@ async function show_key(api: BlihApi) {
 			undefined,
 			true
 		)
+		if (idx === '0') return
 		const key = key_list[+idx - 1]
 		spinner.info(chalk.blue(`Name:		${key.name}` + `\n  Data:		${key.data}`))
 	} catch (err) {
