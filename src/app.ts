@@ -82,6 +82,7 @@ async function login(config: ConfigType) {
 			error = true
 		}
 	} while (error)
+	print_message(`Found ${chalk.cyan(config.repo.length)} repositories`, '', 'message')
 
 	return api
 }
