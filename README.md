@@ -8,6 +8,7 @@ This project is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Comman
 5. `npm ci`
 6. `npm run build`
 7. `./index.js`
+8. Optional: add `alias blih_cli="PATH_TO_CLI/index.js"` in `.bashrc` file
 
 ### Lint
 ```
