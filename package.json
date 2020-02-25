@@ -7,7 +7,7 @@
     "node": ">=6"
   },
   "bin": {
-    "blih_cli ": "prod/index.js",
+    "blih_cli": "prod/index.js",
     "bcli": "prod/index.js"
   },
   "dependencies": {
