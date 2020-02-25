@@ -55,7 +55,7 @@ if git clone --depth 1 "https://github.com/$owner/$repo_name.git"
 then
     printf '\33[32m%s\33[0m\n' "Install in $share_path..."
     cd "$repo_name"
-    npm ci
+    npm i --production
 
     printf '\33[32m%s\33[0m\n' "Coping $repo_name to $bin_path/$repo_name"
     index=`cat package.json | grep -m 1 '"main"' | cut -d$'\"' -f4`
