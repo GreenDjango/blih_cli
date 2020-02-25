@@ -26,6 +26,6 @@ jobs:
       run: |
         rm -rf node_modules/
         npm i --production
-        echo -e "^C^C^C" | prod/index.js
+        sh test/git_action.sh
       env:
         CI: true

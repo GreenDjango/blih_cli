@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Install script for blih_cli
 owner="GreenDjango"
