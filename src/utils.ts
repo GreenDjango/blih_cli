@@ -1,9 +1,12 @@
 import chalk from 'chalk'
 import fs from 'fs'
 import { exec } from 'child_process'
+import { homedir } from 'os'
 
-const CONFIG_FILE = __dirname + '/.cli_data.json'
-export const APP_VERSION = '0.1.0'
+const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
+const CONFIG_FILE = '.cli_data.json'
+const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
+export const APP_VERSION = '0.1.1'
 export const WAIT_MSG = 'Process...'
 
 export type ConfigType = {
@@ -18,8 +21,8 @@ export type ConfigType = {
 export function open_config() {
 	let config
 	try {
-		if (fs.existsSync(CONFIG_FILE)) {
-			const config_file = fs.readFileSync(CONFIG_FILE, 'utf8')
+		if (fs.existsSync(CONFIG_PATH)) {
+			const config_file = fs.readFileSync(CONFIG_PATH, 'utf8')
 			config = JSON.parse(config_file)
 		} else {
 			config = {}
@@ -66,8 +69,11 @@ export function write_config(config: ConfigType) {
 	}
 	config.repo = undefined as any
 	try {
+		if (!fs.existsSync(CONFIG_FOLDER)) {
+			fs.mkdirSync(CONFIG_FOLDER, { recursive: true })
+		}
 		const config_json = JSON.stringify(config, undefined, 4)
-		fs.writeFileSync(CONFIG_FILE, config_json, 'utf8')
+		fs.writeFileSync(CONFIG_PATH, config_json, 'utf8')
 	} catch (err) {
 		print_message('Fail to save config file', err, 'error')
 	}

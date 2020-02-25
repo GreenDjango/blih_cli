@@ -1,25 +1,32 @@
 {
   "name": "blih_cli",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.1",
+  "description": "Blih CLI for Linux",
+  "main": "prod/index.js",
+  "engines": {
+    "node": ">=6"
+  },
   "dependencies": {
-    "@types/inquirer": "^6.5.0",
     "axios": "^0.19.1",
     "chalk": "^3.0.0",
     "inquirer": "^7.0.3",
     "inquirer-autocomplete-prompt": "^1.0.1",
     "inquirer-fuzzy-path": "^2.2.0",
-    "ora": "^4.0.3",
+    "ora": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^6.5.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.5"
   },
-  "devDependencies": {},
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "start": "node lib/src/index.js",
-    "prod": "rm -rf build; rm -rf prod; npm run build; cp -r build prod; rm -rf prod/*.js.map; chmod 777 prod/index.js"
+    "prod": "rm -rf build prod; npm run build; mv build prod; chmod a+x prod/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/GreenDjango/blih_cli.git"
   },
   "author": "Theo",
   "license": "MIT"

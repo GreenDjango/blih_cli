@@ -10,7 +10,6 @@ yarn-error.log*
 
 # Build folder
 build/
-prod/
 
 # Runtime data
 pids

@@ -4,7 +4,6 @@
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"outDir": "build",
-		"sourceMap": true,
 		"strict": true,
 		"resolveJsonModule": true,
 		"target": "es2015",
