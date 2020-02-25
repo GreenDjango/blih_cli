@@ -42,7 +42,7 @@ then
     if [[ $REPLY =~ ^[YyOo]$ ]]
     then
         echo ''
-        rm -rf blih_cli
+        rm -rf "$repo_name"
     else
         printf "Stop $repo_name install\n"
         exit 1
