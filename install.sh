@@ -55,14 +55,14 @@ if git clone --depth 1 "https://github.com/$owner/$repo_name.git"
 then
     printf '\33[32m%s\33[0m\n' "Install in $share_path..."
     cd "$repo_name"
-    npm i --production
+    npm i --production -g
 
     printf '\33[32m%s\33[0m\n' "Coping $repo_name to $bin_path/$repo_name"
     index=`cat package.json | grep -m 1 '"main"' | cut -d$'\"' -f4`
     index_path="$PWD/$index"
-    cd "$bin_path"
-    yes | sudo cp -sf "$index_path" "./$bin_name"
-    sudo chmod a+x "./$bin_name"
+    #cd "$bin_path"
+    #yes | cp -sf "$index_path" "./$bin_name"
+    #chmod a+x "./$bin_name"
 
     printf '\33[32m%s\33[0m\n' "Adding manpage"
     #sudo cp $HOME/norminette/manpage.1.gz /usr/share/man/man1/norminette.1.gz

@@ -6,10 +6,14 @@
   "engines": {
     "node": ">=6"
   },
+  "bin": {
+    "blih_cli ": "prod/index.js",
+    "bcli": "prod/index.js"
+  },
   "dependencies": {
     "axios": "^0.19.1",
     "chalk": "^3.0.0",
-    "inquirer": "^7.0.3",
+    "inquirer": "^6.5.2",
     "inquirer-autocomplete-prompt": "^1.0.1",
     "inquirer-fuzzy-path": "^2.2.0",
     "ora": "^4.0.3"
