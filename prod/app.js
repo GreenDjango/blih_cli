@@ -21,17 +21,19 @@ const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const config = utils_1.open_config();
-    let choice;
-    let should_quit = false;
-    if (process.argv.length < 3) {
+    if (process.argv.length > 2)
+        parse_args(process.argv, config);
+    if (config.verbose && !config.args) {
         console.log(chalk_1.default.red(`   ___  ___ __     _______   ____`));
         console.log(chalk_1.default.green(`  / _ )/ (_) /    / ___/ /  /  _/`));
         console.log(chalk_1.default.blueBright(` / _  / / / _ \\  / /__/ /___/ /`));
         console.log(chalk_1.default.yellow(`/____/_/_/_//_/  \\___/____/___/`) + chalk_1.default.grey.italic(`  v${utils_1.APP_VERSION}\n`));
     }
     const api = yield login(config);
-    if (process.argv.length > 2)
-        yield parse_arg(api, config);
+    if (config.args)
+        yield fast_mode(api, config);
+    let should_quit = false;
+    let choice;
     while (!should_quit) {
         choice = yield ui_1.ask_list(['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
         switch (choice) {
@@ -92,7 +94,9 @@ function login(config) {
                 error = true;
             }
         } while (error);
-        utils_1.print_message(`Found ${chalk_1.default.cyan(config.repo.length)} repositories`, '', 'message');
+        if (config.verbose && !config.args) {
+            utils_1.print_message(`Found ${chalk_1.default.cyan(config.repo.length)} repositories`, '', 'message');
+        }
         return api;
     });
 }
@@ -131,6 +135,7 @@ function option_menu(config) {
                 '↵ Back',
                 `Remember password: ${config.save_token ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Auto Ramassage-tek ACL: ${config.auto_acl ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
+                `Mode verbose: ${config.verbose ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 'Reset all contact',
             ];
             const choice = yield ui_1.ask_list(choices, 'You want options ?');
@@ -142,6 +147,9 @@ function option_menu(config) {
                     config.auto_acl = !config.auto_acl;
                     break;
                 case choices[3]:
+                    config.verbose = !config.verbose;
+                    break;
+                case choices[4]:
                     const valid = yield ui_1.ask_question(`Are you sure ?`);
                     if (valid)
                         config.contact = [];
@@ -153,23 +161,36 @@ function option_menu(config) {
         }
     });
 }
-function parse_arg(api, config) {
+function fast_mode(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (process.argv[2] === '-c' || process.argv[2] === '--create') {
-            yield repository_menu_1.create_repo(api, config, process.argv[3]);
+        if (!config.args)
+            return;
+        if (config.args[2] === '-i') {
+            return;
         }
-        else if (process.argv[2] === '-a' || process.argv[2].substr(0, 6) === '--acl=') {
-            if (process.argv[2] === '-a')
-                yield repository_menu_1.change_acl(api, config, process.argv[3]);
+        else if (config.args[2] === '-c') {
+            yield repository_menu_1.create_repo(api, config, config.args[3]);
+        }
+        else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
+            if (config.args[2] === '-a')
+                yield repository_menu_1.change_acl(api, config, config.args[3]);
             else
-                yield repository_menu_1.change_acl(api, config, process.argv[2].substr(6));
+                yield repository_menu_1.change_acl(api, config, config.args[2].substr(6));
         }
         else
             show_help();
     });
 }
+function parse_args(args, config) {
+    if (args[2] && (args[2] === '-h' || args[2] === '--help')) {
+        show_help();
+        process.exit(0);
+    }
+    config.args = args;
+}
 function show_help() {
-    ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[ca] [OPTION]...' +
-        '\n    -c, --create		create new repository' +
+    ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[ica] [OPTION]...' +
+        '\n\n    -i				interactive mode, default mode' +
+        '\n    -c				create new repository' +
         '\n    -a [REPO], --acl=REPO	change repository acl'));
 }

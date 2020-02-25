@@ -8,9 +8,9 @@ import { key_menu } from './key_menu'
 
 export const run = async () => {
 	const config = open_config()
-	let choice
-	let should_quit = false
-	if (process.argv.length < 3) {
+	if (process.argv.length > 2) parse_args(process.argv, config)
+
+	if (config.verbose && !config.args) {
 		console.log(chalk.red(`   ___  ___ __     _______   ____`))
 		console.log(chalk.green(`  / _ )/ (_) /    / ___/ /  /  _/`))
 		console.log(chalk.blueBright(` / _  / / / _ \\  / /__/ /___/ /`))
@@ -19,7 +19,10 @@ export const run = async () => {
 		)
 	}
 	const api = await login(config)
-	if (process.argv.length > 2) await parse_arg(api, config)
+	if (config.args) await fast_mode(api, config)
+
+	let should_quit = false
+	let choice
 	while (!should_quit) {
 		choice = await ask_list(
 			['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'],
@@ -82,7 +85,9 @@ async function login(config: ConfigType) {
 			error = true
 		}
 	} while (error)
-	print_message(`Found ${chalk.cyan(config.repo.length)} repositories`, '', 'message')
+	if (config.verbose && !config.args) {
+		print_message(`Found ${chalk.cyan(config.repo.length)} repositories`, '', 'message')
+	}
 
 	return api
 }
@@ -122,6 +127,7 @@ async function option_menu(config: ConfigType) {
 			'↵ Back',
 			`Remember password: ${config.save_token ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
 			`Auto Ramassage-tek ACL: ${config.auto_acl ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
+			`Mode verbose: ${config.verbose ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
 			'Reset all contact',
 		]
 		const choice = await ask_list(choices, 'You want options ?')
@@ -133,6 +139,9 @@ async function option_menu(config: ConfigType) {
 				config.auto_acl = !config.auto_acl
 				break
 			case choices[3]:
+				config.verbose = !config.verbose
+				break
+			case choices[4]:
 				const valid = await ask_question(`Are you sure ?`)
 				if (valid) config.contact = []
 				break
@@ -143,20 +152,32 @@ async function option_menu(config: ConfigType) {
 	}
 }
 
-async function parse_arg(api: BlihApi, config: ConfigType) {
-	if (process.argv[2] === '-c' || process.argv[2] === '--create') {
-		await create_repo(api, config, process.argv[3])
-	} else if (process.argv[2] === '-a' || process.argv[2].substr(0, 6) === '--acl=') {
-		if (process.argv[2] === '-a') await change_acl(api, config, process.argv[3])
-		else await change_acl(api, config, process.argv[2].substr(6))
+async function fast_mode(api: BlihApi, config: ConfigType) {
+	if (!config.args) return
+	if (config.args[2] === '-i') {
+		return
+	} else if (config.args[2] === '-c') {
+		await create_repo(api, config, config.args[3])
+	} else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
+		if (config.args[2] === '-a') await change_acl(api, config, config.args[3])
+		else await change_acl(api, config, config.args[2].substr(6))
 	} else show_help()
+}
+
+function parse_args(args: string[], config: ConfigType) {
+	if (args[2] && (args[2] === '-h' || args[2] === '--help')) {
+		show_help()
+		process.exit(0)
+	}
+	config.args = args
 }
 
 function show_help() {
 	ora().info(
 		chalk.blue(
-			'Invalid option\n  Usage blih_cli -[ca] [OPTION]...' +
-				'\n    -c, --create		create new repository' +
+			'Invalid option\n  Usage blih_cli -[ica] [OPTION]...' +
+				'\n\n    -i				interactive mode, default mode' +
+				'\n    -c				create new repository' +
 				'\n    -a [REPO], --acl=REPO	change repository acl'
 		)
 	)

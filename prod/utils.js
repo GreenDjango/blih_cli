@@ -19,7 +19,7 @@ const os_1 = require("os");
 const CONFIG_FOLDER = os_1.homedir() + '/.config/blih_cli';
 const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
-exports.APP_VERSION = '0.1.0';
+exports.APP_VERSION = '0.1.1';
 exports.WAIT_MSG = 'Process...';
 function open_config() {
     let config;
@@ -45,6 +45,8 @@ function parse_config(config) {
         token: '',
         save_token: false,
         auto_acl: true,
+        verbose: true,
+        args: null,
         contact: [],
         repo: [],
     };
@@ -60,6 +62,9 @@ function parse_config(config) {
     if (config.auto_acl === false) {
         new_config.auto_acl = false;
     }
+    if (config.verbose === false) {
+        new_config.verbose = false;
+    }
     if (config.contact) {
         new_config.contact = config.contact;
     }
@@ -69,6 +74,7 @@ function write_config(config) {
     if (!config.save_token) {
         config.token = undefined;
     }
+    config.args = undefined;
     config.repo = undefined;
     try {
         if (!fs_1.default.existsSync(CONFIG_FOLDER)) {

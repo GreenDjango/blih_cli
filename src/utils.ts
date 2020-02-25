@@ -14,6 +14,8 @@ export type ConfigType = {
 	token: string
 	save_token: boolean
 	auto_acl: boolean
+	verbose: boolean
+	args: string[] | null
 	contact: string[]
 	repo: string[]
 }
@@ -40,6 +42,8 @@ function parse_config(config: any) {
 		token: '',
 		save_token: false,
 		auto_acl: true,
+		verbose: true,
+		args: null,
 		contact: [],
 		repo: [],
 	}
@@ -56,6 +60,9 @@ function parse_config(config: any) {
 	if (config.auto_acl === false) {
 		new_config.auto_acl = false
 	}
+	if (config.verbose === false) {
+		new_config.verbose = false
+	}
 	if (config.contact) {
 		new_config.contact = config.contact
 	}
@@ -67,6 +74,7 @@ export function write_config(config: ConfigType) {
 	if (!config.save_token) {
 		config.token = undefined as any
 	}
+	config.args = undefined as any
 	config.repo = undefined as any
 	try {
 		if (!fs.existsSync(CONFIG_FOLDER)) {

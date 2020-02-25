@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo -e "^C" | prod/index.js
+prod/index.js -h

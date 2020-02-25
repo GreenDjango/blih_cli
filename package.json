@@ -21,8 +21,8 @@
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
-    "build": "tsc",
-    "prod": "rm -rf build prod; npm run build; mv build prod; chmod a+x prod/index.js"
+    "build": "tsc; chmod a+x build/index.js",
+    "prod": "rm -rf build prod; npm run build; cp -r build prod"
   },
   "repository": {
     "type": "git",
