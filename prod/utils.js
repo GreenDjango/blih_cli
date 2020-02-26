@@ -71,21 +71,23 @@ function parse_config(config) {
     return new_config;
 }
 function write_config(config) {
-    if (!config.save_token) {
-        config.token = undefined;
-    }
-    config.args = undefined;
-    config.repo = undefined;
-    try {
-        if (!fs_1.default.existsSync(CONFIG_FOLDER)) {
-            fs_1.default.mkdirSync(CONFIG_FOLDER, { recursive: true });
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config.save_token) {
+            config.token = undefined;
         }
-        const config_json = JSON.stringify(config, undefined, 4);
-        fs_1.default.writeFileSync(CONFIG_PATH, config_json, 'utf8');
-    }
-    catch (err) {
-        print_message('Fail to save config file', err, 'error');
-    }
+        config.args = undefined;
+        config.repo = undefined;
+        try {
+            if (!fs_1.default.existsSync(CONFIG_FOLDER)) {
+                fs_1.default.mkdirSync(CONFIG_FOLDER, { recursive: true });
+            }
+            const config_json = JSON.stringify(config, undefined, 4);
+            fs_1.default.writeFileSync(CONFIG_PATH, config_json, 'utf8');
+        }
+        catch (err) {
+            print_message('Fail to save config file', err, 'error');
+        }
+    });
 }
 exports.write_config = write_config;
 function print_message(title, message, level) {

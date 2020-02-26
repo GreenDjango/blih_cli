@@ -22,7 +22,7 @@ const key_menu_1 = require("./key_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const config = utils_1.open_config();
     if (process.argv.length > 2)
-        parse_args(process.argv, config);
+        yield parse_args(process.argv, config);
     if (config.verbose && !config.args) {
         console.log(chalk_1.default.red(`   ___  ___ __     _______   ____`));
         console.log(chalk_1.default.green(`  / _ )/ (_) /    / ___/ /  /  _/`));
@@ -54,7 +54,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
                 should_quit = true;
         }
     }
-    utils_1.write_config(config);
+    yield utils_1.write_config(config);
 });
 function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -182,11 +182,22 @@ function fast_mode(api, config) {
     });
 }
 function parse_args(args, config) {
-    if (args[2] && (args[2] === '-h' || args[2] === '--help')) {
-        show_help();
-        process.exit(0);
-    }
-    config.args = args;
+    return __awaiter(this, void 0, void 0, function* () {
+        if (args[2]) {
+            if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
+                show_help();
+                process.exit(0);
+            }
+            if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update') {
+                const spinner = ora_1.default().start(chalk_1.default.green('Check for update...'));
+                const res = yield utils_1.sh(`sudo sh ${__dirname}/../update.sh 2>&1`);
+                spinner.stop();
+                console.log(res.stdout.slice(0, -1));
+                process.exit(0);
+            }
+        }
+        config.args = args;
+    });
 }
 function show_help() {
     ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[ica] [OPTION]...' +
