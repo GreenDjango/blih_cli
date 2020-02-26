@@ -88,7 +88,9 @@ function delete_key(api) {
         try {
             const key_list = yield api.listKeys();
             spinner.stop();
-            const choice = yield ui_1.ask_list(key_list.map(value => value.name + ' ...' + value.data.substr(-20)), 'Select a key');
+            const choice = yield ui_1.ask_list(['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))], 'Select a key');
+            if (choice === '↵ Back' || !(yield ui_1.ask_question('Are you sure ?')))
+                return;
             const key = choice.split(' ')[0];
             spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
             const res = yield api.deleteKey(key);

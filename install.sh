@@ -62,8 +62,7 @@ then
     npm i --production -g
 
     printf '\33[32m%s\33[0m\n' "Adding manpage"
-    #TODO: sudo cp $HOME/norminette/manpage.1.gz /usr/share/man/man1/norminette.1.gz
-    #sudo cp $HOME/norminette/manpage.1f.gz /usr/share/man/man1/norminette.1f.gz
+    cp -u "./manpage.1.gz" "$share_path/man/man1/blih_cli.1.gz"
 
     printf '\33[32m\n%s\n%s\33[0m\n' "Done !" "Use blih_cli or bcli"
 else

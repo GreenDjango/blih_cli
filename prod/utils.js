@@ -21,6 +21,83 @@ const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
 exports.APP_VERSION = '0.1.1';
 exports.WAIT_MSG = 'Process...';
+class ConfigType {
+    constructor() {
+        this._listen = null;
+        this._email = '';
+        this._token = '';
+        this._save_token = false;
+        this._auto_acl = true;
+        this._verbose = true;
+        this._contact = [];
+        this.args = null;
+        this.repo = [];
+    }
+    to_json() {
+        return {
+            email: this.email,
+            token: this.token,
+            save_token: this.save_token,
+            auto_acl: this.auto_acl,
+            verbose: this.verbose,
+            contact: this.contact,
+        };
+    }
+    addListener(callback) {
+        this._listen = callback;
+    }
+    removeListener() {
+        this._listen = null;
+    }
+    _triggerListener() {
+        if (this._listen) {
+            this._listen(this.to_json());
+        }
+    }
+    get email() {
+        return this._email;
+    }
+    set email(email) {
+        this._email = email;
+        this._triggerListener();
+    }
+    get token() {
+        return this._token;
+    }
+    set token(token) {
+        this._token = token;
+        this._triggerListener();
+    }
+    get save_token() {
+        return this._save_token;
+    }
+    set save_token(save_token) {
+        this._save_token = save_token;
+        this._triggerListener();
+    }
+    get auto_acl() {
+        return this._auto_acl;
+    }
+    set auto_acl(auto_acl) {
+        this._auto_acl = auto_acl;
+        this._triggerListener();
+    }
+    get verbose() {
+        return this._verbose;
+    }
+    set verbose(verbose) {
+        this._verbose = verbose;
+        this._triggerListener();
+    }
+    get contact() {
+        return this._contact;
+    }
+    set contact(contact) {
+        this._contact = contact;
+        this._triggerListener();
+    }
+}
+exports.ConfigType = ConfigType;
 function open_config() {
     let config;
     try {
@@ -40,16 +117,7 @@ function open_config() {
 exports.open_config = open_config;
 function parse_config(config) {
     const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})');
-    const new_config = {
-        email: '',
-        token: '',
-        save_token: false,
-        auto_acl: true,
-        verbose: true,
-        args: null,
-        contact: [],
-        repo: [],
-    };
+    const new_config = new ConfigType();
     if (config.email && regex_email.test(config.email)) {
         new_config.email = config.email;
     }
@@ -68,20 +136,19 @@ function parse_config(config) {
     if (config.contact) {
         new_config.contact = config.contact;
     }
+    new_config.addListener(write_config);
     return new_config;
 }
-function write_config(config) {
+function write_config(config_info) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!config.save_token) {
-            config.token = undefined;
+        if (!config_info.save_token) {
+            config_info.token = undefined;
         }
-        config.args = undefined;
-        config.repo = undefined;
         try {
             if (!fs_1.default.existsSync(CONFIG_FOLDER)) {
                 fs_1.default.mkdirSync(CONFIG_FOLDER, { recursive: true });
             }
-            const config_json = JSON.stringify(config, undefined, 4);
+            const config_json = JSON.stringify(config_info, undefined, 4);
             fs_1.default.writeFileSync(CONFIG_PATH, config_json, 'utf8');
         }
         catch (err) {

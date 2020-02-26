@@ -9,15 +9,96 @@ const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
 export const APP_VERSION = '0.1.1'
 export const WAIT_MSG = 'Process...'
 
-export type ConfigType = {
-	email: string
-	token: string
-	save_token: boolean
-	auto_acl: boolean
-	verbose: boolean
-	args: string[] | null
-	contact: string[]
-	repo: string[]
+export class ConfigType {
+	private _listen: Function | null
+	private _email: string
+	private _token: string
+	private _save_token: boolean
+	private _auto_acl: boolean
+	private _verbose: boolean
+	private _contact: string[]
+	public args: string[] | null
+	public repo: string[]
+
+	constructor() {
+		this._listen = null
+		this._email = ''
+		this._token = ''
+		this._save_token = false
+		this._auto_acl = true
+		this._verbose = true
+		this._contact = []
+		this.args = null
+		this.repo = []
+	}
+
+	to_json() {
+		return {
+			email: this.email,
+			token: this.token,
+			save_token: this.save_token,
+			auto_acl: this.auto_acl,
+			verbose: this.verbose,
+			contact: this.contact,
+		}
+	}
+
+	addListener(callback: Function) {
+		this._listen = callback
+	}
+
+	removeListener() {
+		this._listen = null
+	}
+
+	private _triggerListener() {
+		if (this._listen) {
+			this._listen(this.to_json())
+		}
+	}
+
+	get email() {
+		return this._email
+	}
+	set email(email: string) {
+		this._email = email
+		this._triggerListener()
+	}
+	get token() {
+		return this._token
+	}
+	set token(token: string) {
+		this._token = token
+		this._triggerListener()
+	}
+	get save_token() {
+		return this._save_token
+	}
+	set save_token(save_token: boolean) {
+		this._save_token = save_token
+		this._triggerListener()
+	}
+	get auto_acl() {
+		return this._auto_acl
+	}
+	set auto_acl(auto_acl: boolean) {
+		this._auto_acl = auto_acl
+		this._triggerListener()
+	}
+	get verbose() {
+		return this._verbose
+	}
+	set verbose(verbose: boolean) {
+		this._verbose = verbose
+		this._triggerListener()
+	}
+	get contact() {
+		return this._contact
+	}
+	set contact(contact: string[]) {
+		this._contact = contact
+		this._triggerListener()
+	}
 }
 
 export function open_config() {
@@ -37,16 +118,7 @@ export function open_config() {
 
 function parse_config(config: any) {
 	const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})')
-	const new_config: ConfigType = {
-		email: '',
-		token: '',
-		save_token: false,
-		auto_acl: true,
-		verbose: true,
-		args: null,
-		contact: [],
-		repo: [],
-	}
+	const new_config = new ConfigType()
 
 	if (config.email && regex_email.test(config.email)) {
 		new_config.email = config.email
@@ -67,20 +139,20 @@ function parse_config(config: any) {
 		new_config.contact = config.contact
 	}
 
+	new_config.addListener(write_config)
+
 	return new_config
 }
 
-export async function write_config(config: ConfigType) {
-	if (!config.save_token) {
-		config.token = undefined as any
+export async function write_config(config_info: any) {
+	if (!config_info.save_token) {
+		config_info.token = undefined as any
 	}
-	config.args = undefined as any
-	config.repo = undefined as any
 	try {
 		if (!fs.existsSync(CONFIG_FOLDER)) {
 			fs.mkdirSync(CONFIG_FOLDER, { recursive: true })
 		}
-		const config_json = JSON.stringify(config, undefined, 4)
+		const config_json = JSON.stringify(config_info, undefined, 4)
 		fs.writeFileSync(CONFIG_PATH, config_json, 'utf8')
 	} catch (err) {
 		print_message('Fail to save config file', err, 'error')

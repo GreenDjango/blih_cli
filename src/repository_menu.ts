@@ -155,13 +155,16 @@ async function show_repo(api: BlihApi, config: ConfigType) {
 		const repo_info = await api.repositoryInfo(repo)
 		const creation_date = new Date(0)
 		creation_date.setUTCSeconds(repo_info.creation_time)
+		const repo_acl = (await api.getACL(repo)).map(value => `${value.name} - ${value.rights}`)
+		if (!repo_acl.length) repo_acl.push('no sharing')
 		spinner.info(
 			chalk.blue(
 				`Name:		${repo_info.name}` +
 					`\n  Uuid:		${repo_info.uuid}` +
 					`\n  Url:		${repo_info.url}` +
 					`\n  Creation:	${creation_date.toLocaleString()}` +
-					`\n  Public:	${repo_info.public}`
+					`\n  Public:	${repo_info.public}` +
+					`\n  Share:	${repo_acl.join('\n		')}`
 			)
 		)
 	} catch (err) {

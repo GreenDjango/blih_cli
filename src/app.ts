@@ -20,6 +20,9 @@ export const run = async () => {
 	}
 	const api = await login(config)
 	if (config.args) await fast_mode(api, config)
+	process.stdin.on('keypress', (str, key) => {
+		if (key.ctrl && key.name === 'l') console.clear()
+	})
 
 	let should_quit = false
 	let choice
@@ -46,7 +49,7 @@ export const run = async () => {
 				should_quit = true
 		}
 	}
-	await write_config(config)
+	await write_config(config.to_json())
 }
 
 async function login(config: ConfigType) {
@@ -99,7 +102,7 @@ async function show_contact(config: ConfigType) {
 		const choices = [...config.contact]
 		choices.unshift('Add email')
 		choices.unshift('↵ Back')
-		const choice = await ask_list(choices, 'Some friends')
+		const choice = await ask_list(choices, 'Some friends (email is auto add)')
 		switch (choice) {
 			case choices[0]:
 				should_quit = true
@@ -170,7 +173,11 @@ async function parse_args(args: string[], config: ConfigType) {
 			show_help()
 			process.exit(0)
 		}
-		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update') {
+		if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
+			console.log('v' + APP_VERSION)
+			process.exit(0)
+		}
+		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
 			const spinner = ora().start(chalk.green('Check for update...'))
 			const res = await sh(`sudo sh ${__dirname}/../update.sh 2>&1`)
 			spinner.stop()

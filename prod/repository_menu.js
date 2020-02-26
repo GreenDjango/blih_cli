@@ -167,11 +167,15 @@ function show_repo(api, config) {
             const repo_info = yield api.repositoryInfo(repo);
             const creation_date = new Date(0);
             creation_date.setUTCSeconds(repo_info.creation_time);
+            const repo_acl = (yield api.getACL(repo)).map(value => `${value.name} - ${value.rights}`);
+            if (!repo_acl.length)
+                repo_acl.push('no sharing');
             spinner.info(chalk_1.default.blue(`Name:		${repo_info.name}` +
                 `\n  Uuid:		${repo_info.uuid}` +
                 `\n  Url:		${repo_info.url}` +
                 `\n  Creation:	${creation_date.toLocaleString()}` +
-                `\n  Public:	${repo_info.public}`));
+                `\n  Public:	${repo_info.public}` +
+                `\n  Share:	${repo_acl.join('\n		')}`));
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));

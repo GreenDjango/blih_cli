@@ -75,9 +75,10 @@ async function delete_key(api: BlihApi) {
 		const key_list = await api.listKeys()
 		spinner.stop()
 		const choice = await ask_list(
-			key_list.map(value => value.name + ' ...' + value.data.substr(-20)),
+			['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))],
 			'Select a key'
 		)
+		if (choice === '↵ Back' || !(await ask_question('Are you sure ?'))) return
 		const key = choice.split(' ')[0]
 		spinner.start(chalk.green(WAIT_MSG))
 		const res = await api.deleteKey(key)

@@ -32,6 +32,10 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const api = yield login(config);
     if (config.args)
         yield fast_mode(api, config);
+    process.stdin.on('keypress', (str, key) => {
+        if (key.ctrl && key.name === 'l')
+            console.clear();
+    });
     let should_quit = false;
     let choice;
     while (!should_quit) {
@@ -54,7 +58,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
                 should_quit = true;
         }
     }
-    yield utils_1.write_config(config);
+    yield utils_1.write_config(config.to_json());
 });
 function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -107,7 +111,7 @@ function show_contact(config) {
             const choices = [...config.contact];
             choices.unshift('Add email');
             choices.unshift('↵ Back');
-            const choice = yield ui_1.ask_list(choices, 'Some friends');
+            const choice = yield ui_1.ask_list(choices, 'Some friends (email is auto add)');
             switch (choice) {
                 case choices[0]:
                     should_quit = true;
@@ -188,7 +192,11 @@ function parse_args(args, config) {
                 show_help();
                 process.exit(0);
             }
-            if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update') {
+            if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
+                console.log('v' + utils_1.APP_VERSION);
+                process.exit(0);
+            }
+            if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
                 const spinner = ora_1.default().start(chalk_1.default.green('Check for update...'));
                 const res = yield utils_1.sh(`sudo sh ${__dirname}/../update.sh 2>&1`);
                 spinner.stop();
