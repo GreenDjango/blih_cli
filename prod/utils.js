@@ -195,3 +195,23 @@ function sh(cmd) {
     });
 }
 exports.sh = sh;
+function sh_live(cmd) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(function (resolve, reject) {
+            var _a, _b;
+            const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve({ stdout, stderr });
+            });
+            (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', data => {
+                process.stdout.write(data);
+            });
+            (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', data => {
+                process.stderr.write(data);
+            });
+        });
+    });
+}
+exports.sh_live = sh_live;

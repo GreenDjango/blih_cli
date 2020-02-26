@@ -41,6 +41,9 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     while (!should_quit) {
         choice = yield ui_1.ask_list(['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
         switch (choice) {
+            /*TODO: case 'Git clone':
+                await repo_menu(api, config)
+                break*/
             case 'Repositories management':
                 yield repository_menu_1.repo_menu(api, config);
                 break;
@@ -189,7 +192,7 @@ function parse_args(args, config) {
     return __awaiter(this, void 0, void 0, function* () {
         if (args[2]) {
             if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
-                show_help();
+                yield utils_1.sh_live('man blih_cli');
                 process.exit(0);
             }
             if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
@@ -197,10 +200,7 @@ function parse_args(args, config) {
                 process.exit(0);
             }
             if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
-                const spinner = ora_1.default().start(chalk_1.default.green('Check for update...'));
-                const res = yield utils_1.sh(`sudo sh ${__dirname}/../update.sh 2>&1`);
-                spinner.stop();
-                console.log(res.stdout.slice(0, -1));
+                yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
                 process.exit(0);
             }
         }
@@ -208,8 +208,5 @@ function parse_args(args, config) {
     });
 }
 function show_help() {
-    ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[ica] [OPTION]...' +
-        '\n\n    -i				interactive mode, default mode' +
-        '\n    -c				create new repository' +
-        '\n    -a [REPO], --acl=REPO	change repository acl'));
+    ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
 }

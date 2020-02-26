@@ -72,6 +72,7 @@ function create_repo(api, config, repo_name) {
                 spinner.succeed(chalk_1.default.green(res2) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] }));
                 to_change = yield acl_menu(acl_list, config);
             }
+            //TODO: if (await ask_question(`Git clone ${input} ?`)) 1
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));
