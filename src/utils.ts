@@ -70,7 +70,7 @@ function parse_config(config: any) {
 	return new_config
 }
 
-export function write_config(config: ConfigType) {
+export async function write_config(config: ConfigType) {
 	if (!config.save_token) {
 		config.token = undefined as any
 	}

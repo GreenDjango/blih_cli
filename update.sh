@@ -1,33 +1,31 @@
 #!/bin/sh
 
 # Update script for blih_cli
-current_tag=$(git rev-list --tags --max-count=1)
+repo_name="blih_cli"
+share_path="/usr/local/share"
 
-# Loader
-loader()
-{
-    PID=$!
-    i=1
-    sp="/-\|"
-    printf '\33[3m%s\33[0m  ' "$1"
-    while [ -d /proc/$PID ]
-    do
-        printf "\b${sp:i++%${#sp}:1}"
-    done
-    echo ''
-} 
+# Test if script is run as root
+if [ "$EUID" -ne 0 ]
+then
+    printf '\33[31m%s\33[0m\n' \
+    "Error: Please run as root"
+    exit 2
+fi
+
+cd "$share_path/$repo_name"
+current_tag=$(git show --format="%H" --no-patch)
 
 # Get new tags from the remote
-git fetch --tags &
-loader "Fetch repo"
+printf "Fetch repo...\n"
+git fetch --tags
 latest_tag=$(git rev-list --tags --max-count=1)
 if [ "$latest_tag" != "$current_tag" ]
 then
     # Get the latest tag name, assign it to a variable
     latest_tag_name=$(git describe --tags $latest_tag)
     # Checkout the latest tag
-    git reset --hard
-    git checkout $latest_tag
+    git reset --hard > /dev/null
+    git checkout "$latest_tag" 2> /dev/null
     if [ $? -ne 0 ]
     then
         printf '\33[31m%s\33[0m\n' "Error: Update fail"

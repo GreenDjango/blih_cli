@@ -2,13 +2,13 @@ import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
-import { ConfigType, APP_VERSION, open_config, write_config, print_message } from './utils'
+import { ConfigType, APP_VERSION, open_config, write_config, print_message, sh } from './utils'
 import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
 
 export const run = async () => {
 	const config = open_config()
-	if (process.argv.length > 2) parse_args(process.argv, config)
+	if (process.argv.length > 2) await parse_args(process.argv, config)
 
 	if (config.verbose && !config.args) {
 		console.log(chalk.red(`   ___  ___ __     _______   ____`))
@@ -46,7 +46,7 @@ export const run = async () => {
 				should_quit = true
 		}
 	}
-	write_config(config)
+	await write_config(config)
 }
 
 async function login(config: ConfigType) {
@@ -164,10 +164,19 @@ async function fast_mode(api: BlihApi, config: ConfigType) {
 	} else show_help()
 }
 
-function parse_args(args: string[], config: ConfigType) {
-	if (args[2] && (args[2] === '-h' || args[2] === '--help')) {
-		show_help()
-		process.exit(0)
+async function parse_args(args: string[], config: ConfigType) {
+	if (args[2]) {
+		if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
+			show_help()
+			process.exit(0)
+		}
+		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update') {
+			const spinner = ora().start(chalk.green('Check for update...'))
+			const res = await sh(`sudo sh ${__dirname}/../update.sh 2>&1`)
+			spinner.stop()
+			console.log(res.stdout.slice(0, -1))
+			process.exit(0)
+		}
 	}
 	config.args = args
 }

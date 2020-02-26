@@ -55,20 +55,17 @@ if git clone --depth 1 "https://github.com/$owner/$repo_name.git"
 then
     printf '\33[32m%s\33[0m\n' "Install in $share_path..."
     cd "$repo_name"
+    git fetch --tags
+    latest_tag=$(git rev-list --tags --max-count=1)
+    git checkout "$latest_tag" 2> /dev/null
+
     npm i --production -g
 
-    printf '\33[32m%s\33[0m\n' "Coping $repo_name to $bin_path/$repo_name"
-    index=`cat package.json | grep -m 1 '"main"' | cut -d$'\"' -f4`
-    index_path="$PWD/$index"
-    #cd "$bin_path"
-    #yes | cp -sf "$index_path" "./$bin_name"
-    #chmod a+x "./$bin_name"
-
     printf '\33[32m%s\33[0m\n' "Adding manpage"
-    #sudo cp $HOME/norminette/manpage.1.gz /usr/share/man/man1/norminette.1.gz
+    #TODO: sudo cp $HOME/norminette/manpage.1.gz /usr/share/man/man1/norminette.1.gz
     #sudo cp $HOME/norminette/manpage.1f.gz /usr/share/man/man1/norminette.1f.gz
 
-    printf '\33[32m\n%s\n%s\33[0m\n' "Done !" "Use $repo_name"
+    printf '\33[32m\n%s\n%s\33[0m\n' "Done !" "Use blih_cli or bcli"
 else
     printf '\33[31m%s\33[0m\n' \
     "Error: could not clone repository"
