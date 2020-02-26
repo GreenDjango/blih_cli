@@ -188,3 +188,18 @@ export async function sh(cmd: string): Promise<{ stdout: string; stderr: string 
 		})
 	})
 }
+
+export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: string }> {
+	return new Promise(function(resolve, reject) {
+		const child = exec(cmd, (err, stdout, stderr) => {
+			if (err) reject(err)
+			else resolve({ stdout, stderr })
+		})
+		child.stdout?.on('data', data => {
+			process.stdout.write(data)
+		})
+		child.stderr?.on('data', data => {
+			process.stderr.write(data)
+		})
+	})
+}

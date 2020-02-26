@@ -62,6 +62,7 @@ export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: 
 			)
 			to_change = await acl_menu(acl_list, config)
 		}
+		//TODO: if (await ask_question(`Git clone ${input} ?`)) 1
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

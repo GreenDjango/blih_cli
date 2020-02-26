@@ -1,7 +1,7 @@
-// MIT https://www.npmjs.com/package/blih
-
 import crypto from 'crypto'
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+
+// MIT https://www.npmjs.com/package/blih
 
 const options = {
 	baseURL: 'https://blih.epitech.eu/',

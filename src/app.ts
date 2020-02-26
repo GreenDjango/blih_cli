@@ -2,7 +2,7 @@ import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
-import { ConfigType, APP_VERSION, open_config, write_config, print_message, sh } from './utils'
+import { ConfigType, APP_VERSION, open_config, write_config, print_message, sh_live } from './utils'
 import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
 
@@ -32,6 +32,9 @@ export const run = async () => {
 			"Let's do some works"
 		)
 		switch (choice) {
+			/*TODO: case 'Git clone':
+				await repo_menu(api, config)
+				break*/
 			case 'Repositories management':
 				await repo_menu(api, config)
 				break
@@ -170,7 +173,7 @@ async function fast_mode(api: BlihApi, config: ConfigType) {
 async function parse_args(args: string[], config: ConfigType) {
 	if (args[2]) {
 		if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
-			show_help()
+			await sh_live('man blih_cli')
 			process.exit(0)
 		}
 		if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
@@ -178,10 +181,7 @@ async function parse_args(args: string[], config: ConfigType) {
 			process.exit(0)
 		}
 		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
-			const spinner = ora().start(chalk.green('Check for update...'))
-			const res = await sh(`sudo sh ${__dirname}/../update.sh 2>&1`)
-			spinner.stop()
-			console.log(res.stdout.slice(0, -1))
+			await sh_live(`sudo sh ${__dirname}/../update.sh`)
 			process.exit(0)
 		}
 	}
@@ -190,11 +190,6 @@ async function parse_args(args: string[], config: ConfigType) {
 
 function show_help() {
 	ora().info(
-		chalk.blue(
-			'Invalid option\n  Usage blih_cli -[ica] [OPTION]...' +
-				'\n\n    -i				interactive mode, default mode' +
-				'\n    -c				create new repository' +
-				'\n    -a [REPO], --acl=REPO	change repository acl'
-		)
+		chalk.blue('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`')
 	)
 }
