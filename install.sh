@@ -62,6 +62,10 @@ then
     npm i --production -g
 
     printf '\33[32m%s\33[0m\n' "Adding manpage"
+    if [ ! -d "$share_path/man/man1" ]
+    then
+        mkdir -p "$share_path/man/man1"
+    fi
     cp -u "./manpage.1.gz" "$share_path/man/man1/blih_cli.1.gz"
 
     printf '\33[32m\n%s\n%s\33[0m\n' "Done !" "Use blih_cli or bcli"

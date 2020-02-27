@@ -53,9 +53,8 @@ async function add_key(api: BlihApi) {
 			await sh(`ssh-add ${HOME_DIR}/.ssh/${name}`)
 			path = `${HOME_DIR}/.ssh/${name}.pub`
 		} else {
-			const input = await ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`)
-			spinner.info(chalk.blue('Use `ssh-add ' + input + '` for enable the key'))
-			path = input
+			path = await ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`)
+			spinner.info(chalk.blue('Use `ssh-add ' + path + '` for enable the key'))
 			spinner.start(chalk.green(WAIT_MSG))
 		}
 		let key = fs.readFileSync(path, 'utf8')

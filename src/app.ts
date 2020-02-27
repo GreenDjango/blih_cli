@@ -1,8 +1,9 @@
 import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_email, ask_password, ask_question } from './ui'
+import { ask_list, ask_email, ask_password, ask_question, clear_line } from './ui'
 import { ConfigType, APP_VERSION, open_config, write_config, print_message, sh_live } from './utils'
+import { git_menu } from './git_menu'
 import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
 
@@ -25,16 +26,17 @@ export const run = async () => {
 	})
 
 	let should_quit = false
-	let choice
 	while (!should_quit) {
-		choice = await ask_list(
-			['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'],
+		const choice = await ask_list(
+			['Git clone', 'Repositories management', 'Key management', 'Contact', 'Option', 'Exit'],
 			"Let's do some works"
 		)
+
+		if (!config.verbose) clear_line(true)
 		switch (choice) {
-			/*TODO: case 'Git clone':
-				await repo_menu(api, config)
-				break*/
+			case 'Git clone':
+				await git_menu(api, config)
+				break
 			case 'Repositories management':
 				await repo_menu(api, config)
 				break
@@ -184,7 +186,13 @@ async function parse_args(args: string[], config: ConfigType) {
 			await sh_live(`sudo sh ${__dirname}/../update.sh`)
 			process.exit(0)
 		}
+		if (args[2] === '--uninstall') {
+			if (!(await ask_question('Uninstall blih_cli ?'))) return
+			await sh_live(`sudo sh ${__dirname}/../uninstall.sh`)
+			process.exit(0)
+		}
 	}
+
 	config.args = args
 }
 

@@ -1,4 +1,5 @@
 import * as inquirer from 'inquirer'
+import chalk from 'chalk'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
 
@@ -77,7 +78,7 @@ export async function ask_question(message?: string) {
 	return prompted.confirm as boolean
 }
 
-export async function ask_autocomplete(source: string[], message?: string) {
+export async function ask_autocomplete(source: string[], message?: string, suggestOnly?: boolean) {
 	let prompted: any
 
 	do {
@@ -86,18 +87,26 @@ export async function ask_autocomplete(source: string[], message?: string) {
 				type: 'autocomplete',
 				name: 'autocomplete',
 				message: message || '>',
-				suggestOnly: true,
+				pageSize: 10,
+				suggestOnly: suggestOnly === false ? false : true,
 				source: async (answer: any, input: any) => {
-					const regex_input = RegExp(input)
+					const regex_input = RegExp(input, 'i')
 					return source.filter(value => regex_input.test(value))
 				},
 			},
 		])
+		if (!prompted.autocomplete) console.log(chalk.yellow('Use tab for select'))
 	} while (!prompted.autocomplete)
 	return prompted.autocomplete as string
 }
 
-export async function ask_path(message?: string, filter?: string, path?: string) {
+export async function ask_path(
+	message?: string,
+	filter?: string,
+	path?: string,
+	depth?: number,
+	folder?: boolean
+) {
 	let prompted: any
 
 	do {
@@ -105,9 +114,9 @@ export async function ask_path(message?: string, filter?: string, path?: string)
 			{
 				type: 'fuzzypath',
 				name: 'fuzzypath',
-				message: message,
-				itemType: 'file',
-				depthLimit: 4,
+				message: message || '>',
+				itemType: folder ? 'folder' : 'file',
+				depthLimit: depth || 4,
 				rootPath: path ? path : undefined,
 				suggestOnly: true,
 				excludePath: (nodePath: string) => {
@@ -121,11 +130,12 @@ export async function ask_path(message?: string, filter?: string, path?: string)
 				},
 			},
 		])
+		if (!prompted.fuzzypath) console.log(chalk.yellow('Use tab for select'))
 	} while (!prompted.fuzzypath)
 	return prompted.fuzzypath as string
 }
 
-export async function ask_input(message: string) {
+export async function ask_input(message?: string) {
 	const prompted = await inquirer.prompt([
 		{
 			type: 'input',
@@ -134,4 +144,17 @@ export async function ask_input(message: string) {
 		},
 	])
 	return prompted.input as string
+}
+
+export function ctext(string: string) {
+	const spaces = Math.floor(process.stdout.getWindowSize()[0] / 2 - string.length / 2)
+	return Array(spaces + 1).join(' ') + string
+}
+
+export function clear_line(up_line?: boolean) {
+	process.stdout.clearLine(0)
+	if (up_line) {
+		process.stdout.moveCursor(0, -1)
+		process.stdout.clearLine(0)
+	}
 }
