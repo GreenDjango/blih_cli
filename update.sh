@@ -18,7 +18,12 @@ current_tag=$(git show --format="%H" --no-patch)
 # Get new tags from the remote
 printf "Fetch repo...\n"
 git fetch --tags
-latest_tag=$(git rev-list --tags --max-count=1)
+if [ "$1" == "snapshot" ]
+then
+    latest_tag=$(git rev-list --all --max-count=1)
+else
+    latest_tag=$(git rev-list --tags --max-count=1)
+fi
 if [ "$latest_tag" != "$current_tag" ]
 then
     # Get the latest tag name, assign it to a variable

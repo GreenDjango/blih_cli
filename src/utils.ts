@@ -6,7 +6,7 @@ import { homedir } from 'os'
 const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
 const CONFIG_FILE = '.cli_data.json'
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
-export const APP_VERSION = '0.1.1'
+export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
 
 export class ConfigType {
@@ -202,4 +202,13 @@ export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: st
 			process.stderr.write(data)
 		})
 	})
+}
+
+async function get_app_version() {
+	try {
+		const res = await sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`)
+		return res.stdout.split('\n')[0] || 'v0.0.0'
+	} catch (err) {
+		return 'v0.0.0'
+	}
 }

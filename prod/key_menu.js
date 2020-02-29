@@ -66,9 +66,8 @@ function add_key(api) {
                 path = `${HOME_DIR}/.ssh/${name}.pub`;
             }
             else {
-                const input = yield ui_1.ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`);
-                spinner.info(chalk_1.default.blue('Use `ssh-add ' + input + '` for enable the key'));
-                path = input;
+                path = yield ui_1.ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`);
+                spinner.info(chalk_1.default.blue('Use `ssh-add ' + path + '` for enable the key'));
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
             }
             let key = fs_1.default.readFileSync(path, 'utf8');

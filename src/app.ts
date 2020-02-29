@@ -8,15 +8,17 @@ import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
 
 export const run = async () => {
+	if (process.argv.length > 2) await parse_args(process.argv)
 	const config = open_config()
-	if (process.argv.length > 2) await parse_args(process.argv, config)
 
+	if (process.argv.length > 2) config.args = process.argv
 	if (config.verbose && !config.args) {
 		console.log(chalk.red(`   ___  ___ __     _______   ____`))
 		console.log(chalk.green(`  / _ )/ (_) /    / ___/ /  /  _/`))
 		console.log(chalk.blueBright(` / _  / / / _ \\  / /__/ /___/ /`))
 		console.log(
-			chalk.yellow(`/____/_/_/_//_/  \\___/____/___/`) + chalk.grey.italic(`  v${APP_VERSION}\n`)
+			chalk.yellow(`/____/_/_/_//_/  \\___/____/___/`) +
+				chalk.grey.italic(`  ${await APP_VERSION}\n`)
 		)
 	}
 	const api = await login(config)
@@ -172,28 +174,30 @@ async function fast_mode(api: BlihApi, config: ConfigType) {
 	} else show_help()
 }
 
-async function parse_args(args: string[], config: ConfigType) {
+async function parse_args(args: string[]) {
 	if (args[2]) {
 		if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
 			await sh_live('man blih_cli')
 			process.exit(0)
 		}
 		if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
-			console.log('v' + APP_VERSION)
+			console.log(await APP_VERSION)
 			process.exit(0)
 		}
 		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
 			await sh_live(`sudo sh ${__dirname}/../update.sh`)
 			process.exit(0)
 		}
+		if (args[2] === '--snapshot') {
+			await sh_live(`sudo sh ${__dirname}/../update.sh snapshot`)
+			process.exit(0)
+		}
 		if (args[2] === '--uninstall') {
-			if (!(await ask_question('Uninstall blih_cli ?'))) return
+			if (!(await ask_question('Uninstall blih_cli ?'))) process.exit(0)
 			await sh_live(`sudo sh ${__dirname}/../uninstall.sh`)
 			process.exit(0)
 		}
 	}
-
-	config.args = args
 }
 
 function show_help() {

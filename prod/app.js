@@ -17,17 +17,21 @@ const chalk_1 = __importDefault(require("chalk"));
 const blih_api_1 = require("./blih_api");
 const ui_1 = require("./ui");
 const utils_1 = require("./utils");
+const git_menu_1 = require("./git_menu");
 const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
+    if (process.argv.length > 2)
+        yield parse_args(process.argv);
     const config = utils_1.open_config();
     if (process.argv.length > 2)
-        yield parse_args(process.argv, config);
+        config.args = process.argv;
     if (config.verbose && !config.args) {
         console.log(chalk_1.default.red(`   ___  ___ __     _______   ____`));
         console.log(chalk_1.default.green(`  / _ )/ (_) /    / ___/ /  /  _/`));
         console.log(chalk_1.default.blueBright(` / _  / / / _ \\  / /__/ /___/ /`));
-        console.log(chalk_1.default.yellow(`/____/_/_/_//_/  \\___/____/___/`) + chalk_1.default.grey.italic(`  v${utils_1.APP_VERSION}\n`));
+        console.log(chalk_1.default.yellow(`/____/_/_/_//_/  \\___/____/___/`) +
+            chalk_1.default.grey.italic(`  ${yield utils_1.APP_VERSION}\n`));
     }
     const api = yield login(config);
     if (config.args)
@@ -37,13 +41,14 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
             console.clear();
     });
     let should_quit = false;
-    let choice;
     while (!should_quit) {
-        choice = yield ui_1.ask_list(['Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
+        const choice = yield ui_1.ask_list(['Git clone', 'Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
+        if (!config.verbose)
+            ui_1.clear_line(true);
         switch (choice) {
-            /*TODO: case 'Git clone':
-                await repo_menu(api, config)
-                break*/
+            case 'Git clone':
+                yield git_menu_1.git_menu(api, config);
+                break;
             case 'Repositories management':
                 yield repository_menu_1.repo_menu(api, config);
                 break;
@@ -188,7 +193,7 @@ function fast_mode(api, config) {
             show_help();
     });
 }
-function parse_args(args, config) {
+function parse_args(args) {
     return __awaiter(this, void 0, void 0, function* () {
         if (args[2]) {
             if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
@@ -196,15 +201,24 @@ function parse_args(args, config) {
                 process.exit(0);
             }
             if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
-                console.log('v' + utils_1.APP_VERSION);
+                console.log(yield utils_1.APP_VERSION);
                 process.exit(0);
             }
             if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
                 yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
                 process.exit(0);
             }
+            if (args[2] === '--snapshot') {
+                yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh snapshot`);
+                process.exit(0);
+            }
+            if (args[2] === '--uninstall') {
+                if (!(yield ui_1.ask_question('Uninstall blih_cli ?')))
+                    process.exit(0);
+                yield utils_1.sh_live(`sudo sh ${__dirname}/../uninstall.sh`);
+                process.exit(0);
+            }
         }
-        config.args = args;
     });
 }
 function show_help() {

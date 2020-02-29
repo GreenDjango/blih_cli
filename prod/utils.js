@@ -19,7 +19,7 @@ const os_1 = require("os");
 const CONFIG_FOLDER = os_1.homedir() + '/.config/blih_cli';
 const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
-exports.APP_VERSION = '0.1.1';
+exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
 class ConfigType {
     constructor() {
@@ -215,3 +215,14 @@ function sh_live(cmd) {
     });
 }
 exports.sh_live = sh_live;
+function get_app_version() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const res = yield sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`);
+            return res.stdout.split('\n')[0] || 'v0.0.0';
+        }
+        catch (err) {
+            return 'v0.0.0';
+        }
+    });
+}

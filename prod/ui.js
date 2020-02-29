@@ -15,8 +15,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = __importStar(require("inquirer"));
+const chalk_1 = __importDefault(require("chalk"));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'));
 function ask_list(choices, message, return_index) {
@@ -98,7 +102,7 @@ function ask_question(message) {
     });
 }
 exports.ask_question = ask_question;
-function ask_autocomplete(source, message) {
+function ask_autocomplete(source, message, suggestOnly) {
     return __awaiter(this, void 0, void 0, function* () {
         let prompted;
         do {
@@ -107,19 +111,22 @@ function ask_autocomplete(source, message) {
                     type: 'autocomplete',
                     name: 'autocomplete',
                     message: message || '>',
-                    suggestOnly: true,
+                    pageSize: 10,
+                    suggestOnly: suggestOnly === false ? false : true,
                     source: (answer, input) => __awaiter(this, void 0, void 0, function* () {
-                        const regex_input = RegExp(input);
+                        const regex_input = RegExp(input, 'i');
                         return source.filter(value => regex_input.test(value));
                     }),
                 },
             ]);
+            if (!prompted.autocomplete)
+                console.log(chalk_1.default.yellow('Use tab for select'));
         } while (!prompted.autocomplete);
         return prompted.autocomplete;
     });
 }
 exports.ask_autocomplete = ask_autocomplete;
-function ask_path(message, filter, path) {
+function ask_path(message, filter, path, depth, folder) {
     return __awaiter(this, void 0, void 0, function* () {
         let prompted;
         do {
@@ -127,9 +134,9 @@ function ask_path(message, filter, path) {
                 {
                     type: 'fuzzypath',
                     name: 'fuzzypath',
-                    message: message,
-                    itemType: 'file',
-                    depthLimit: 4,
+                    message: message || '>',
+                    itemType: folder ? 'folder' : 'file',
+                    depthLimit: depth || 4,
                     rootPath: path ? path : undefined,
                     suggestOnly: true,
                     excludePath: (nodePath) => {
@@ -144,6 +151,8 @@ function ask_path(message, filter, path) {
                     },
                 },
             ]);
+            if (!prompted.fuzzypath)
+                console.log(chalk_1.default.yellow('Use tab for select'));
         } while (!prompted.fuzzypath);
         return prompted.fuzzypath;
     });
@@ -162,3 +171,16 @@ function ask_input(message) {
     });
 }
 exports.ask_input = ask_input;
+function ctext(string) {
+    const spaces = Math.floor(process.stdout.getWindowSize()[0] / 2 - string.length / 2);
+    return Array(spaces + 1).join(' ') + string;
+}
+exports.ctext = ctext;
+function clear_line(up_line) {
+    process.stdout.clearLine(0);
+    if (up_line) {
+        process.stdout.moveCursor(0, -1);
+        process.stdout.clearLine(0);
+    }
+}
+exports.clear_line = clear_line;
