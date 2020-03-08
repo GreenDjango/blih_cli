@@ -43,8 +43,6 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     let should_quit = false;
     while (!should_quit) {
         const choice = yield ui_1.ask_list(['Git clone', 'Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
-        if (!config.verbose)
-            ui_1.clear_line(true);
         switch (choice) {
             case 'Git clone':
                 yield git_menu_1.git_menu(api, config);

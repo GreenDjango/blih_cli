@@ -2,7 +2,7 @@ import ora from 'ora'
 import chalk from 'chalk'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_autocomplete, ask_question, ask_input, clear_line } from './ui'
+import { ask_list, ask_autocomplete, ask_question, ask_input } from './ui'
 import { ConfigType, sh } from './utils'
 
 export async function git_menu(api: BlihApi, config: ConfigType) {
@@ -12,13 +12,12 @@ export async function git_menu(api: BlihApi, config: ConfigType) {
 		const choices = ['↵ Back', 'My repository', 'Other repository']
 		const choice = await ask_list(choices, 'Git clone repositories')
 
-		if (!config.verbose) clear_line(true)
 		switch (choice) {
 			case choices[1]:
 				await clone_my_repo(api, config)
 				break
 			case choices[2]:
-				//await clone_other_repo(api, config)
+				//TODO: await clone_other_repo(api, config)
 				break
 			case choices[0]:
 			default:
@@ -28,7 +27,7 @@ export async function git_menu(api: BlihApi, config: ConfigType) {
 }
 
 async function clone_my_repo(api: BlihApi, config: ConfigType) {
-	const repo_name = await ask_autocomplete(['↵ Back', ...config.repo], undefined, false)
+	const repo_name = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
 	const spinner = ora()
 	spinner.color = 'blue'
 

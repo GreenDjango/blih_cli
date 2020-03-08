@@ -21,6 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const inquirer = __importStar(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
+const utils_1 = require("./utils");
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'));
 function ask_list(choices, message, return_index) {
@@ -34,10 +35,12 @@ function ask_list(choices, message, return_index) {
                 pageSize: 10,
             },
         ]);
+        is_verbose();
         if (return_index) {
             const idx = choices.findIndex(value => value === prompted.list);
             if (idx >= 0)
                 return idx.toString();
+            return '0';
         }
         return prompted.list;
     });
@@ -52,6 +55,7 @@ function ask_password() {
                 mask: '*',
             },
         ]);
+        is_verbose();
         return prompted.password;
     });
 }
@@ -67,6 +71,7 @@ function ask_email() {
                     name: 'email',
                 },
             ]);
+            is_verbose();
         } while (!regex_email.test(prompted.email));
         return prompted.email;
     });
@@ -85,6 +90,7 @@ function ask_qcm(choices, values, checked, message) {
                 message: message || '>',
             },
         ]);
+        is_verbose();
         return prompted.checkbox;
     });
 }
@@ -98,6 +104,7 @@ function ask_question(message) {
                 message: message || '>',
             },
         ]);
+        is_verbose();
         return prompted.confirm;
     });
 }
@@ -112,13 +119,14 @@ function ask_autocomplete(source, message, suggestOnly) {
                     name: 'autocomplete',
                     message: message || '>',
                     pageSize: 10,
-                    suggestOnly: suggestOnly === false ? false : true,
+                    suggestOnly: suggestOnly ? false : true,
                     source: (answer, input) => __awaiter(this, void 0, void 0, function* () {
                         const regex_input = RegExp(input, 'i');
                         return source.filter(value => regex_input.test(value));
                     }),
                 },
             ]);
+            is_verbose();
             if (!prompted.autocomplete)
                 console.log(chalk_1.default.yellow('Use tab for select'));
         } while (!prompted.autocomplete);
@@ -151,6 +159,7 @@ function ask_path(message, filter, path, depth, folder) {
                     },
                 },
             ]);
+            is_verbose();
             if (!prompted.fuzzypath)
                 console.log(chalk_1.default.yellow('Use tab for select'));
         } while (!prompted.fuzzypath);
@@ -167,6 +176,7 @@ function ask_input(message) {
                 message: message || '>',
             },
         ]);
+        is_verbose();
         return prompted.input;
     });
 }
@@ -176,6 +186,10 @@ function ctext(string) {
     return Array(spaces + 1).join(' ') + string;
 }
 exports.ctext = ctext;
+function is_verbose() {
+    if (!utils_1.VERBOSE)
+        clear_line(true);
+}
 function clear_line(up_line) {
     process.stdout.clearLine(0);
     if (up_line) {

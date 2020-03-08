@@ -1,5 +1,6 @@
 import * as inquirer from 'inquirer'
 import chalk from 'chalk'
+import { VERBOSE } from './utils'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
 
@@ -13,9 +14,11 @@ export async function ask_list(choices: string[], message?: string, return_index
 			pageSize: 10,
 		},
 	])
+	is_verbose()
 	if (return_index) {
 		const idx = choices.findIndex(value => value === prompted.list)
 		if (idx >= 0) return idx.toString()
+		return '0'
 	}
 	return prompted.list as string
 }
@@ -28,6 +31,7 @@ export async function ask_password() {
 			mask: '*',
 		},
 	])
+	is_verbose()
 	return prompted.password as string
 }
 
@@ -42,8 +46,8 @@ export async function ask_email() {
 				name: 'email',
 			},
 		])
+		is_verbose()
 	} while (!regex_email.test(prompted.email))
-
 	return prompted.email as string
 }
 
@@ -64,6 +68,7 @@ export async function ask_qcm(
 			message: message || '>',
 		},
 	])
+	is_verbose()
 	return prompted.checkbox as string[]
 }
 
@@ -75,6 +80,7 @@ export async function ask_question(message?: string) {
 			message: message || '>',
 		},
 	])
+	is_verbose()
 	return prompted.confirm as boolean
 }
 
@@ -88,13 +94,14 @@ export async function ask_autocomplete(source: string[], message?: string, sugge
 				name: 'autocomplete',
 				message: message || '>',
 				pageSize: 10,
-				suggestOnly: suggestOnly === false ? false : true,
+				suggestOnly: suggestOnly ? false : true,
 				source: async (answer: any, input: any) => {
 					const regex_input = RegExp(input, 'i')
 					return source.filter(value => regex_input.test(value))
 				},
 			},
 		])
+		is_verbose()
 		if (!prompted.autocomplete) console.log(chalk.yellow('Use tab for select'))
 	} while (!prompted.autocomplete)
 	return prompted.autocomplete as string
@@ -130,6 +137,7 @@ export async function ask_path(
 				},
 			},
 		])
+		is_verbose()
 		if (!prompted.fuzzypath) console.log(chalk.yellow('Use tab for select'))
 	} while (!prompted.fuzzypath)
 	return prompted.fuzzypath as string
@@ -143,12 +151,17 @@ export async function ask_input(message?: string) {
 			message: message || '>',
 		},
 	])
+	is_verbose()
 	return prompted.input as string
 }
 
 export function ctext(string: string) {
 	const spaces = Math.floor(process.stdout.getWindowSize()[0] / 2 - string.length / 2)
 	return Array(spaces + 1).join(' ') + string
+}
+
+function is_verbose() {
+	if (!VERBOSE) clear_line(true)
 }
 
 export function clear_line(up_line?: boolean) {

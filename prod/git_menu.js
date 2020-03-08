@@ -23,14 +23,12 @@ function git_menu(api, config) {
         while (!should_quit) {
             const choices = ['↵ Back', 'My repository', 'Other repository'];
             const choice = yield ui_1.ask_list(choices, 'Git clone repositories');
-            if (!config.verbose)
-                ui_1.clear_line(true);
             switch (choice) {
                 case choices[1]:
                     yield clone_my_repo(api, config);
                     break;
                 case choices[2]:
-                    //await clone_other_repo(api, config)
+                    //TODO: await clone_other_repo(api, config)
                     break;
                 case choices[0]:
                 default:
@@ -42,7 +40,7 @@ function git_menu(api, config) {
 exports.git_menu = git_menu;
 function clone_my_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const repo_name = yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, false);
+        const repo_name = yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
         const spinner = ora_1.default();
         spinner.color = 'blue';
         if (repo_name === '↵ Back')

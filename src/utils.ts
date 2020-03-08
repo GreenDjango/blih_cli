@@ -8,6 +8,7 @@ const CONFIG_FILE = '.cli_data.json'
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
 export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
+export let VERBOSE = true
 
 export class ConfigType {
 	private _listen: Function | null
@@ -89,6 +90,7 @@ export class ConfigType {
 		return this._verbose
 	}
 	set verbose(verbose: boolean) {
+		VERBOSE = verbose
 		this._verbose = verbose
 		this._triggerListener()
 	}

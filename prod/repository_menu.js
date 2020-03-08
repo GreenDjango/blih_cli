@@ -64,13 +64,13 @@ function create_repo(api, config, repo_name) {
                 spinner.succeed(chalk_1.default.green(res + ' (ramassage-tek)'));
                 acl_list.push({ name: 'ramassage-tek', rights: 'r' });
             }
-            let to_change = yield acl_menu(acl_list, config);
-            while (to_change.length) {
+            let acl = yield acl_menu(acl_list, config);
+            while (acl) {
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
-                const res2 = yield api.setACL(input, to_change[0], to_change[1]);
+                const res2 = yield api.setACL(input, acl.name, acl.rights);
                 acl_list = yield api.getACL(input);
-                spinner.succeed(chalk_1.default.green(res2) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] }));
-                to_change = yield acl_menu(acl_list, config);
+                spinner.succeed(chalk_1.default.green(res2) + ' ' + acl_to_string(acl));
+                acl = yield acl_menu(acl_list, config);
             }
             //TODO: if (await ask_question(`Git clone ${input} ?`)) 1
         }
@@ -82,7 +82,9 @@ function create_repo(api, config, repo_name) {
 exports.create_repo = create_repo;
 function delete_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const to_delete = yield ui_1.ask_list(config.repo);
+        const to_delete = yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
+        if (to_delete === '↵ Back')
+            return;
         const valid = yield ui_1.ask_question(`Delete ${to_delete} ?`);
         if (valid) {
             const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
@@ -104,13 +106,13 @@ function change_acl(api, config, repo_name) {
         try {
             let acl_list = yield api.getACL(to_acl);
             spinner.stop();
-            let to_change = yield acl_menu(acl_list, config);
-            while (to_change.length) {
+            let acl = yield acl_menu(acl_list, config);
+            while (acl) {
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
-                const res = yield api.setACL(to_acl, to_change[0], to_change[1]);
+                const res = yield api.setACL(to_acl, acl.name, acl.rights);
                 acl_list = yield api.getACL(to_acl);
-                spinner.succeed(chalk_1.default.green(res) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] }));
-                to_change = yield acl_menu(acl_list, config);
+                spinner.succeed(chalk_1.default.green(res) + ' ' + acl_to_string(acl));
+                acl = yield acl_menu(acl_list, config);
             }
         }
         catch (err) {
@@ -122,19 +124,14 @@ exports.change_acl = change_acl;
 function acl_menu(acl_list, config) {
     return __awaiter(this, void 0, void 0, function* () {
         const ask = ['↵ Back', 'Add', ...acl_list.map(value => acl_to_string(value))];
-        const user = (yield ui_1.ask_list(ask, 'Give ACL')).split(' ', 1)[0];
-        if (user === '↵') {
-            return [];
-        }
-        if (user === 'Add') {
-            const res = yield ask_acl(config);
-            acl_list.push({ name: res[0], rights: res[1] });
-            return res;
-        }
-        const idx = acl_list.findIndex(value => value.name === user);
-        const to_change = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl_list[idx]), user)).join('');
-        acl_list[idx].rights = to_change;
-        return [user, to_change];
+        const idx = yield ui_1.ask_list(ask, 'Give ACL', true);
+        if (idx === '0')
+            return null;
+        if (idx === '1')
+            return yield ask_acl(config);
+        const acl = acl_list[+idx - 2];
+        acl.rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl), acl.name)).join('');
+        return acl;
     });
 }
 function ask_acl(config) {
@@ -143,7 +140,7 @@ function ask_acl(config) {
         const rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)).join('');
         if (user !== 'ramassage-tek' && !config.contact.some(value => value === user))
             config.contact.push(user);
-        return [user, rights];
+        return { name: user, rights };
     });
 }
 function acl_to_string(acl) {

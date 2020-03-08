@@ -21,6 +21,7 @@ const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
 exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
+exports.VERBOSE = true;
 class ConfigType {
     constructor() {
         this._listen = null;
@@ -86,6 +87,7 @@ class ConfigType {
         return this._verbose;
     }
     set verbose(verbose) {
+        exports.VERBOSE = verbose;
         this._verbose = verbose;
         this._triggerListener();
     }

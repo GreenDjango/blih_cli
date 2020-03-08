@@ -52,15 +52,13 @@ export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: 
 			spinner.succeed(chalk.green(res + ' (ramassage-tek)'))
 			acl_list.push({ name: 'ramassage-tek', rights: 'r' })
 		}
-		let to_change = await acl_menu(acl_list, config)
-		while (to_change.length) {
+		let acl = await acl_menu(acl_list, config)
+		while (acl) {
 			spinner.start(chalk.green(WAIT_MSG))
-			const res2 = await api.setACL(input, to_change[0], to_change[1])
+			const res2 = await api.setACL(input, acl.name, acl.rights)
 			acl_list = await api.getACL(input)
-			spinner.succeed(
-				chalk.green(res2) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] })
-			)
-			to_change = await acl_menu(acl_list, config)
+			spinner.succeed(chalk.green(res2) + ' ' + acl_to_string(acl))
+			acl = await acl_menu(acl_list, config)
 		}
 		//TODO: if (await ask_question(`Git clone ${input} ?`)) 1
 	} catch (err) {
@@ -69,8 +67,10 @@ export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: 
 }
 
 async function delete_repo(api: BlihApi, config: ConfigType) {
-	const to_delete = await ask_list(config.repo)
+	const to_delete = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
+	if (to_delete === '↵ Back') return
 	const valid = await ask_question(`Delete ${to_delete} ?`)
+
 	if (valid) {
 		const spinner = ora().start(chalk.green(WAIT_MSG))
 		try {
@@ -89,15 +89,13 @@ export async function change_acl(api: BlihApi, config: ConfigType, repo_name?: s
 	try {
 		let acl_list = await api.getACL(to_acl)
 		spinner.stop()
-		let to_change = await acl_menu(acl_list, config)
-		while (to_change.length) {
+		let acl = await acl_menu(acl_list, config)
+		while (acl) {
 			spinner.start(chalk.green(WAIT_MSG))
-			const res = await api.setACL(to_acl, to_change[0], to_change[1])
+			const res = await api.setACL(to_acl, acl.name, acl.rights)
 			acl_list = await api.getACL(to_acl)
-			spinner.succeed(
-				chalk.green(res) + ' ' + acl_to_string({ name: to_change[0], rights: to_change[1] })
-			)
-			to_change = await acl_menu(acl_list, config)
+			spinner.succeed(chalk.green(res) + ' ' + acl_to_string(acl))
+			acl = await acl_menu(acl_list, config)
 		}
 	} catch (err) {
 		spinner.fail(chalk.red(err))
@@ -106,21 +104,15 @@ export async function change_acl(api: BlihApi, config: ConfigType, repo_name?: s
 
 async function acl_menu(acl_list: ACLType[], config: ConfigType) {
 	const ask = ['↵ Back', 'Add', ...acl_list.map(value => acl_to_string(value))]
-	const user = (await ask_list(ask, 'Give ACL')).split(' ', 1)[0]
-	if (user === '↵') {
-		return []
-	}
-	if (user === 'Add') {
-		const res = await ask_acl(config)
-		acl_list.push({ name: res[0], rights: res[1] })
-		return res
-	}
-	const idx = acl_list.findIndex(value => value.name === user)
-	const to_change = (
-		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl_list[idx]), user)
+	const idx = await ask_list(ask, 'Give ACL', true)
+
+	if (idx === '0') return null
+	if (idx === '1') return await ask_acl(config)
+	const acl = acl_list[+idx - 2]
+	acl.rights = (
+		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl), acl.name)
 	).join('')
-	acl_list[idx].rights = to_change
-	return [user, to_change]
+	return acl
 }
 
 async function ask_acl(config: ConfigType) {
@@ -130,7 +122,7 @@ async function ask_acl(config: ConfigType) {
 	).join('')
 	if (user !== 'ramassage-tek' && !config.contact.some(value => value === user))
 		config.contact.push(user)
-	return [user, rights]
+	return { name: user, rights } as ACLType
 }
 
 function acl_to_string(acl: ACLType) {
