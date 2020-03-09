@@ -16,6 +16,7 @@ const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const ui_1 = require("./ui");
 const utils_1 = require("./utils");
+const git_menu_1 = require("./git_menu");
 function repo_menu(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
@@ -57,22 +58,14 @@ function create_repo(api, config, repo_name) {
             let res = yield api.createRepository(input);
             config.repo.push(input);
             spinner.succeed(chalk_1.default.green(res));
-            let acl_list = [];
             if (config.auto_acl) {
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
                 res = yield api.setACL(input, 'ramassage-tek', 'r');
                 spinner.succeed(chalk_1.default.green(res + ' (ramassage-tek)'));
-                acl_list.push({ name: 'ramassage-tek', rights: 'r' });
             }
-            let acl = yield acl_menu(acl_list, config);
-            while (acl) {
-                spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
-                const res2 = yield api.setACL(input, acl.name, acl.rights);
-                acl_list = yield api.getACL(input);
-                spinner.succeed(chalk_1.default.green(res2) + ' ' + acl_to_string(acl));
-                acl = yield acl_menu(acl_list, config);
-            }
-            //TODO: if (await ask_question(`Git clone ${input} ?`)) 1
+            yield change_acl(api, config, input);
+            if (yield ui_1.ask_question(`Git clone ${input} ?`))
+                yield git_menu_1.clone_repo(api, input, config.email);
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));
@@ -101,7 +94,9 @@ function delete_repo(api, config) {
 }
 function change_acl(api, config, repo_name) {
     return __awaiter(this, void 0, void 0, function* () {
-        const to_acl = repo_name || (yield ui_1.ask_list(config.repo));
+        const to_acl = repo_name || (yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true));
+        if (to_acl === '↵ Back')
+            return;
         const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
         try {
             let acl_list = yield api.getACL(to_acl);
@@ -157,7 +152,7 @@ function acl_to_bool(acl) {
 }
 function show_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const repo = yield ui_1.ask_list(['↵ Back', ...config.repo]);
+        const repo = yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
         if (repo === '↵ Back')
             return;
         const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
