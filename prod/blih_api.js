@@ -49,7 +49,7 @@ class BlihApi {
             this._token = credentials.token;
         }
         else if (credentials.password) {
-            this._token = this.hashPassword(credentials.password);
+            this._token = BlihApi.hashPassword(credentials.password);
         }
         else {
             throw 'A password or token is needed to authenticate';
@@ -220,7 +220,7 @@ class BlihApi {
      * @param  {String} password - password to hash
      * @return {String} a new token
      */
-    hashPassword(password) {
+    static hashPassword(password) {
         return crypto_1.default
             .createHash('sha512')
             .update(password)
@@ -230,7 +230,7 @@ class BlihApi {
      * Ping the Blih server
      * @return {Promise} the response time in milliseconds
      */
-    ping() {
+    static ping() {
         return __awaiter(this, void 0, void 0, function* () {
             const api = axios_1.default.create(options);
             // Add timestamps to requests and responses

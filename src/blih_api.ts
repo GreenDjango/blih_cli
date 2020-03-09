@@ -53,7 +53,7 @@ export class BlihApi {
 		if (credentials.token) {
 			this._token = credentials.token
 		} else if (credentials.password) {
-			this._token = this.hashPassword(credentials.password)
+			this._token = BlihApi.hashPassword(credentials.password)
 		} else {
 			throw 'A password or token is needed to authenticate'
 		}
@@ -225,7 +225,7 @@ export class BlihApi {
 	 * @param  {String} password - password to hash
 	 * @return {String} a new token
 	 */
-	hashPassword(password: string): string {
+	static hashPassword(password: string): string {
 		return crypto
 			.createHash('sha512')
 			.update(password)
@@ -236,7 +236,7 @@ export class BlihApi {
 	 * Ping the Blih server
 	 * @return {Promise} the response time in milliseconds
 	 */
-	async ping(): Promise<number> {
+	static async ping(): Promise<number> {
 		const api = axios.create(options)
 
 		// Add timestamps to requests and responses

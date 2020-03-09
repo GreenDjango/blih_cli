@@ -1,3 +1,3 @@
 #!/bin/sh
 
-prod/index.js -h
+prod/index.js -v

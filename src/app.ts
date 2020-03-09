@@ -59,13 +59,13 @@ export const run = async () => {
 }
 
 async function login(config: ConfigType) {
-	let api: BlihApi = new BlihApi({ email: '1', password: '1' })
+	let api
 	let error = false
 	const spinner = ora().start(chalk.green('Check Blih server...'))
 
 	spinner.color = 'blue'
 	try {
-		const time = await api.ping()
+		const time = await BlihApi.ping()
 		spinner.succeed(chalk.green('Blih server up: ') + chalk.cyan(time + 'ms'))
 	} catch (err) {
 		spinner.stop()
@@ -78,7 +78,7 @@ async function login(config: ConfigType) {
 		}
 		print_message(`Login with: ${chalk.cyan(config.email)}`, '', 'message')
 		if (!config.token) {
-			config.token = api.hashPassword(await ask_password())
+			config.token = BlihApi.hashPassword(await ask_password())
 		}
 		spinner.start(chalk.green('Try to login...'))
 		try {
@@ -93,7 +93,7 @@ async function login(config: ConfigType) {
 			config.token = ''
 			error = true
 		}
-	} while (error)
+	} while (error || !api)
 	if (config.verbose && !config.args) {
 		print_message(`Found ${chalk.cyan(config.repo.length)} repositories`, '', 'message')
 	}

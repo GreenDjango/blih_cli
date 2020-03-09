@@ -68,12 +68,12 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        let api = new blih_api_1.BlihApi({ email: '1', password: '1' });
+        let api;
         let error = false;
         const spinner = ora_1.default().start(chalk_1.default.green('Check Blih server...'));
         spinner.color = 'blue';
         try {
-            const time = yield api.ping();
+            const time = yield blih_api_1.BlihApi.ping();
             spinner.succeed(chalk_1.default.green('Blih server up: ') + chalk_1.default.cyan(time + 'ms'));
         }
         catch (err) {
@@ -87,7 +87,7 @@ function login(config) {
             }
             utils_1.print_message(`Login with: ${chalk_1.default.cyan(config.email)}`, '', 'message');
             if (!config.token) {
-                config.token = api.hashPassword(yield ui_1.ask_password());
+                config.token = blih_api_1.BlihApi.hashPassword(yield ui_1.ask_password());
             }
             spinner.start(chalk_1.default.green('Try to login...'));
             try {
@@ -103,7 +103,7 @@ function login(config) {
                 config.token = '';
                 error = true;
             }
-        } while (error);
+        } while (error || !api);
         if (config.verbose && !config.args) {
             utils_1.print_message(`Found ${chalk_1.default.cyan(config.repo.length)} repositories`, '', 'message');
         }
