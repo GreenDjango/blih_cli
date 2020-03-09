@@ -1,0 +1,24 @@
+blih_cli 0.1.2
+2020-03-09
+
+What's in?
+- Verbose off now leave no trace
+- Uninstall with script
+- Option --uninstall flag uninstall blih_cli without removing config file
+- Option --snapshot flag update blih_cli to the last commit
+- Refactor acl menu
+- Introducing git clone menu with 3 options (my repo, other repo, all repo)
+- Fix man page missing on install
+
+-------------------------------------------------------------------------------
+
+blih_cli 0.1.1
+2020-02-26
+
+What's in?
+- Install and update with script
+- option -u flag update blih_cli
+- Auto save config in config file
+- Add man page named blih_cli
+- CTRL + L clean screen
+
