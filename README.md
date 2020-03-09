@@ -1,6 +1,7 @@
 # Blih CLI
 
 [![release][1]][2] [![workflow][3]][4] ![size][20] [![issues][5]][6] [![license][7]][8]
+
 Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Command-Line Interface) for linux env.
 
 ![alt text](demo.gif 'Demo bonus')
