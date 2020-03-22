@@ -40,6 +40,10 @@ async function clone_other_repo(api: BlihApi, config: ConfigType) {
 	const repo_name = await ask_input('Repository name ?')
 	const email = await ask_autocomplete(config.contact, 'Enter repository email')
 
+	if (!config.contact.some(value => value === email)) {
+		config.contact.push(email)
+		config.contact = config.contact
+	}
 	await clone_repo(api, repo_name, email)
 }
 

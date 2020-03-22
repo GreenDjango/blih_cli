@@ -11,17 +11,17 @@
     "bcli": "prod/index.js"
   },
   "dependencies": {
-    "axios": "^0.19.1",
+    "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "inquirer": "^6.5.2",
-    "inquirer-autocomplete-prompt": "^1.0.1",
+    "inquirer-autocomplete-prompt": "^1.0.2",
     "inquirer-fuzzy-path": "^2.2.0",
     "ora": "^4.0.3"
   },
   "devDependencies": {
     "@types/inquirer": "^6.5.0",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.5"
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json",

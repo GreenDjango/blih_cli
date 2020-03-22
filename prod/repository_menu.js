@@ -133,8 +133,10 @@ function ask_acl(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = yield ui_1.ask_autocomplete(['ramassage-tek', ...config.contact], 'Enter new email');
         const rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)).join('');
-        if (user !== 'ramassage-tek' && !config.contact.some(value => value === user))
+        if (user !== 'ramassage-tek' && !config.contact.some(value => value === user)) {
             config.contact.push(user);
+            config.contact = config.contact;
+        }
         return { name: user, rights };
     });
 }

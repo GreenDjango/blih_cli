@@ -114,8 +114,10 @@ async function ask_acl(config: ConfigType) {
 	const rights = (
 		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)
 	).join('')
-	if (user !== 'ramassage-tek' && !config.contact.some(value => value === user))
+	if (user !== 'ramassage-tek' && !config.contact.some(value => value === user)) {
 		config.contact.push(user)
+		config.contact = config.contact
+	}
 	return { name: user, rights } as ACLType
 }
 

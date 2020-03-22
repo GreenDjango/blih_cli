@@ -53,6 +53,10 @@ function clone_other_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
         const repo_name = yield ui_1.ask_input('Repository name ?');
         const email = yield ui_1.ask_autocomplete(config.contact, 'Enter repository email');
+        if (!config.contact.some(value => value === email)) {
+            config.contact.push(email);
+            config.contact = config.contact;
+        }
         yield clone_repo(api, repo_name, email);
     });
 }

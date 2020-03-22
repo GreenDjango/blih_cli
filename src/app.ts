@@ -117,6 +117,7 @@ async function show_contact(config: ConfigType) {
 				const new_address = await ask_email()
 				if (!config.contact.some(value => value === new_address)) {
 					config.contact.push(new_address)
+					config.contact = config.contact
 				}
 				break
 			default:
