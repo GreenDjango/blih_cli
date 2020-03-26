@@ -20,8 +20,8 @@ const utils_1 = require("./utils");
 function git_menu(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
+        const choices = ['↵ Back', 'My repository', 'Other repository', 'All my repositories'];
         while (!should_quit) {
-            const choices = ['↵ Back', 'My repository', 'Other repository', 'All my repositories'];
             const choice = yield ui_1.ask_list(choices, 'Git clone repositories');
             switch (choice) {
                 case choices[1]:
@@ -77,7 +77,7 @@ function clone_repo(api, repo_name, email) {
             spinner.start(chalk_1.default.green(`Clone repository in ${repo_path || process.cwd()}...`));
             const cd = repo_path ? `cd ${repo_path}; ` : '';
             yield utils_1.sh(`${cd}git clone git@git.epitech.eu:/${email}/${repo_name}`);
-            spinner.succeed(chalk_1.default.green('Repository ') + chalk_1.default.blue(repo_name) + chalk_1.default.green(' clone'));
+            spinner.succeed(chalk_1.default.green('Repository ') + utils_1.clor.info(repo_name) + chalk_1.default.green(' clone'));
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));
@@ -95,7 +95,7 @@ function clone_all_repo(api, config) {
             spinner.stop();
             let repo_path = null;
             const repo_nb = repo_list.length;
-            if (!(yield ui_1.ask_question(`Git clone ${chalk_1.default.blue(repo_nb)} repositories here ?`)))
+            if (!(yield ui_1.ask_question(`Git clone ${utils_1.clor.info(repo_nb)} repositories here ?`)))
                 repo_path = yield ui_1.ask_input('Repository destination:');
             if (repo_path !== null && !fs_1.default.existsSync(repo_path)) {
                 if (yield ui_1.ask_question('Path not exist, create ?'))

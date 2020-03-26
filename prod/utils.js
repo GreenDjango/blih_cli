@@ -19,9 +19,39 @@ const os_1 = require("os");
 const CONFIG_FOLDER = os_1.homedir() + '/.config/blih_cli';
 const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
+let COLORS = { info: 'blue' };
 exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
 exports.VERBOSE = true;
+exports.colorsValue = new Set([
+    'black',
+    'blackBright',
+    'blue',
+    'blueBright',
+    'cyan',
+    'cyanBright',
+    'green',
+    'greenBright',
+    'grey',
+    'magenta',
+    'magentaBright',
+    'red',
+    'redBright',
+    'white',
+    'whiteBright',
+    'yellow',
+    'yellowBright',
+]);
+class clor {
+    // TODO: remove static getKeyValue = (key: string) => (obj: Record<string, any>) => obj[key]
+    static info(text) {
+        return chalk_1.default[COLORS.info](text);
+    }
+    static getColorsKey() {
+        return Object.keys(COLORS).map(key => key);
+    }
+}
+exports.clor = clor;
 class ConfigType {
     constructor() {
         this._listen = null;
@@ -31,6 +61,7 @@ class ConfigType {
         this._auto_acl = true;
         this._verbose = true;
         this._contact = [];
+        this._colors = COLORS;
         this.args = null;
         this.repo = [];
     }
@@ -42,6 +73,7 @@ class ConfigType {
             auto_acl: this.auto_acl,
             verbose: this.verbose,
             contact: this.contact,
+            colors: this.colors,
         };
     }
     addListener(callback) {
@@ -98,6 +130,14 @@ class ConfigType {
         this._contact = contact;
         this._triggerListener();
     }
+    get colors() {
+        return this._colors;
+    }
+    set colors(colors) {
+        COLORS = colors;
+        this._colors = colors;
+        this._triggerListener();
+    }
 }
 exports.ConfigType = ConfigType;
 function open_config() {
@@ -138,12 +178,20 @@ function parse_config(config) {
     if (config.contact) {
         new_config.contact = config.contact;
     }
+    if (config.colors) {
+        clor.getColorsKey().forEach(key => {
+            if (exports.colorsValue.has(config.colors[key])) {
+                ;
+                new_config.colors[key] = config.colors[key];
+            }
+        });
+    }
     new_config.addListener(write_config);
     return new_config;
 }
 function write_config(config_info) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!config_info.save_token) {
+        if (config_info && !config_info.save_token) {
             config_info.token = undefined;
         }
         try {

@@ -4,16 +4,16 @@ import { homedir } from 'os'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_question, ask_path, ask_input } from './ui'
-import { WAIT_MSG, sh } from './utils'
+import { clor, WAIT_MSG, sh } from './utils'
 
 const HOME_DIR = homedir()
 
 export async function key_menu(api: BlihApi) {
 	let should_quit = false
+	const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list']
 
 	while (!should_quit) {
-		const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list']
-		const choice = await ask_list(choices, 'Repository')
+		const choice = await ask_list(choices, 'Manage your SSH keys')
 		switch (choice) {
 			case choices[1]:
 				await add_key(api)
@@ -54,7 +54,7 @@ async function add_key(api: BlihApi) {
 			path = `${HOME_DIR}/.ssh/${name}.pub`
 		} else {
 			path = await ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`)
-			spinner.info(chalk.blue('Use `ssh-add ' + path + '` for enable the key'))
+			spinner.info(clor.info('Use `ssh-add ' + path + '` for enable the key'))
 			spinner.start(chalk.green(WAIT_MSG))
 		}
 		let key = fs.readFileSync(path, 'utf8')
@@ -101,7 +101,7 @@ async function show_key(api: BlihApi) {
 		)
 		if (idx === '0') return
 		const key = key_list[+idx - 1]
-		spinner.info(chalk.blue(`Name:		${key.name}` + `\n  Data:		${key.data}`))
+		spinner.info(clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`))
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

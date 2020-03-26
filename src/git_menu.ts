@@ -3,13 +3,13 @@ import chalk from 'chalk'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_autocomplete, ask_question, ask_input } from './ui'
-import { ConfigType, sh, WAIT_MSG } from './utils'
+import { ConfigType, clor, sh, WAIT_MSG } from './utils'
 
 export async function git_menu(api: BlihApi, config: ConfigType) {
 	let should_quit = false
+	const choices = ['↵ Back', 'My repository', 'Other repository', 'All my repositories']
 
 	while (!should_quit) {
-		const choices = ['↵ Back', 'My repository', 'Other repository', 'All my repositories']
 		const choice = await ask_list(choices, 'Git clone repositories')
 
 		switch (choice) {
@@ -63,7 +63,7 @@ export async function clone_repo(api: BlihApi, repo_name: string, email: string)
 		spinner.start(chalk.green(`Clone repository in ${repo_path || process.cwd()}...`))
 		const cd = repo_path ? `cd ${repo_path}; ` : ''
 		await sh(`${cd}git clone git@git.epitech.eu:/${email}/${repo_name}`)
-		spinner.succeed(chalk.green('Repository ') + chalk.blue(repo_name) + chalk.green(' clone'))
+		spinner.succeed(chalk.green('Repository ') + clor.info(repo_name) + chalk.green(' clone'))
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}
@@ -79,7 +79,7 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 		spinner.stop()
 		let repo_path: string | null = null
 		const repo_nb = repo_list.length
-		if (!(await ask_question(`Git clone ${chalk.blue(repo_nb)} repositories here ?`)))
+		if (!(await ask_question(`Git clone ${clor.info(repo_nb)} repositories here ?`)))
 			repo_path = await ask_input('Repository destination:')
 		if (repo_path !== null && !fs.existsSync(repo_path)) {
 			if (await ask_question('Path not exist, create ?'))

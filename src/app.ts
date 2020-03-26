@@ -2,10 +2,19 @@ import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
-import { ConfigType, APP_VERSION, open_config, write_config, print_message, sh_live } from './utils'
+import {
+	ConfigType,
+	APP_VERSION,
+	open_config,
+	write_config,
+	clor,
+	print_message,
+	sh_live,
+} from './utils'
 import { git_menu } from './git_menu'
 import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
+import { options_menu } from './options_menu'
 
 export const run = async () => {
 	if (process.argv.length > 2) await parse_args(process.argv)
@@ -23,34 +32,42 @@ export const run = async () => {
 	}
 	const api = await login(config)
 	if (config.args) await fast_mode(api, config)
-	process.stdin.on('keypress', (str, key) => {
-		if (key.ctrl && key.name === 'l') console.clear()
+	process.stdin.on('keypress', async (str, key) => {
+		if (key.ctrl && key.name === 'l') {
+			console.clear()
+		}
+		//TODO if (key.name === 'escape')
 	})
 
 	let should_quit = false
+	const choices = [
+		'Git clone',
+		'Repositories management',
+		'Keys management',
+		'Contacts list',
+		'Options',
+		'Exit',
+	]
 	while (!should_quit) {
-		const choice = await ask_list(
-			['Git clone', 'Repositories management', 'Key management', 'Contact', 'Option', 'Exit'],
-			"Let's do some works"
-		)
+		const choice = await ask_list(choices, "Let's do some works")
 
 		switch (choice) {
-			case 'Git clone':
+			case choices[0]:
 				await git_menu(api, config)
 				break
-			case 'Repositories management':
+			case choices[1]:
 				await repo_menu(api, config)
 				break
-			case 'Key management':
+			case choices[2]:
 				await key_menu(api)
 				break
-			case 'Contact':
+			case choices[3]:
 				await show_contact(config)
 				break
-			case 'Option':
-				await option_menu(config)
+			case choices[4]:
+				await options_menu(config)
 				break
-			case 'Exit':
+			case choices[5]:
 			default:
 				should_quit = true
 		}
@@ -89,7 +106,7 @@ async function login(config: ConfigType) {
 		} catch (err) {
 			spinner.stop()
 			print_message('Fail to login', err, 'fail')
-			config.email = ''
+			if (err === 'Bad token') config.email = ''
 			config.token = ''
 			error = true
 		}
@@ -125,39 +142,6 @@ async function show_contact(config: ConfigType) {
 				if (valid) {
 					config.contact = config.contact.filter(value => value !== choice)
 				}
-		}
-	}
-}
-
-async function option_menu(config: ConfigType) {
-	let should_quit = false
-
-	while (!should_quit) {
-		const choices = [
-			'↵ Back',
-			`Remember password: ${config.save_token ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
-			`Auto Ramassage-tek ACL: ${config.auto_acl ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
-			`Mode verbose: ${config.verbose ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
-			'Reset all contact',
-		]
-		const choice = await ask_list(choices, 'You want options ?')
-		switch (choice) {
-			case choices[1]:
-				config.save_token = !config.save_token
-				break
-			case choices[2]:
-				config.auto_acl = !config.auto_acl
-				break
-			case choices[3]:
-				config.verbose = !config.verbose
-				break
-			case choices[4]:
-				const valid = await ask_question(`Are you sure ?`)
-				if (valid) config.contact = []
-				break
-			case choices[0]:
-			default:
-				should_quit = true
 		}
 	}
 }
@@ -202,6 +186,6 @@ async function parse_args(args: string[]) {
 
 function show_help() {
 	ora().info(
-		chalk.blue('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`')
+		clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`')
 	)
 }

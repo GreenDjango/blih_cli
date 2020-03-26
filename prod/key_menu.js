@@ -22,9 +22,9 @@ const HOME_DIR = os_1.homedir();
 function key_menu(api) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
+        const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list'];
         while (!should_quit) {
-            const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list'];
-            const choice = yield ui_1.ask_list(choices, 'Repository');
+            const choice = yield ui_1.ask_list(choices, 'Manage your SSH keys');
             switch (choice) {
                 case choices[1]:
                     yield add_key(api);
@@ -67,7 +67,7 @@ function add_key(api) {
             }
             else {
                 path = yield ui_1.ask_path('Ssh key path:', '\\.pub$', `${HOME_DIR}/`);
-                spinner.info(chalk_1.default.blue('Use `ssh-add ' + path + '` for enable the key'));
+                spinner.info(utils_1.clor.info('Use `ssh-add ' + path + '` for enable the key'));
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
             }
             let key = fs_1.default.readFileSync(path, 'utf8');
@@ -111,7 +111,7 @@ function show_key(api) {
             if (idx === '0')
                 return;
             const key = key_list[+idx - 1];
-            spinner.info(chalk_1.default.blue(`Name:		${key.name}` + `\n  Data:		${key.data}`));
+            spinner.info(utils_1.clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`));
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));

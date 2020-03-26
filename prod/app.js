@@ -20,6 +20,7 @@ const utils_1 = require("./utils");
 const git_menu_1 = require("./git_menu");
 const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
+const options_menu_1 = require("./options_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     if (process.argv.length > 2)
         yield parse_args(process.argv);
@@ -36,30 +37,40 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     const api = yield login(config);
     if (config.args)
         yield fast_mode(api, config);
-    process.stdin.on('keypress', (str, key) => {
-        if (key.ctrl && key.name === 'l')
+    process.stdin.on('keypress', (str, key) => __awaiter(void 0, void 0, void 0, function* () {
+        if (key.ctrl && key.name === 'l') {
             console.clear();
-    });
+        }
+        //TODO if (key.name === 'escape')
+    }));
     let should_quit = false;
+    const choices = [
+        'Git clone',
+        'Repositories management',
+        'Keys management',
+        'Contacts list',
+        'Options',
+        'Exit',
+    ];
     while (!should_quit) {
-        const choice = yield ui_1.ask_list(['Git clone', 'Repositories management', 'Key management', 'Contact', 'Option', 'Exit'], "Let's do some works");
+        const choice = yield ui_1.ask_list(choices, "Let's do some works");
         switch (choice) {
-            case 'Git clone':
+            case choices[0]:
                 yield git_menu_1.git_menu(api, config);
                 break;
-            case 'Repositories management':
+            case choices[1]:
                 yield repository_menu_1.repo_menu(api, config);
                 break;
-            case 'Key management':
+            case choices[2]:
                 yield key_menu_1.key_menu(api);
                 break;
-            case 'Contact':
+            case choices[3]:
                 yield show_contact(config);
                 break;
-            case 'Option':
-                yield option_menu(config);
+            case choices[4]:
+                yield options_menu_1.options_menu(config);
                 break;
-            case 'Exit':
+            case choices[5]:
             default:
                 should_quit = true;
         }
@@ -99,7 +110,8 @@ function login(config) {
             catch (err) {
                 spinner.stop();
                 utils_1.print_message('Fail to login', err, 'fail');
-                config.email = '';
+                if (err === 'Bad token')
+                    config.email = '';
                 config.token = '';
                 error = true;
             }
@@ -134,40 +146,6 @@ function show_contact(config) {
                     if (valid) {
                         config.contact = config.contact.filter(value => value !== choice);
                     }
-            }
-        }
-    });
-}
-function option_menu(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let should_quit = false;
-        while (!should_quit) {
-            const choices = [
-                '↵ Back',
-                `Remember password: ${config.save_token ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
-                `Auto Ramassage-tek ACL: ${config.auto_acl ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
-                `Mode verbose: ${config.verbose ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
-                'Reset all contact',
-            ];
-            const choice = yield ui_1.ask_list(choices, 'You want options ?');
-            switch (choice) {
-                case choices[1]:
-                    config.save_token = !config.save_token;
-                    break;
-                case choices[2]:
-                    config.auto_acl = !config.auto_acl;
-                    break;
-                case choices[3]:
-                    config.verbose = !config.verbose;
-                    break;
-                case choices[4]:
-                    const valid = yield ui_1.ask_question(`Are you sure ?`);
-                    if (valid)
-                        config.contact = [];
-                    break;
-                case choices[0]:
-                default:
-                    should_quit = true;
             }
         }
     });
@@ -221,5 +199,5 @@ function parse_args(args) {
     });
 }
 function show_help() {
-    ora_1.default().info(chalk_1.default.blue('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
+    ora_1.default().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
 }

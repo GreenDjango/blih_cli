@@ -1,6 +1,6 @@
 # Blih CLI
 
-[![release][1]][2] [![workflow][3]][4] ![size][20] [![issues][5]][6] [![license][7]][8]
+[![release][1]][2] [![workflow][3]][4] [![size][20]][21] [![issues][5]][6] [![license][7]][8]
 
 Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Command-Line Interface) for linux env.
 
@@ -61,11 +61,12 @@ npm run prod
 ```
 
 [1]: https://img.shields.io/github/v/release/GreenDjango/blih_cli?maxAge=600
-[2]: http://commonmark.org 'GitHub release (latest by date)'
+[2]: https://github.com/GreenDjango/blih_cli/releases 'GitHub release (latest by date)'
 [3]: https://img.shields.io/github/workflow/status/GreenDjango/blih_cli/Node.js%20CI?maxAge=600
-[4]: http://commonmark.org 'GitHub Workflow Status'
+[4]: https://github.com/GreenDjango/blih_cli/actions 'GitHub Workflow Status'
 [5]: https://img.shields.io/github/issues-closed/GreenDjango/blih_cli?maxAge=600
-[6]: http://commonmark.org 'GitHub closed issues'
+[6]: https://github.com/GreenDjango/blih_cli/issues 'GitHub closed issues'
 [7]: https://img.shields.io/github/license/GreenDjango/blih_cli?maxAge=2592000
-[8]: http://commonmark.org 'GitHub license'
-[20]: https://img.shields.io/github/repo-size/GreenDjango/blih_cli?maxAge=600  'GitHub repo size'
+[8]: https://github.com/GreenDjango/blih_cli/blob/master/LICENSE 'GitHub license'
+[20]: https://img.shields.io/github/repo-size/GreenDjango/blih_cli?maxAge=600
+[21]: https://github.com/GreenDjango/blih_cli 'GitHub repo size'

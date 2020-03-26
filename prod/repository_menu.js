@@ -20,14 +20,14 @@ const git_menu_1 = require("./git_menu");
 function repo_menu(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
+        const choices = [
+            '↵ Back',
+            'Create repository',
+            'Delete repository',
+            'Change ACL',
+            'Show repositories list',
+        ];
         while (!should_quit) {
-            const choices = [
-                '↵ Back',
-                'Create repository',
-                'Delete repository',
-                'Change ACL',
-                'Show repositories list',
-            ];
             const choice = yield ui_1.ask_list(choices, 'Repository');
             switch (choice) {
                 case choices[1]:
@@ -165,7 +165,7 @@ function show_repo(api, config) {
             const repo_acl = (yield api.getACL(repo)).map(value => `${value.name} - ${value.rights}`);
             if (!repo_acl.length)
                 repo_acl.push('no sharing');
-            spinner.info(chalk_1.default.blue(`Name:		${repo_info.name}` +
+            spinner.info(utils_1.clor.info(`Name:		${repo_info.name}` +
                 `\n  Uuid:		${repo_info.uuid}` +
                 `\n  Url:		${repo_info.url}` +
                 `\n  Creation:	${creation_date.toLocaleString()}` +

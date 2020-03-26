@@ -2,22 +2,22 @@ import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_question, ask_input, ask_qcm, ask_autocomplete } from './ui'
-import { ConfigType, WAIT_MSG } from './utils'
+import { ConfigType, clor, WAIT_MSG } from './utils'
 import { clone_repo } from './git_menu'
 
 type ACLType = { name: string; rights: string }
 
 export async function repo_menu(api: BlihApi, config: ConfigType) {
 	let should_quit = false
+	const choices = [
+		'↵ Back',
+		'Create repository',
+		'Delete repository',
+		'Change ACL',
+		'Show repositories list',
+	]
 
 	while (!should_quit) {
-		const choices = [
-			'↵ Back',
-			'Create repository',
-			'Delete repository',
-			'Change ACL',
-			'Show repositories list',
-		]
 		const choice = await ask_list(choices, 'Repository')
 		switch (choice) {
 			case choices[1]:
@@ -147,7 +147,7 @@ async function show_repo(api: BlihApi, config: ConfigType) {
 		const repo_acl = (await api.getACL(repo)).map(value => `${value.name} - ${value.rights}`)
 		if (!repo_acl.length) repo_acl.push('no sharing')
 		spinner.info(
-			chalk.blue(
+			clor.info(
 				`Name:		${repo_info.name}` +
 					`\n  Uuid:		${repo_info.uuid}` +
 					`\n  Url:		${repo_info.url}` +

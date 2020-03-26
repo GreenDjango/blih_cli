@@ -6,9 +6,42 @@ import { homedir } from 'os'
 const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
 const CONFIG_FILE = '.cli_data.json'
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
+let COLORS = { info: 'blue' }
 export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
 export let VERBOSE = true
+
+export const colorsValue = new Set([
+	'black',
+	'blackBright',
+	'blue',
+	'blueBright',
+	'cyan',
+	'cyanBright',
+	'green',
+	'greenBright',
+	'grey',
+	'magenta',
+	'magentaBright',
+	'red',
+	'redBright',
+	'white',
+	'whiteBright',
+	'yellow',
+	'yellowBright',
+])
+
+export class clor {
+	// TODO: remove static getKeyValue = (key: string) => (obj: Record<string, any>) => obj[key]
+
+	static info(text: any): string {
+		return (chalk as any)[COLORS.info](text)
+	}
+
+	static getColorsKey(): string[] {
+		return Object.keys(COLORS).map(key => key)
+	}
+}
 
 export class ConfigType {
 	private _listen: Function | null
@@ -18,6 +51,7 @@ export class ConfigType {
 	private _auto_acl: boolean
 	private _verbose: boolean
 	private _contact: string[]
+	private _colors: { info: string }
 	public args: string[] | null
 	public repo: string[]
 
@@ -29,6 +63,7 @@ export class ConfigType {
 		this._auto_acl = true
 		this._verbose = true
 		this._contact = []
+		this._colors = COLORS
 		this.args = null
 		this.repo = []
 	}
@@ -41,6 +76,7 @@ export class ConfigType {
 			auto_acl: this.auto_acl,
 			verbose: this.verbose,
 			contact: this.contact,
+			colors: this.colors,
 		}
 	}
 
@@ -101,6 +137,14 @@ export class ConfigType {
 		this._contact = contact
 		this._triggerListener()
 	}
+	get colors() {
+		return this._colors
+	}
+	set colors(colors) {
+		COLORS = colors
+		this._colors = colors
+		this._triggerListener()
+	}
 }
 
 export function open_config() {
@@ -140,6 +184,13 @@ function parse_config(config: any) {
 	if (config.contact) {
 		new_config.contact = config.contact
 	}
+	if (config.colors) {
+		clor.getColorsKey().forEach(key => {
+			if (colorsValue.has(config.colors[key])) {
+				;(new_config.colors as any)[key] = config.colors[key]
+			}
+		})
+	}
 
 	new_config.addListener(write_config)
 
@@ -147,8 +198,8 @@ function parse_config(config: any) {
 }
 
 export async function write_config(config_info: any) {
-	if (!config_info.save_token) {
-		config_info.token = undefined as any
+	if (config_info && !config_info.save_token) {
+		config_info.token = undefined
 	}
 	try {
 		if (!fs.existsSync(CONFIG_FOLDER)) {
