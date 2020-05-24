@@ -8,7 +8,7 @@ Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CL
 
 ## Install & Setup
 
-1. Install node https://nodejs.org/en/ (use `sudo apt-get install node` for ubuntu or `sudo dnf install node` for fedora)
+1. Install node https://nodejs.org/en/ (use `sudo apt-get install nodejs` for ubuntu or `sudo dnf install node` for fedora)
 2. `git clone https://github.com/GreenDjango/blih_cli`
 3. `sudo sh blih_cli/install.sh`
 4. `rm -rf blih_cli/`
