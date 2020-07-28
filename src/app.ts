@@ -17,6 +17,7 @@ import { key_menu } from './key_menu'
 import { options_menu } from './options_menu'
 
 export const run = async () => {
+    process.title = 'blih cli'
 	if (process.argv.length > 2) await parse_args(process.argv)
 	const config = open_config()
 
