@@ -1,6 +1,16 @@
 #!/bin/sh
+#**
+#* Copyright (c) 2020 Blih CLI
+#*
+#* Update script for blih_cli
+#*
+#* @summary Update script for blih_cli
+#* @author Theo <@GreenDjango>
+#*
+#* Created at     : 2020-02-25 15:19:31 
+#**
 
-# Update script for blih_cli
+# Repo path
 repo_name="blih_cli"
 share_path="/usr/local/share"
 
@@ -9,6 +19,17 @@ if [ "$EUID" -ne 0 ]
 then
     printf '\33[31m%s\33[0m\n' \
     "Error: Please run as root"
+    exit 2
+fi
+
+# Test network and repo
+## use http instead of 'git@github.com:GreenDjango/blih_cli.git' because
+## no need to add the RSA key fingerprint (cf: SSH deadlock issue #13)
+git ls-remote -h "https://github.com/GreenDjango/$repo_name.git" &> /dev/null
+if [ "$?" -ne 0 ]
+then
+    printf '\33[31m%s\33[0m\n' \
+    "Error: Please check your network connection"
     exit 2
 fi
 
