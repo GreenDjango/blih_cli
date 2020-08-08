@@ -6,7 +6,9 @@ import { homedir } from 'os'
 const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
 const CONFIG_FILE = '.cli_data.json'
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
+const PACKAGE_PATH = `${__dirname}/../package.json`
 let COLORS = { info: 'blue' }
+export const IS_DEBUG = get_is_debug_build()
 export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
 export let VERBOSE = true
@@ -39,7 +41,7 @@ export class clor {
 	}
 
 	static getColorsKey(): string[] {
-		return Object.keys(COLORS).map(key => key)
+		return Object.keys(COLORS).map((key) => key)
 	}
 }
 
@@ -185,7 +187,7 @@ function parse_config(config: any) {
 		new_config.contact = config.contact
 	}
 	if (config.colors) {
-		clor.getColorsKey().forEach(key => {
+		clor.getColorsKey().forEach((key) => {
 			if (colorsValue.has(config.colors[key])) {
 				;(new_config.colors as any)[key] = config.colors[key]
 			}
@@ -234,7 +236,7 @@ export function print_message(title: string, message: string, level: 'message' |
 }
 
 export async function sh(cmd: string): Promise<{ stdout: string; stderr: string }> {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		exec(cmd, (err, stdout, stderr) => {
 			if (err) reject(err)
 			else resolve({ stdout, stderr })
@@ -243,15 +245,16 @@ export async function sh(cmd: string): Promise<{ stdout: string; stderr: string 
 }
 
 export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: string }> {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		const child = exec(cmd, (err, stdout, stderr) => {
 			if (err) reject(err)
 			else resolve({ stdout, stderr })
 		})
-		child.stdout?.on('data', data => {
+		//process.stdin?.on()
+		child.stdout?.on('data', (data) => {
 			process.stdout.write(data)
 		})
-		child.stderr?.on('data', data => {
+		child.stderr?.on('data', (data) => {
 			process.stderr.write(data)
 		})
 	})
@@ -259,9 +262,22 @@ export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: st
 
 async function get_app_version() {
 	try {
-		const res = await sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`)
-		return res.stdout.split('\n')[0] || 'v0.0.0'
+		if (IS_DEBUG) {
+			const res = await sh(
+				`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`
+			)
+			return res.stdout.split('\n')[0] || 'v0.0.0'
+		} else {
+			const package_file = fs.readFileSync(PACKAGE_PATH, 'utf8')
+			const package_obj = JSON.parse(package_file)
+			return 'v' + package_obj?.version
+		}
 	} catch (err) {
 		return 'v0.0.0'
 	}
+}
+
+function get_is_debug_build() {
+	return false
+	return fs.existsSync(`${__dirname}/../.npmignore`)
 }

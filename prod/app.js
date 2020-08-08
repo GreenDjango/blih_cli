@@ -22,6 +22,7 @@ const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
 const options_menu_1 = require("./options_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
+    process.title = 'blih cli';
     if (process.argv.length > 2)
         yield parse_args(process.argv);
     const config = utils_1.open_config();
@@ -103,7 +104,7 @@ function login(config) {
             spinner.start(chalk_1.default.green('Try to login...'));
             try {
                 api = new blih_api_1.BlihApi({ email: config.email, token: config.token });
-                config.repo = (yield api.listRepositories()).map(value => value.name);
+                config.repo = (yield api.listRepositories()).map((value) => value.name);
                 error = false;
                 spinner.stop();
             }
@@ -136,7 +137,7 @@ function show_contact(config) {
                     break;
                 case choices[1]:
                     const new_address = yield ui_1.ask_email();
-                    if (!config.contact.some(value => value === new_address)) {
+                    if (!config.contact.some((value) => value === new_address)) {
                         config.contact.push(new_address);
                         config.contact = config.contact;
                     }
@@ -144,7 +145,7 @@ function show_contact(config) {
                 default:
                     const valid = yield ui_1.ask_question(`Remove ${choice} ?`);
                     if (valid) {
-                        config.contact = config.contact.filter(value => value !== choice);
+                        config.contact = config.contact.filter((value) => value !== choice);
                     }
             }
         }
@@ -181,6 +182,8 @@ function parse_args(args) {
                 console.log(yield utils_1.APP_VERSION);
                 process.exit(0);
             }
+            if (!utils_1.IS_DEBUG)
+                return;
             if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
                 yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
                 process.exit(0);

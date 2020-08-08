@@ -4,6 +4,7 @@ import { BlihApi } from './blih_api'
 import { ask_list, ask_email, ask_password, ask_question } from './ui'
 import {
 	ConfigType,
+	IS_DEBUG,
 	APP_VERSION,
 	open_config,
 	write_config,
@@ -17,7 +18,7 @@ import { key_menu } from './key_menu'
 import { options_menu } from './options_menu'
 
 export const run = async () => {
-    process.title = 'blih cli'
+	process.title = 'blih cli'
 	if (process.argv.length > 2) await parse_args(process.argv)
 	const config = open_config()
 
@@ -101,7 +102,7 @@ async function login(config: ConfigType) {
 		spinner.start(chalk.green('Try to login...'))
 		try {
 			api = new BlihApi({ email: config.email, token: config.token })
-			config.repo = (await api.listRepositories()).map(value => value.name)
+			config.repo = (await api.listRepositories()).map((value) => value.name)
 			error = false
 			spinner.stop()
 		} catch (err) {
@@ -133,7 +134,7 @@ async function show_contact(config: ConfigType) {
 				break
 			case choices[1]:
 				const new_address = await ask_email()
-				if (!config.contact.some(value => value === new_address)) {
+				if (!config.contact.some((value) => value === new_address)) {
 					config.contact.push(new_address)
 					config.contact = config.contact
 				}
@@ -141,7 +142,7 @@ async function show_contact(config: ConfigType) {
 			default:
 				const valid = await ask_question(`Remove ${choice} ?`)
 				if (valid) {
-					config.contact = config.contact.filter(value => value !== choice)
+					config.contact = config.contact.filter((value) => value !== choice)
 				}
 		}
 	}
@@ -169,6 +170,7 @@ async function parse_args(args: string[]) {
 			console.log(await APP_VERSION)
 			process.exit(0)
 		}
+		if (!IS_DEBUG) return
 		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
 			await sh_live(`sudo sh ${__dirname}/../update.sh`)
 			process.exit(0)

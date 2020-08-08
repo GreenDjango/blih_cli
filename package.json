@@ -1,5 +1,5 @@
 {
-  "name": "blih_cli",
+  "name": "@greendjango/blih_cli",
   "version": "0.1.2",
   "description": "Blih CLI for Linux",
   "main": "prod/index.js",
@@ -32,6 +32,7 @@
     "type": "git",
     "url": "git://github.com/GreenDjango/blih_cli.git"
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/GreenDjango" },
   "author": "Theo C.",
   "license": "MIT"
 }

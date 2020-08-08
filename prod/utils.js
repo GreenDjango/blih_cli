@@ -19,7 +19,9 @@ const os_1 = require("os");
 const CONFIG_FOLDER = os_1.homedir() + '/.config/blih_cli';
 const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
+const PACKAGE_PATH = `${__dirname}/../package.json`;
 let COLORS = { info: 'blue' };
+exports.IS_DEBUG = get_is_debug_build();
 exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
 exports.VERBOSE = true;
@@ -48,7 +50,7 @@ class clor {
         return chalk_1.default[COLORS.info](text);
     }
     static getColorsKey() {
-        return Object.keys(COLORS).map(key => key);
+        return Object.keys(COLORS).map((key) => key);
     }
 }
 exports.clor = clor;
@@ -179,7 +181,7 @@ function parse_config(config) {
         new_config.contact = config.contact;
     }
     if (config.colors) {
-        clor.getColorsKey().forEach(key => {
+        clor.getColorsKey().forEach((key) => {
             if (exports.colorsValue.has(config.colors[key])) {
                 ;
                 new_config.colors[key] = config.colors[key];
@@ -255,10 +257,11 @@ function sh_live(cmd) {
                 else
                     resolve({ stdout, stderr });
             });
-            (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', data => {
+            //process.stdin?.on()
+            (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
                 process.stdout.write(data);
             });
-            (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', data => {
+            (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
                 process.stderr.write(data);
             });
         });
@@ -268,11 +271,22 @@ exports.sh_live = sh_live;
 function get_app_version() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const res = yield sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`);
-            return res.stdout.split('\n')[0] || 'v0.0.0';
+            if (exports.IS_DEBUG) {
+                const res = yield sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`);
+                return res.stdout.split('\n')[0] || 'v0.0.0';
+            }
+            else {
+                const package_file = fs_1.default.readFileSync(PACKAGE_PATH, 'utf8');
+                const package_obj = JSON.parse(package_file);
+                return 'v' + (package_obj === null || package_obj === void 0 ? void 0 : package_obj.version);
+            }
         }
         catch (err) {
             return 'v0.0.0';
         }
     });
+}
+function get_is_debug_build() {
+    return false;
+    return fs_1.default.existsSync(`${__dirname}/../.npmignore`);
 }
