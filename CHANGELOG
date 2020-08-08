@@ -4,6 +4,7 @@ blih_cli 0.1.3
 What's in?
 - Add colors option
 - Fix git clone email save
+- Fix update deadlock and shallow git error
 - Fix update deadlock
 - Update Dependencies
 

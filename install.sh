@@ -21,7 +21,7 @@ if [ $? -ne 0 ]
 then
     printf '\33[31m%s\33[0m\n%s\n' \
     "Error: Npm is not installed" \
-    "Use \`sudo apt-get node\` for ubuntu or \`sudo dnf install node\` for fedora"
+    "Use \`sudo apt install nodejs npm\` for ubuntu or \`sudo dnf install nodejs\` for fedora"
     exit 2
 fi
 
@@ -51,7 +51,7 @@ fi
 
 # Git clone blih_cli repositorie
 printf '\33[32m%s\33[0m\n' "Git clone repo..."
-if git clone --depth 1 "https://github.com/$owner/$repo_name.git"
+if git clone --progress "https://github.com/$owner/$repo_name.git"
 then
     printf '\33[32m%s\33[0m\n' "Install in $share_path..."
     cd "$repo_name"
