@@ -6,33 +6,46 @@ Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CL
 
 ![alt text](demo.gif 'Demo bonus')
 
-## Install & Setup
+## 💾 Install & Setup
 
-1. Install node https://nodejs.org/en/ (use `sudo apt-get install nodejs` for ubuntu or `sudo dnf install node` for fedora)
-2. `git clone https://github.com/GreenDjango/blih_cli`
-3. `sudo sh blih_cli/install.sh`
-4. `rm -rf blih_cli/`
-5. Enjoy with `blih_cli` !
-6. Optional: add `alias my_name="blih_cli"` in .bashrc file
+⚠️ Install [node](https://nodejs.org/en/) & npm (use `sudo apt install nodejs npm` for ubuntu
+or `sudo dnf install nodejs` for fedora)
 
-## Update
+#### 👶 Easy mode
+1. `sudo npm i blih_cli -g`
+
+#### 👨‍💻 Expert mode
+1. `git clone https://github.com/GreenDjango/blih_cli`
+2. `sudo sh blih_cli/install.sh`
+3. `rm -rf blih_cli/`
+
+Enjoy with `blih_cli` !
+Optional: add `alias my_name="blih_cli"` in .bashrc file
+
+## 🔄 Update
+
+#### With npm
+
+`npm update blih_cli -g`
+
+#### With expert mode install
 
 Use `blih_cli -u` for up to next **stable** version
 
 Use `blih_cli --snapshot` for up to the next **snapshot** version.
 This version can crash. Use only if you want to test the new features
 
-## Help
+## 🦺 Help
 
 Use `man blih_cli` for show help
 
-## Uninstall
+## 💣 Uninstall
 
 Use `blih_cli --uninstall` for uninstall blih_cli from
 
 ---
 
-## Dev
+## 💻 Dev
 
 ```
 git clone https://github.com/GreenDjango/blih_cli
