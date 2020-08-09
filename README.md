@@ -53,6 +53,8 @@ Use `blih_cli --uninstall` for uninstall blih_cli from
 
 ## 💻 Dev
 
+![GitHub package.json version](https://img.shields.io/github/package-json/v/GreenDjango/blih_cli) ➡️ ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/GreenDjango/blih_cli) ➡️ [![release][1]][2] ➡️ [![npm][11]][12]
+
 ```
 git clone https://github.com/GreenDjango/blih_cli
 cd blih_cli
