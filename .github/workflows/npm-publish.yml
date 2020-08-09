@@ -73,10 +73,11 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - name: Check if version has been updated
         id: check
-        diff-search: true
         uses: EndBug/version-check@7d67b971df2c119e8dab599b302b311d5db2e8f7
               # This is tagged version v1.5.0, but do not use version tags
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
+        with:
+          diff-search: true
       - name: Update package name
         if: steps.check.outputs.changed == 'true'
         run: |
