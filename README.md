@@ -1,6 +1,6 @@
 # Blih CLI
 
-[![release][1]][2] [![workflow][3]][4] [![size][20]][21] [![issues][5]][6] [![license][7]][8]
+[![release][1]][2] [![workflow][3]][4] [![CodeFactor][9]][10] [![size][20]][21] [![issues][5]][6] [![license][7]][8]
 
 Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Command-Line Interface) for linux env.
 
@@ -26,7 +26,7 @@ Optional: add `alias my_name="blih_cli"` in .bashrc file
 
 #### With npm
 
-`npm update blih_cli -g`
+`npm up blih_cli -g`
 
 #### With expert mode install
 
@@ -40,6 +40,12 @@ This version can crash. Use only if you want to test the new features
 Use `man blih_cli` for show help
 
 ## 💣 Uninstall
+
+#### With npm
+
+`npm un blih_cli -g`
+
+#### With expert mode install
 
 Use `blih_cli --uninstall` for uninstall blih_cli from
 
@@ -81,5 +87,7 @@ npm run prod
 [6]: https://github.com/GreenDjango/blih_cli/issues 'GitHub closed issues'
 [7]: https://img.shields.io/github/license/GreenDjango/blih_cli?maxAge=2592000
 [8]: https://github.com/GreenDjango/blih_cli/blob/master/LICENSE 'GitHub license'
+[9]: https://www.codefactor.io/repository/github/greendjango/blih_cli/badge
+[10]: https://www.codefactor.io/repository/github/greendjango/blih_cli 'Repository code rating'
 [20]: https://img.shields.io/github/repo-size/GreenDjango/blih_cli?maxAge=600
 [21]: https://github.com/GreenDjango/blih_cli 'GitHub repo size'

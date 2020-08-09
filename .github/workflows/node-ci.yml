@@ -24,7 +24,7 @@ jobs:
       run: |
         rm -rf node_modules/
         npm i --production
-        sh tests/git_action.sh
+        ./prod/index.js -v
       env:
         CI: true
 
