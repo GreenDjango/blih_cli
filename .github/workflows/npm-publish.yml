@@ -13,6 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     continue-on-error: false
+    # outputs:
+    #   status: ${{ steps.ID.conclusion }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -69,7 +71,22 @@ jobs:
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-      - run: npm ci
-      #- run: npm publish
+      - name: Check if version has been updated
+        id: check
+        diff-search: true
+        uses: EndBug/version-check@7d67b971df2c119e8dab599b302b311d5db2e8f7
+              # This is tagged version v1.5.0, but do not use version tags
+              # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
+      - name: Update package name
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          sudo npm install -g json
+          REGISTRY_NAME=`json registryNames.github -f package.json`
+          json -I -f package.json -e this.name=\"$REGISTRY_NAME\"
+      - name: Publishing new package
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          npm ci
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
