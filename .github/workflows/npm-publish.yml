@@ -30,9 +30,11 @@ jobs:
           checkName: ci-status
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           timeoutSeconds: 180
-      - if: steps.wait-for-build.outputs.conclusion == 'success'
+      - name: CI action build OK
+        if: steps.wait-for-build.outputs.conclusion == 'success'
         run: exit 0
-      - name: CI action build fail
+      - name: CI action build FAIL
+        if: steps.wait-for-build.outputs.conclusion != 'success'
         run: exit 1
 
   publish-npm:
