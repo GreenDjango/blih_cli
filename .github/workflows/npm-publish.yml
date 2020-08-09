@@ -12,6 +12,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    continue-on-error: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -20,14 +21,15 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Wait for CI action to succeed
-        uses: fountainhead/action-wait-for-check@v1.0.0
+        uses: fountainhead/action-wait-for-check@7ee38294c9e2ee911a1db471a8095ee7e00d4663
+              # This is tagged version v1.0.0, but do not use version tags
+              # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: node-ci
+          checkName: ci-status
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           timeoutSeconds: 180
-
       - if: steps.wait-for-build.outputs.conclusion == 'success'
         run: exit 0
       - name: CI action build fail
@@ -36,7 +38,7 @@ jobs:
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
-    if: needs.build.outputs.status == 'success'
+    # if: needs.build.outputs.status == 'success'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -44,7 +46,9 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
       - name: Publish if version has been updated
-        uses: pascalgn/npm-publish-action@1.3.3
+        uses: pascalgn/npm-publish-action@06e0830ea83eea10ed4a62654eeaedafb8bf50fc
+              # This is tagged version v1.3.3, but do not use version tags
+              # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         with: # All of theses inputs are optional
           tag_name: "v%s"
           tag_message: "v%s"
