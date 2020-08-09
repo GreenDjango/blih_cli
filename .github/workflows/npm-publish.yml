@@ -26,6 +26,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: node-ci
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          timeoutSeconds: 180
 
       - if: steps.wait-for-build.outputs.conclusion == 'success'
         run: exit 0
