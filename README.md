@@ -1,6 +1,6 @@
 # Blih CLI
 
-[![release][1]][2] [![workflow][3]][4] [![CodeFactor][9]][10] [![size][20]][21] [![issues][5]][6] [![license][7]][8]
+[![release][1]][2] [![npm][11]][12] [![workflow][3]][4] [![CodeFactor][9]][10] [![size][20]][21] [![issues][5]][6] [![license][7]][8]
 
 Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CLI (Command-Line Interface) for linux env.
 
@@ -81,7 +81,7 @@ npm run prod
 
 [1]: https://img.shields.io/github/v/release/GreenDjango/blih_cli?maxAge=600
 [2]: https://github.com/GreenDjango/blih_cli/releases 'GitHub release (latest by date)'
-[3]: https://img.shields.io/github/workflow/status/GreenDjango/blih_cli/Node.js%20CI?maxAge=600
+[3]: https://img.shields.io/github/workflow/status/GreenDjango/blih_cli/node-ci?maxAge=600
 [4]: https://github.com/GreenDjango/blih_cli/actions 'GitHub Workflow Status'
 [5]: https://img.shields.io/github/issues-closed/GreenDjango/blih_cli?maxAge=600
 [6]: https://github.com/GreenDjango/blih_cli/issues 'GitHub closed issues'
@@ -89,5 +89,7 @@ npm run prod
 [8]: https://github.com/GreenDjango/blih_cli/blob/master/LICENSE 'GitHub license'
 [9]: https://www.codefactor.io/repository/github/greendjango/blih_cli/badge
 [10]: https://www.codefactor.io/repository/github/greendjango/blih_cli 'Repository code rating'
+[11]: https://img.shields.io/npm/v/blih_cli?maxAge=600
+[12]: https://www.npmjs.com/package/blih_cli 'npm version'
 [20]: https://img.shields.io/github/repo-size/GreenDjango/blih_cli?maxAge=600
 [21]: https://github.com/GreenDjango/blih_cli 'GitHub repo size'
