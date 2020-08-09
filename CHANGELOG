@@ -2,7 +2,9 @@ blih_cli 0.2.1
 2020-08-09
 
 What's in?
+- Fix missing flag (-u, etc...) for debug build
 - Update Dependencies
+- Show repository path after git clone
 
 -------------------------------------------------------------------------------
 

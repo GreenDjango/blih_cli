@@ -54,7 +54,7 @@ function clone_other_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {
         const repo_name = yield ui_1.ask_input('Repository name ?');
         const email = yield ui_1.ask_autocomplete(config.contact, 'Enter repository email');
-        if (!config.contact.some(value => value === email)) {
+        if (!config.contact.some((value) => value === email)) {
             config.contact.push(email);
             config.contact = config.contact;
         }
@@ -69,16 +69,18 @@ function clone_repo(api, repo_name, email) {
             let repo_path = null;
             if (!(yield ui_1.ask_question('Git clone here ?')))
                 repo_path = yield ui_1.ask_input('Repository destination:');
-            if (repo_path !== null && !fs_1.default.existsSync(repo_path)) {
+            if (repo_path === '')
+                return;
+            if (repo_path && !fs_1.default.existsSync(repo_path)) {
                 if (yield ui_1.ask_question('Path not exist, create ?'))
                     fs_1.default.mkdirSync(repo_path, { recursive: true });
                 else
                     return;
+                process.chdir(repo_path);
             }
-            spinner.start(chalk_1.default.green(`Clone repository in ${repo_path || process.cwd()}...`));
-            const cd = repo_path ? `cd ${repo_path}; ` : '';
-            yield utils_1.sh(`${cd}git clone git@git.epitech.eu:/${email}/${repo_name}`);
-            spinner.succeed(chalk_1.default.green('Repository ') + utils_1.clor.info(repo_name) + chalk_1.default.green(' clone'));
+            spinner.start(chalk_1.default.green('Clone ') + utils_1.clor.info(repo_name) + chalk_1.default.green(' repository...'));
+            yield utils_1.sh(`git clone git@git.epitech.eu:/${email}/${repo_name}`);
+            spinner.succeed(chalk_1.default.green(`Repository ${process.cwd()}/`) + utils_1.clor.info(repo_name) + chalk_1.default.green('/ clone'));
         }
         catch (err) {
             spinner.fail(chalk_1.default.red(err));

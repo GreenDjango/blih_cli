@@ -40,7 +40,7 @@ async function clone_other_repo(api: BlihApi, config: ConfigType) {
 	const repo_name = await ask_input('Repository name ?')
 	const email = await ask_autocomplete(config.contact, 'Enter repository email')
 
-	if (!config.contact.some(value => value === email)) {
+	if (!config.contact.some((value) => value === email)) {
 		config.contact.push(email)
 		config.contact = config.contact
 	}
@@ -55,15 +55,18 @@ export async function clone_repo(api: BlihApi, repo_name: string, email: string)
 		let repo_path = null
 		if (!(await ask_question('Git clone here ?')))
 			repo_path = await ask_input('Repository destination:')
-		if (repo_path !== null && !fs.existsSync(repo_path)) {
+		if (repo_path === '') return
+		if (repo_path && !fs.existsSync(repo_path)) {
 			if (await ask_question('Path not exist, create ?'))
 				fs.mkdirSync(repo_path, { recursive: true })
 			else return
+			process.chdir(repo_path)
 		}
-		spinner.start(chalk.green(`Clone repository in ${repo_path || process.cwd()}...`))
-		const cd = repo_path ? `cd ${repo_path}; ` : ''
-		await sh(`${cd}git clone git@git.epitech.eu:/${email}/${repo_name}`)
-		spinner.succeed(chalk.green('Repository ') + clor.info(repo_name) + chalk.green(' clone'))
+		spinner.start(chalk.green('Clone ') + clor.info(repo_name) + chalk.green(' repository...'))
+		await sh(`git clone git@git.epitech.eu:/${email}/${repo_name}`)
+		spinner.succeed(
+			chalk.green(`Repository ${process.cwd()}/`) + clor.info(repo_name) + chalk.green('/ clone')
+		)
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}
