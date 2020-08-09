@@ -4,7 +4,7 @@
     "npmjs": "blih_cli",
     "github": "@greendjango/blih_cli"
   },
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Blih CLI for Linux",
   "main": "prod/index.js",
   "engines": {
