@@ -170,6 +170,10 @@ async function parse_args(args: string[]) {
 			console.log(await APP_VERSION)
 			process.exit(0)
 		}
+		if (args[2] === '-d' || args[2] === '-D' || args[2] === '--debug') {
+			console.log(IS_DEBUG ? 'true' : 'false')
+			process.exit(0)
+		}
 		if (!IS_DEBUG) return
 		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
 			await sh_live(`sudo sh ${__dirname}/../update.sh`)

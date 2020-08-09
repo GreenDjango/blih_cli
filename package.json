@@ -16,21 +16,22 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "chalk": "^3.0.0",
+    "chalk": "^4.1.0",
     "inquirer": "^6.5.2",
     "inquirer-autocomplete-prompt": "^1.0.2",
     "inquirer-fuzzy-path": "^2.2.0",
-    "ora": "^4.0.3"
+    "ora": "^5.0.0"
   },
   "devDependencies": {
     "@types/inquirer": "^6.5.0",
-    "tslint": "^6.1.0",
-    "typescript": "^3.8.3"
+    "tslint": "^6.1.3",
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc; chmod a+x build/index.js",
-    "prod": "rm -rf build prod; npm run build; cp -r build prod"
+    "prod": "rm -rf build prod; npm run build; cp -r build prod",
+    "update": "npm outdated || exit 0"
   },
   "man": "./man/json.1",
   "repository": {

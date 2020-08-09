@@ -20,7 +20,6 @@ tslint.json
 .prettierrc.json
 .github/
 *.sh
-*.gz
 
 # Runtime data
 pids

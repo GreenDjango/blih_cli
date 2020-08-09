@@ -278,6 +278,5 @@ async function get_app_version() {
 }
 
 function get_is_debug_build() {
-	return false
 	return fs.existsSync(`${__dirname}/../.npmignore`)
 }

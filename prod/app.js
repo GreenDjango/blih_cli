@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
 const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const blih_api_1 = require("./blih_api");
@@ -180,6 +181,10 @@ function parse_args(args) {
             }
             if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
                 console.log(yield utils_1.APP_VERSION);
+                process.exit(0);
+            }
+            if (args[2] === '-d' || args[2] === '-D' || args[2] === '--debug') {
+                console.log(utils_1.IS_DEBUG ? 'true' : 'false');
                 process.exit(0);
             }
             if (!utils_1.IS_DEBUG)
