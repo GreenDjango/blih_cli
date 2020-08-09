@@ -32,7 +32,6 @@
     "type": "git",
     "url": "git://github.com/GreenDjango/blih_cli.git"
   },
-  "publishConfig": { "registry": "https://npm.pkg.github.com/GreenDjango" },
   "author": "Theo C.",
   "license": "MIT"
 }
