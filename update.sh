@@ -56,7 +56,7 @@ then
     then
         printf '\33[31m%s\33[0m\n' "Error: Update fail"
     else
-        npm i --production -g
+        npm i --production --no-fund -g
         cp -u "./man/manpage.1.gz" "$share_path/man/man1/blih_cli.1.gz"
         printf '\33[32m%s\33[0m\n' "Update to -> $latest_tag_name"
     fi

@@ -59,7 +59,7 @@ then
     latest_tag=$(git rev-list --tags --max-count=1)
     git checkout "$latest_tag" 2> /dev/null
 
-    npm i --production -g
+    npm i --production --no-fund -g
 
     printf '\33[32m%s\33[0m\n' "Adding manpage"
     if [ ! -d "$share_path/man/man1" ]
