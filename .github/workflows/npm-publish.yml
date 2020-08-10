@@ -62,15 +62,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }} # You need to set this in your repo settings
 
-  publish-gpr:
+  test-version:
     needs: publish-npm
     runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.has-changed.conclusion }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
       - name: Check if version has been updated
         id: check
         uses: EndBug/version-check@7d67b971df2c119e8dab599b302b311d5db2e8f7
@@ -78,14 +76,35 @@ jobs:
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         with:
           diff-search: true
+      - name: Return if version has been updated
+        id: has-changed
+        run: echo "##[set-output name=status;]${{ steps.check.outputs.changed }}"
+
+  test-yes:
+    needs: test-version
+    runs-on: ubuntu-latest
+    if: needs.test-version.outputs.status == 'success'
+    steps:
+      - uses: actions/checkout@v2
+      - name: It's work ?
+        run: echo "YES"
+
+  publish-gpr:
+    needs: test-version
+    runs-on: ubuntu-latest
+    if: needs.test-version.outputs.status == 'successqq'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
       - name: Update package name
-        if: steps.check.outputs.changed == 'true'
         run: |
           sudo npm install -g json
           REGISTRY_NAME=`json registryNames.github -f package.json`
           json -I -f package.json -e this.name=\"$REGISTRY_NAME\"
       - name: Publishing new package
-        if: steps.check.outputs.changed == 'true'
         run: |
           npm ci
           npm publish
