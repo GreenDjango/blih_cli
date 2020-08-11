@@ -115,7 +115,9 @@ jobs:
         run: |
           mkdir "$HOME/.ssh/"
           echo -e "${{ secrets.AUR_AUTH_KEY }}" > "$HOME/.ssh/aur"
+          echo -e "${{ secrets.AUR_AUTH_KEY_PUB }}" > "$HOME/.ssh/aur.pub"
           sudo chmod 600 "$HOME/.ssh/aur"
+          sudo chmod 600 "$HOME/.ssh/aur.pub"
           eval "$(ssh-agent -s)"
           ssh-add "$HOME/.ssh/aur"
           echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
