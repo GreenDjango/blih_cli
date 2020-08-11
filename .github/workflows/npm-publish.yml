@@ -113,9 +113,9 @@ jobs:
           node-version: 12
       - name: Clone aur repository
         run: |
-          echo "home $HOME"
           mkdir "$HOME/.ssh/"
           echo -e "${{ secrets.AUR_AUTH_KEY }}" > "$HOME/.ssh/aur"
+          sudo chmod 600 "$HOME/.ssh/aur"
           eval "$(ssh-agent -s)"
           ssh-add "$HOME/.ssh/aur"
           echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
