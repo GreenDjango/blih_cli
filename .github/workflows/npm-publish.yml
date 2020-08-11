@@ -66,7 +66,7 @@ jobs:
     needs: publish-npm
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.has-changed.conclusion }}
+      status: ${{ steps.haschanged.outputs.status }}
     steps:
       - uses: actions/checkout@v2
       - name: Check if version has been updated
@@ -77,13 +77,13 @@ jobs:
         with:
           diff-search: true
       - name: Return if version has been updated
-        id: has-changed
-        run: echo "##[set-output name=status;]${{ steps.check.outputs.changed }}"
+        id: haschanged
+        run: echo "##[set-output name=status;]${{ steps.check.outputs.changed || false }}"
 
   test-yes:
     needs: test-version
     runs-on: ubuntu-latest
-    if: needs.test-version.outputs.status == 'success'
+    if: needs.test-version.outputs.status == 'true'
     steps:
       - uses: actions/checkout@v2
       - name: It's work ?
@@ -92,7 +92,7 @@ jobs:
   publish-gpr:
     needs: test-version
     runs-on: ubuntu-latest
-    if: needs.test-version.outputs.status == 'successqq'
+    if: needs.test-version.outputs.status == 'true'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
