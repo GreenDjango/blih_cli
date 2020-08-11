@@ -111,15 +111,18 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - name: Clone aur repository
+      - name: Setup ssh key
         run: |
           mkdir "$HOME/.ssh/"
           echo -e "${{ secrets.AUR_AUTH_KEY }}" > "$HOME/.ssh/aur"
-          echo -e "${{ secrets.AUR_AUTH_KEY_PUB }}" > "$HOME/.ssh/aur.pub"
+          ssh-keygen -y -f "$HOME/.ssh/aur" > "$HOME/.ssh/aur.pub"
           sudo chmod 600 "$HOME/.ssh/aur"
           sudo chmod 600 "$HOME/.ssh/aur.pub"
+          echo -e "Host aur.archlinux.org\n  IdentityFile $HOME/.ssh/aur" > "$HOME/.ssh/config"
           eval "$(ssh-agent -s)"
           ssh-add "$HOME/.ssh/aur"
+      - name: Clone aur repository
+        run: |
           ssh -o StrictHostKeyChecking=no aur@aur.archlinux.org uptime || echo ""
           echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
           git clone --depth=1 ssh://aur@aur.archlinux.org/blih_cli-git.git
