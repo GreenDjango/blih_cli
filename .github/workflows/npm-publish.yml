@@ -113,11 +113,11 @@ jobs:
           node-version: 12
       - name: Clone aur repository
         run: |
-          mkdir "$HOME/.ssh/"
-          echo -e "${{ secrets.AUR_AUTH_KEY }}" > "$HOME/.ssh/aur"
-          sudo apt install ssh -y
-          ssh-add "$HOME/.ssh/aur"
-          echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
+          mkdir "~/.ssh/"
+          echo -e "${{ secrets.AUR_AUTH_KEY }}" > "~/.ssh/aur"
+          eval "$(ssh-agent -s)"
+          ssh-add "~/.ssh/aur"
+          echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "~/.gitconfig"
           git clone --depth=1 ssh://aur@aur.archlinux.org/blih_cli-git.git
       - name: Update package name
         run: |
