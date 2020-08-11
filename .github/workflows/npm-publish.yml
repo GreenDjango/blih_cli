@@ -115,8 +115,8 @@ jobs:
         run: |
           mkdir "$HOME/.ssh/"
           echo -e "${{ secrets.AUR_AUTH_KEY }}" > "$HOME/.ssh/aur"
-          ssh-keygen -y -f "$HOME/.ssh/aur" > "$HOME/.ssh/aur.pub"
           sudo chmod 600 "$HOME/.ssh/aur"
+          ssh-keygen -y -f "$HOME/.ssh/aur" > "$HOME/.ssh/aur.pub"
           sudo chmod 600 "$HOME/.ssh/aur.pub"
           echo -e "Host aur.archlinux.org\n  IdentityFile $HOME/.ssh/aur" > "$HOME/.ssh/config"
           eval "$(ssh-agent -s)"
