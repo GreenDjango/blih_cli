@@ -120,6 +120,7 @@ jobs:
           sudo chmod 600 "$HOME/.ssh/aur.pub"
           eval "$(ssh-agent -s)"
           ssh-add "$HOME/.ssh/aur"
+          ssh -o StrictHostKeyChecking=no aur@aur.archlinux.org uptime || echo ""
           echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
           git clone --depth=1 ssh://aur@aur.archlinux.org/blih_cli-git.git
       - name: Update package name
