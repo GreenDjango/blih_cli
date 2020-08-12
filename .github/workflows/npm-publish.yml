@@ -131,6 +131,7 @@ jobs:
           if [ -z "$PKGVER" ];then exit 1; fi;
           cd blih_cli-git/
           sed -Ei "s/pkgver=.*/pkgver=$PKGVER/" PKGBUILD
+          sed -Ei "s/pkgver = .*/pkgver = $PKGVER/" .SRCINFO
       - name: Publishing new package
         run: |
           rm -rf .git/
