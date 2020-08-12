@@ -103,14 +103,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-aur:
-    #needs: test-version
+    needs: build
     runs-on: ubuntu-latest
-    #if: needs.test-version.outputs.status == 'true'
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
       - name: Setup ssh key
         run: |
           mkdir "$HOME/.ssh/"
@@ -126,13 +122,13 @@ jobs:
           ssh -o StrictHostKeyChecking=no aur@aur.archlinux.org uptime || echo ""
           echo -e "[user]\nemail = theo.cousinet@epitech.eu\nname = Theo\n" > "$HOME/.gitconfig"
           git clone --depth=1 ssh://aur@aur.archlinux.org/blih_cli-git.git
-      - name: Update package name
+      - name: Update PKGBUILD file # eg: v0.2.0-16-g13e7cc3 -> 0.2.0_16_g13e7cc3 -> update PKGBUILD file
         run: |
-          echo "ok"
+          PKGVER=`git show --format=\"%H\" --no-patch | git describe --tags | sed 's/v//' | sed 's/-/_/g'`
+          cd blih_cli-git/
+          sed -Ei "s/pkgver=.*/pkgver=$PKGVER/" PKGBUILD
       - name: Publishing new package
         run: |
-          cd blih_cli-git/
-          echo "hello" > test.txt
           git add -A
-          git commit -m "test github action"
+          git commit -m "github action auto update"
           git push
