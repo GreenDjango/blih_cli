@@ -128,6 +128,8 @@ jobs:
       - name: Update PKGBUILD file # eg: v0.2.0-16-g13e7cc3 -> 0.2.0_16_g13e7cc3 -> update PKGBUILD file
         run: |
           PKGVER=`git show --format=\"%H\" --no-patch | git describe --tags | sed 's/v//' | sed 's/-/_/g'`
+          if [ -z "$PKGVER" ];then exit 1; fi;
+          rm -rf .git/
           cd blih_cli-git/
           sed -Ei "s/pkgver=.*/pkgver=$PKGVER/" PKGBUILD
       - name: Publishing new package
