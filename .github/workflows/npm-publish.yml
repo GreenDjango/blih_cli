@@ -31,7 +31,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: ci-status
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          timeoutSeconds: 180
+          intervalSeconds: 20
+          timeoutSeconds: 240
       - name: CI action build OK
         if: steps.wait-for-build.outputs.conclusion == 'success'
         run: exit 0
@@ -107,6 +108,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Setup ssh key
         run: |
           mkdir "$HOME/.ssh/"
