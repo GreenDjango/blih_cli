@@ -129,15 +129,12 @@ jobs:
         run: |
           PKGVER=`git show --format=\"%H\" --no-patch | git describe --tags | sed 's/v//' | sed 's/-/_/g'`
           if [ -z "$PKGVER" ];then exit 1; fi;
-          ls -la
-          rm -rf .git/
-          ls -la
           cd blih_cli-git/
-          ls -la
           sed -Ei "s/pkgver=.*/pkgver=$PKGVER/" PKGBUILD
       - name: Publishing new package
         run: |
-          ls -la
+          rm -rf .git/
+          cd blih_cli-git/
           git add -A
           git commit -m "github action auto update"
           git push
