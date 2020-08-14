@@ -59,7 +59,7 @@ export class BlihApi {
 		}
 
 		this._api = axios.create(options)
-		this._api.interceptors.response.use(rep => rep, responseErrorInterceptor)
+		this._api.interceptors.response.use((rep) => rep, responseErrorInterceptor)
 	}
 
 	/**
@@ -95,9 +95,9 @@ export class BlihApi {
 	async listRepositories(): Promise<{ name: string; url: string; uuid: string }[]> {
 		const list = (await this.call('get', '/repositories')).data.repositories
 		return Object.keys(list)
-			.filter(r => r.length)
+			.filter((r) => r.length)
 			.sort()
-			.map(r => ({
+			.map((r) => ({
 				name: r,
 				url: list[r].url,
 				uuid: list[r].uuid,
@@ -139,9 +139,9 @@ export class BlihApi {
 		try {
 			const acl = (await this.call('get', `/repository/${encode_repo}/acls`)).data
 			return Object.keys(acl)
-				.filter(c => c.length && acl[c].length)
+				.filter((c) => c.length && acl[c].length)
 				.sort()
-				.map(c => ({
+				.map((c) => ({
 					name: c,
 					rights: acl[c],
 				}))
@@ -192,9 +192,9 @@ export class BlihApi {
 	async listKeys(): Promise<{ name: string; data: string }[]> {
 		const keys = (await this.call('get', '/sshkeys')).data
 		return Object.keys(keys)
-			.filter(k => k.length)
+			.filter((k) => k.length)
 			.sort()
-			.map(k => ({
+			.map((k) => ({
 				name: k,
 				data: keys[k],
 			}))
@@ -226,10 +226,7 @@ export class BlihApi {
 	 * @return {String} a new token
 	 */
 	static hashPassword(password: string): string {
-		return crypto
-			.createHash('sha512')
-			.update(password)
-			.digest('hex')
+		return crypto.createHash('sha512').update(password).digest('hex')
 	}
 
 	/**
@@ -241,13 +238,13 @@ export class BlihApi {
 
 		// Add timestamps to requests and responses
 		api.interceptors.request.use(
-			config => {
+			(config) => {
 				;(config as any).startTimestamp = Date.now()
 				return config
 			},
-			error => Promise.reject(error)
+			(error) => Promise.reject(error)
 		)
-		api.interceptors.response.use(response => {
+		api.interceptors.response.use((response) => {
 			;(response.config as any).endTimestamp = Date.now()
 			return response
 		}, responseErrorInterceptor)
@@ -274,7 +271,7 @@ export class BlihApi {
 		body.signature = crypto
 			.createHmac('sha512', this._token)
 			.update(body.user)
-			.update(body.data ? JSON.stringify(body.data, null, 4) : '')
+			.update(body.data ? JSON.stringify(body.data, undefined, 4) : '')
 			.digest('hex')
 
 		return this._api.request({

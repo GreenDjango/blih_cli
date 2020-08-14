@@ -45,7 +45,7 @@ export default class ListSpinnerPrompt extends Base {
 		// If def is a Number, then use as index. Otherwise, check for value.
 		if (typeof def === 'number' && def >= 0 && def < this.opt.choices.realLength) {
 			this.selected = def
-		} else if (!(typeof def === 'number') && def !== null) {
+		} else if (!(typeof def === 'number') && def != null) {
 			const index = this.opt.choices.realChoices.findIndex(({ value }: any) => value === def)
 			this.selected = Math.max(index, 0)
 		}

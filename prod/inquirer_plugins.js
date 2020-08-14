@@ -36,7 +36,7 @@ class ListSpinnerPrompt extends base_1.default {
         if (typeof def === 'number' && def >= 0 && def < this.opt.choices.realLength) {
             this.selected = def;
         }
-        else if (!(typeof def === 'number') && def !== null) {
+        else if (!(typeof def === 'number') && def != null) {
             const index = this.opt.choices.realChoices.findIndex(({ value }) => value === def);
             this.selected = Math.max(index, 0);
         }

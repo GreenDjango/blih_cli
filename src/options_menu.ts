@@ -5,13 +5,15 @@ import { ConfigType, clor, colorsValue, spinner_names } from './utils'
 export async function options_menu(config: ConfigType) {
 	let should_quit = false
 
-	await spinner_option(config)
 	while (!should_quit) {
 		const choices = [
 			'↵ Back',
 			`Remember password: ${config.save_token ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
 			`Auto Ramassage-tek ACL: ${config.auto_acl ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
 			`Mode verbose: ${config.verbose ? chalk.green.bold('✔') : chalk.red.bold('✗')}`,
+			`Check update at launch: ${
+				config.check_update ? chalk.green.bold('✔') : chalk.red.bold('✗')
+			}`,
 			`Colors option`,
 			`Spinner option`,
 			'Reset all contact',
@@ -28,12 +30,15 @@ export async function options_menu(config: ConfigType) {
 				config.verbose = !config.verbose
 				break
 			case choices[4]:
-				await colors_option(config)
+				config.check_update = !config.check_update
 				break
 			case choices[5]:
-				await spinner_option(config)
+				await colors_option(config)
 				break
 			case choices[6]:
+				await spinner_option(config)
+				break
+			case choices[7]:
 				const valid = await ask_question(`Are you sure ?`)
 				if (valid) config.contact = []
 				break

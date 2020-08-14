@@ -67,7 +67,7 @@ async function delete_repo(api: BlihApi, config: ConfigType) {
 		const spinner = ora().start(chalk.green(WAIT_MSG))
 		try {
 			const res = await api.deleteRepository(to_delete)
-			config.repo = config.repo.filter(value => value !== to_delete)
+			config.repo = config.repo.filter((value) => value !== to_delete)
 			spinner.succeed(chalk.green(res))
 		} catch (err) {
 			spinner.fail(chalk.red(err))
@@ -97,10 +97,10 @@ export async function change_acl(api: BlihApi, config: ConfigType, repo_name?: s
 }
 
 async function acl_menu(acl_list: ACLType[], config: ConfigType) {
-	const ask = ['↵ Back', 'Add', ...acl_list.map(value => acl_to_string(value))]
+	const ask = ['↵ Back', 'Add', ...acl_list.map((value) => acl_to_string(value))]
 	const idx = await ask_list(ask, 'Give ACL', true)
 
-	if (idx === '0') return null
+	if (idx === '0') return undefined
 	if (idx === '1') return await ask_acl(config)
 	const acl = acl_list[+idx - 2]
 	acl.rights = (
@@ -114,7 +114,7 @@ async function ask_acl(config: ConfigType) {
 	const rights = (
 		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)
 	).join('')
-	if (user !== 'ramassage-tek' && !config.contact.some(value => value === user)) {
+	if (user !== 'ramassage-tek' && !config.contact.some((value) => value === user)) {
 		config.contact.push(user)
 		config.contact = config.contact
 	}
@@ -144,7 +144,7 @@ async function show_repo(api: BlihApi, config: ConfigType) {
 		const repo_info = await api.repositoryInfo(repo)
 		const creation_date = new Date(0)
 		creation_date.setUTCSeconds(repo_info.creation_time)
-		const repo_acl = (await api.getACL(repo)).map(value => `${value.name} - ${value.rights}`)
+		const repo_acl = (await api.getACL(repo)).map((value) => `${value.name} - ${value.rights}`)
 		if (!repo_acl.length) repo_acl.push('no sharing')
 		spinner.info(
 			clor.info(

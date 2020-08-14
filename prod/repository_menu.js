@@ -84,7 +84,7 @@ function delete_repo(api, config) {
             const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
             try {
                 const res = yield api.deleteRepository(to_delete);
-                config.repo = config.repo.filter(value => value !== to_delete);
+                config.repo = config.repo.filter((value) => value !== to_delete);
                 spinner.succeed(chalk_1.default.green(res));
             }
             catch (err) {
@@ -119,10 +119,10 @@ function change_acl(api, config, repo_name) {
 exports.change_acl = change_acl;
 function acl_menu(acl_list, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const ask = ['↵ Back', 'Add', ...acl_list.map(value => acl_to_string(value))];
+        const ask = ['↵ Back', 'Add', ...acl_list.map((value) => acl_to_string(value))];
         const idx = yield ui_1.ask_list(ask, 'Give ACL', true);
         if (idx === '0')
-            return null;
+            return undefined;
         if (idx === '1')
             return yield ask_acl(config);
         const acl = acl_list[+idx - 2];
@@ -134,7 +134,7 @@ function ask_acl(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = yield ui_1.ask_autocomplete(['ramassage-tek', ...config.contact], 'Enter new email');
         const rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)).join('');
-        if (user !== 'ramassage-tek' && !config.contact.some(value => value === user)) {
+        if (user !== 'ramassage-tek' && !config.contact.some((value) => value === user)) {
             config.contact.push(user);
             config.contact = config.contact;
         }
@@ -163,7 +163,7 @@ function show_repo(api, config) {
             const repo_info = yield api.repositoryInfo(repo);
             const creation_date = new Date(0);
             creation_date.setUTCSeconds(repo_info.creation_time);
-            const repo_acl = (yield api.getACL(repo)).map(value => `${value.name} - ${value.rights}`);
+            const repo_acl = (yield api.getACL(repo)).map((value) => `${value.name} - ${value.rights}`);
             if (!repo_acl.length)
                 repo_acl.push('no sharing');
             spinner.info(utils_1.clor.info(`Name:		${repo_info.name}` +

@@ -1,3 +1,5 @@
+import os from 'os'
+import { exec } from 'child_process'
 import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
@@ -22,6 +24,7 @@ export const run = async () => {
 	if (process.argv.length > 2) await parse_args(process.argv)
 	const config = open_config()
 
+	if (!IS_DEBUG && config.check_update) check_update(await APP_VERSION)
 	if (process.argv.length > 2) config.args = process.argv
 	if (config.verbose && !config.args) {
 		console.log(chalk.red(`   ___  ___ __     _______   ____`))
@@ -32,6 +35,7 @@ export const run = async () => {
 				chalk.grey.italic(`  ${await APP_VERSION}\n`)
 		)
 	}
+	if (IS_DEBUG) console.log(`DEBUG VERSION, skip: ${process.env.BLIH_CLI_CONFIG_SKIP}`)
 	const api = await login(config)
 	if (config.args) await fast_mode(api, config)
 	process.stdin.on('keypress', async (str, key) => {
@@ -84,7 +88,8 @@ async function login(config: ConfigType) {
 
 	spinner.color = 'blue'
 	try {
-		const time = await BlihApi.ping()
+		let time = 0
+		if (!process.env.BLIH_CLI_CONFIG_SKIP) time = await BlihApi.ping()
 		spinner.succeed(chalk.green('Blih server up: ') + chalk.cyan(time + 'ms'))
 	} catch (err) {
 		spinner.stop()
@@ -102,7 +107,8 @@ async function login(config: ConfigType) {
 		spinner.start(chalk.green('Try to login...'))
 		try {
 			api = new BlihApi({ email: config.email, token: config.token })
-			config.repo = (await api.listRepositories()).map((value) => value.name)
+			if (!process.env.BLIH_CLI_CONFIG_SKIP)
+				config.repo = (await api.listRepositories()).map((value) => value.name)
 			error = false
 			spinner.stop()
 		} catch (err) {
@@ -174,18 +180,21 @@ async function parse_args(args: string[]) {
 			console.log(IS_DEBUG ? 'true' : 'false')
 			process.exit(0)
 		}
-		if (!IS_DEBUG) return
 		if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
-			await sh_live(`sudo sh ${__dirname}/../update.sh`)
-			process.exit(0)
-		}
-		if (args[2] === '--snapshot') {
-			await sh_live(`sudo sh ${__dirname}/../update.sh snapshot`)
+			if (IS_DEBUG) await sh_live(`sudo sh ${__dirname}/../update.sh`)
+			else console.log('Use: `sudo npm up blih_cli -g`')
 			process.exit(0)
 		}
 		if (args[2] === '--uninstall') {
-			if (!(await ask_question('Uninstall blih_cli ?'))) process.exit(0)
-			await sh_live(`sudo sh ${__dirname}/../uninstall.sh`)
+			if (IS_DEBUG) {
+				if (!(await ask_question('Uninstall blih_cli ?'))) process.exit(0)
+				await sh_live(`sudo sh ${__dirname}/../uninstall.sh`)
+			} else console.log('Use: `sudo npm un blih_cli -g`')
+			process.exit(0)
+		}
+		if (!IS_DEBUG) return
+		if (args[2] === '--snapshot') {
+			await sh_live(`sudo sh ${__dirname}/../update.sh snapshot`)
 			process.exit(0)
 		}
 	}
@@ -195,4 +204,16 @@ function show_help() {
 	ora().info(
 		clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`')
 	)
+}
+
+function check_update(current: string) {
+	if (os.type() === 'Linux' || os.type().match(/BSD$/)) {
+		exec('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
+			if (err || !stdout) return
+			if ('v' + stdout !== current) {
+				// prettier-ignore
+				exec(`notify-send "New update available" "Try 'sudo npm up blih_cli -g' to update" -i "${__dirname}/../logo.png" -a "blih cli" -t 10000`)
+			}
+		})
+	}
 }

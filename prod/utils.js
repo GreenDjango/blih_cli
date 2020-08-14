@@ -59,35 +59,37 @@ class clor {
 exports.clor = clor;
 class ConfigType {
     constructor() {
-        this._listen = null;
+        this._listen = undefined;
         this._email = '';
         this._token = '';
+        this._spinner_name = 'dots';
         this._save_token = false;
         this._auto_acl = true;
         this._verbose = true;
+        this._check_update = true;
         this._contact = [];
         this._colors = COLORS;
-        this._spinner_name = 'dots';
-        this.args = null;
+        this.args = undefined;
         this.repo = [];
     }
     to_json() {
         return {
             email: this.email,
             token: this.token,
+            spinner_name: this.spinner_name,
             save_token: this.save_token,
             auto_acl: this.auto_acl,
             verbose: this.verbose,
+            check_update: this.check_update,
             contact: this.contact,
             colors: this.colors,
-            spinner_name: this.spinner_name,
         };
     }
     addListener(callback) {
         this._listen = callback;
     }
     removeListener() {
-        this._listen = null;
+        this._listen = undefined;
     }
     _triggerListener() {
         if (this._listen) {
@@ -105,13 +107,30 @@ class ConfigType {
         return this._token;
     }
     set token(token) {
+        if (typeof token !== 'string')
+            return;
         this._token = token;
+        this._triggerListener();
+    }
+    get spinner_name() {
+        return this._spinner_name;
+    }
+    set spinner_name(spinner_name) {
+        if (typeof spinner_name !== 'string')
+            return;
+        if (!exports.spinner_names.has(spinner_name)) {
+            console.error(`Config error: '${spinner_name}' is not a valid spinner_name`);
+            return;
+        }
+        this._spinner_name = spinner_name;
         this._triggerListener();
     }
     get save_token() {
         return this._save_token;
     }
     set save_token(save_token) {
+        if (typeof save_token !== 'boolean')
+            return;
         this._save_token = save_token;
         this._triggerListener();
     }
@@ -119,6 +138,8 @@ class ConfigType {
         return this._auto_acl;
     }
     set auto_acl(auto_acl) {
+        if (typeof auto_acl !== 'boolean')
+            return;
         this._auto_acl = auto_acl;
         this._triggerListener();
     }
@@ -126,8 +147,19 @@ class ConfigType {
         return this._verbose;
     }
     set verbose(verbose) {
+        if (typeof verbose !== 'boolean')
+            return;
         exports.VERBOSE = verbose;
         this._verbose = verbose;
+        this._triggerListener();
+    }
+    get check_update() {
+        return this._check_update;
+    }
+    set check_update(check_update) {
+        if (typeof check_update !== 'boolean')
+            return;
+        this._check_update = check_update;
         this._triggerListener();
     }
     get contact() {
@@ -144,17 +176,6 @@ class ConfigType {
         // TODO: parse & check if is valid color
         COLORS = colors;
         this._colors = colors;
-        this._triggerListener();
-    }
-    get spinner_name() {
-        return this._spinner_name;
-    }
-    set spinner_name(spinner_name) {
-        if (!exports.spinner_names.has(spinner_name)) {
-            console.error(`Config error: '${spinner_name}' is not a valid spinner_name`);
-            return;
-        }
-        this._spinner_name = spinner_name;
         this._triggerListener();
     }
 }
@@ -179,34 +200,24 @@ exports.open_config = open_config;
 function parse_config(config) {
     const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})');
     const new_config = new ConfigType();
-    if (config.email && regex_email.test(config.email)) {
+    // TODO: move email & color parse in getter / setter
+    if ((config === null || config === void 0 ? void 0 : config.email) && regex_email.test(config.email)) {
         new_config.email = config.email;
     }
-    if (config.token) {
-        new_config.token = config.token;
-    }
-    if (config.save_token) {
-        new_config.save_token = true;
-    }
-    if (config.auto_acl === false) {
-        new_config.auto_acl = false;
-    }
-    if (config.verbose === false) {
-        new_config.verbose = false;
-    }
-    if (config.contact) {
-        new_config.contact = config.contact;
-    }
-    if (config.colors) {
+    new_config.token = config === null || config === void 0 ? void 0 : config.token;
+    new_config.spinner_name = config === null || config === void 0 ? void 0 : config.spinner_name;
+    new_config.save_token = config === null || config === void 0 ? void 0 : config.save_token;
+    new_config.auto_acl = config === null || config === void 0 ? void 0 : config.auto_acl;
+    new_config.verbose = config === null || config === void 0 ? void 0 : config.verbose;
+    new_config.check_update = config === null || config === void 0 ? void 0 : config.check_update;
+    new_config.contact = config === null || config === void 0 ? void 0 : config.contact;
+    if (config === null || config === void 0 ? void 0 : config.colors) {
         clor.getColorsKey().forEach((key) => {
             if (exports.colorsValue.has(config.colors[key])) {
                 ;
                 new_config.colors[key] = config.colors[key];
             }
         });
-    }
-    if (config.spinner_name) {
-        new_config.spinner_name = config.spinner_name;
     }
     new_config.addListener(write_config);
     return new_config;

@@ -19,13 +19,13 @@ const utils_1 = require("./utils");
 function options_menu(config) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
-        yield spinner_option(config);
         while (!should_quit) {
             const choices = [
                 '↵ Back',
                 `Remember password: ${config.save_token ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Auto Ramassage-tek ACL: ${config.auto_acl ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Mode verbose: ${config.verbose ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
+                `Check update at launch: ${config.check_update ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Colors option`,
                 `Spinner option`,
                 'Reset all contact',
@@ -42,12 +42,15 @@ function options_menu(config) {
                     config.verbose = !config.verbose;
                     break;
                 case choices[4]:
-                    yield colors_option(config);
+                    config.check_update = !config.check_update;
                     break;
                 case choices[5]:
-                    yield spinner_option(config);
+                    yield colors_option(config);
                     break;
                 case choices[6]:
+                    yield spinner_option(config);
+                    break;
+                case choices[7]:
                     const valid = yield ui_1.ask_question(`Are you sure ?`);
                     if (valid)
                         config.contact = [];

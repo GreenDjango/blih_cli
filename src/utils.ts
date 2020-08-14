@@ -49,29 +49,31 @@ export class clor {
 }
 
 export class ConfigType {
-	private _listen: Function | null
+	private _listen: Function | undefined
 	private _email: string
 	private _token: string
+	private _spinner_name: string
 	private _save_token: boolean
 	private _auto_acl: boolean
 	private _verbose: boolean
+	private _check_update: boolean
 	private _contact: string[]
 	private _colors: { info: string }
-	private _spinner_name: string
-	public args: string[] | null
+	public args: string[] | undefined
 	public repo: string[]
 
 	constructor() {
-		this._listen = null
+		this._listen = undefined
 		this._email = ''
 		this._token = ''
+		this._spinner_name = 'dots'
 		this._save_token = false
 		this._auto_acl = true
 		this._verbose = true
+		this._check_update = true
 		this._contact = []
 		this._colors = COLORS
-		this._spinner_name = 'dots'
-		this.args = null
+		this.args = undefined
 		this.repo = []
 	}
 
@@ -79,12 +81,13 @@ export class ConfigType {
 		return {
 			email: this.email,
 			token: this.token,
+			spinner_name: this.spinner_name,
 			save_token: this.save_token,
 			auto_acl: this.auto_acl,
 			verbose: this.verbose,
+			check_update: this.check_update,
 			contact: this.contact,
 			colors: this.colors,
-			spinner_name: this.spinner_name,
 		}
 	}
 
@@ -93,7 +96,7 @@ export class ConfigType {
 	}
 
 	removeListener() {
-		this._listen = null
+		this._listen = undefined
 	}
 
 	private _triggerListener() {
@@ -113,13 +116,27 @@ export class ConfigType {
 		return this._token
 	}
 	set token(token: string) {
+		if (typeof token !== 'string') return
 		this._token = token
+		this._triggerListener()
+	}
+	get spinner_name() {
+		return this._spinner_name
+	}
+	set spinner_name(spinner_name: string) {
+		if (typeof spinner_name !== 'string') return
+		if (!spinner_names.has(spinner_name)) {
+			console.error(`Config error: '${spinner_name}' is not a valid spinner_name`)
+			return
+		}
+		this._spinner_name = spinner_name
 		this._triggerListener()
 	}
 	get save_token() {
 		return this._save_token
 	}
 	set save_token(save_token: boolean) {
+		if (typeof save_token !== 'boolean') return
 		this._save_token = save_token
 		this._triggerListener()
 	}
@@ -127,6 +144,7 @@ export class ConfigType {
 		return this._auto_acl
 	}
 	set auto_acl(auto_acl: boolean) {
+		if (typeof auto_acl !== 'boolean') return
 		this._auto_acl = auto_acl
 		this._triggerListener()
 	}
@@ -134,8 +152,17 @@ export class ConfigType {
 		return this._verbose
 	}
 	set verbose(verbose: boolean) {
+		if (typeof verbose !== 'boolean') return
 		VERBOSE = verbose
 		this._verbose = verbose
+		this._triggerListener()
+	}
+	get check_update() {
+		return this._check_update
+	}
+	set check_update(check_update: boolean) {
+		if (typeof check_update !== 'boolean') return
+		this._check_update = check_update
 		this._triggerListener()
 	}
 	get contact() {
@@ -152,17 +179,6 @@ export class ConfigType {
 		// TODO: parse & check if is valid color
 		COLORS = colors
 		this._colors = colors
-		this._triggerListener()
-	}
-	get spinner_name() {
-		return this._spinner_name
-	}
-	set spinner_name(spinner_name: string) {
-		if (!spinner_names.has(spinner_name)) {
-			console.error(`Config error: '${spinner_name}' is not a valid spinner_name`)
-			return
-		}
-		this._spinner_name = spinner_name
 		this._triggerListener()
 	}
 }
@@ -186,35 +202,24 @@ function parse_config(config: any) {
 	const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})')
 	const new_config = new ConfigType()
 
-	if (config.email && regex_email.test(config.email)) {
+	// TODO: move email & color parse in getter / setter
+	if (config?.email && regex_email.test(config.email)) {
 		new_config.email = config.email
 	}
-	if (config.token) {
-		new_config.token = config.token
-	}
-	if (config.save_token) {
-		new_config.save_token = true
-	}
-	if (config.auto_acl === false) {
-		new_config.auto_acl = false
-	}
-	if (config.verbose === false) {
-		new_config.verbose = false
-	}
-	if (config.contact) {
-		new_config.contact = config.contact
-	}
-	if (config.colors) {
+	new_config.token = config?.token
+	new_config.spinner_name = config?.spinner_name
+	new_config.save_token = config?.save_token
+	new_config.auto_acl = config?.auto_acl
+	new_config.verbose = config?.verbose
+	new_config.check_update = config?.check_update
+	new_config.contact = config?.contact
+	if (config?.colors) {
 		clor.getColorsKey().forEach((key) => {
 			if (colorsValue.has(config.colors[key])) {
 				;(new_config.colors as any)[key] = config.colors[key]
 			}
 		})
 	}
-	if (config.spinner_name) {
-		new_config.spinner_name = config.spinner_name
-	}
-
 	new_config.addListener(write_config)
 
 	return new_config

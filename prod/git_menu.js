@@ -66,7 +66,7 @@ function clone_repo(api, repo_name, email) {
         const spinner = ora_1.default();
         spinner.color = 'blue';
         try {
-            let repo_path = null;
+            let repo_path;
             if (!(yield ui_1.ask_question('Git clone here ?')))
                 repo_path = yield ui_1.ask_input('Repository destination:');
             if (repo_path === '')
@@ -96,11 +96,11 @@ function clone_all_repo(api, config) {
         try {
             const repo_list = yield api.listRepositories();
             spinner.stop();
-            let repo_path = null;
             const repo_nb = repo_list.length;
+            let repo_path;
             if (!(yield ui_1.ask_question(`Git clone ${utils_1.clor.info(repo_nb)} repositories here ?`)))
                 repo_path = yield ui_1.ask_input('Repository destination:');
-            if (repo_path !== null && !fs_1.default.existsSync(repo_path)) {
+            if (repo_path && !fs_1.default.existsSync(repo_path)) {
                 if (yield ui_1.ask_question('Path not exist, create ?'))
                     fs_1.default.mkdirSync(repo_path, { recursive: true });
                 else

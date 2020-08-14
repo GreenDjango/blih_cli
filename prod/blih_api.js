@@ -56,7 +56,7 @@ class BlihApi {
             throw 'A password or token is needed to authenticate';
         }
         this._api = axios_1.default.create(options);
-        this._api.interceptors.response.use(rep => rep, responseErrorInterceptor);
+        this._api.interceptors.response.use((rep) => rep, responseErrorInterceptor);
     }
     /**
      * Create a repository
@@ -93,9 +93,9 @@ class BlihApi {
         return __awaiter(this, void 0, void 0, function* () {
             const list = (yield this.call('get', '/repositories')).data.repositories;
             return Object.keys(list)
-                .filter(r => r.length)
+                .filter((r) => r.length)
                 .sort()
-                .map(r => ({
+                .map((r) => ({
                 name: r,
                 url: list[r].url,
                 uuid: list[r].uuid,
@@ -130,9 +130,9 @@ class BlihApi {
             try {
                 const acl = (yield this.call('get', `/repository/${encode_repo}/acls`)).data;
                 return Object.keys(acl)
-                    .filter(c => c.length && acl[c].length)
+                    .filter((c) => c.length && acl[c].length)
                     .sort()
-                    .map(c => ({
+                    .map((c) => ({
                     name: c,
                     rights: acl[c],
                 }));
@@ -186,9 +186,9 @@ class BlihApi {
         return __awaiter(this, void 0, void 0, function* () {
             const keys = (yield this.call('get', '/sshkeys')).data;
             return Object.keys(keys)
-                .filter(k => k.length)
+                .filter((k) => k.length)
                 .sort()
-                .map(k => ({
+                .map((k) => ({
                 name: k,
                 data: keys[k],
             }));
@@ -222,10 +222,7 @@ class BlihApi {
      * @return {String} a new token
      */
     static hashPassword(password) {
-        return crypto_1.default
-            .createHash('sha512')
-            .update(password)
-            .digest('hex');
+        return crypto_1.default.createHash('sha512').update(password).digest('hex');
     }
     /**
      * Ping the Blih server
@@ -235,12 +232,12 @@ class BlihApi {
         return __awaiter(this, void 0, void 0, function* () {
             const api = axios_1.default.create(options);
             // Add timestamps to requests and responses
-            api.interceptors.request.use(config => {
+            api.interceptors.request.use((config) => {
                 ;
                 config.startTimestamp = Date.now();
                 return config;
-            }, error => Promise.reject(error));
-            api.interceptors.response.use(response => {
+            }, (error) => Promise.reject(error));
+            api.interceptors.response.use((response) => {
                 ;
                 response.config.endTimestamp = Date.now();
                 return response;
@@ -263,7 +260,7 @@ class BlihApi {
             body.signature = crypto_1.default
                 .createHmac('sha512', this._token)
                 .update(body.user)
-                .update(body.data ? JSON.stringify(body.data, null, 4) : '')
+                .update(body.data ? JSON.stringify(body.data, undefined, 4) : '')
                 .digest('hex');
             return this._api.request({
                 method,

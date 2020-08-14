@@ -37,8 +37,9 @@
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
-    "build": "tsc; chmod a+x build/index.js",
-    "prod": "rm -rf build prod; npm run build; cp -r build prod",
+    "buildDev": "tsc; chmod a+x build/index.js",
+    "buildProd": "rm -rf build prod; npm run buildDev -s; cp -r build prod",
+    "dev" : "env BLIH_CLI_CONFIG_SKIP=true ./build/index.js",
     "update": "npm outdated || exit 0"
   },
   "man": "./man/json.1",

@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
+const os_1 = __importDefault(require("os"));
+const child_process_1 = require("child_process");
 const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const blih_api_1 = require("./blih_api");
@@ -27,6 +29,8 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     if (process.argv.length > 2)
         yield parse_args(process.argv);
     const config = utils_1.open_config();
+    if (!utils_1.IS_DEBUG && config.check_update)
+        check_update(yield utils_1.APP_VERSION);
     if (process.argv.length > 2)
         config.args = process.argv;
     if (config.verbose && !config.args) {
@@ -36,6 +40,8 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log(chalk_1.default.yellow(`/____/_/_/_//_/  \\___/____/___/`) +
             chalk_1.default.grey.italic(`  ${yield utils_1.APP_VERSION}\n`));
     }
+    if (utils_1.IS_DEBUG)
+        console.log(`DEBUG VERSION, skip: ${process.env.BLIH_CLI_CONFIG_SKIP}`);
     const api = yield login(config);
     if (config.args)
         yield fast_mode(api, config);
@@ -86,7 +92,9 @@ function login(config) {
         const spinner = ora_1.default().start(chalk_1.default.green('Check Blih server...'));
         spinner.color = 'blue';
         try {
-            const time = yield blih_api_1.BlihApi.ping();
+            let time = 0;
+            if (!process.env.BLIH_CLI_CONFIG_SKIP)
+                time = yield blih_api_1.BlihApi.ping();
             spinner.succeed(chalk_1.default.green('Blih server up: ') + chalk_1.default.cyan(time + 'ms'));
         }
         catch (err) {
@@ -105,7 +113,8 @@ function login(config) {
             spinner.start(chalk_1.default.green('Try to login...'));
             try {
                 api = new blih_api_1.BlihApi({ email: config.email, token: config.token });
-                config.repo = (yield api.listRepositories()).map((value) => value.name);
+                if (!process.env.BLIH_CLI_CONFIG_SKIP)
+                    config.repo = (yield api.listRepositories()).map((value) => value.name);
                 error = false;
                 spinner.stop();
             }
@@ -187,20 +196,27 @@ function parse_args(args) {
                 console.log(utils_1.IS_DEBUG ? 'true' : 'false');
                 process.exit(0);
             }
-            if (!utils_1.IS_DEBUG)
-                return;
             if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
-                yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
-                process.exit(0);
-            }
-            if (args[2] === '--snapshot') {
-                yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh snapshot`);
+                if (utils_1.IS_DEBUG)
+                    yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
+                else
+                    console.log('Use: `sudo npm up blih_cli -g`');
                 process.exit(0);
             }
             if (args[2] === '--uninstall') {
-                if (!(yield ui_1.ask_question('Uninstall blih_cli ?')))
-                    process.exit(0);
-                yield utils_1.sh_live(`sudo sh ${__dirname}/../uninstall.sh`);
+                if (utils_1.IS_DEBUG) {
+                    if (!(yield ui_1.ask_question('Uninstall blih_cli ?')))
+                        process.exit(0);
+                    yield utils_1.sh_live(`sudo sh ${__dirname}/../uninstall.sh`);
+                }
+                else
+                    console.log('Use: `sudo npm un blih_cli -g`');
+                process.exit(0);
+            }
+            if (!utils_1.IS_DEBUG)
+                return;
+            if (args[2] === '--snapshot') {
+                yield utils_1.sh_live(`sudo sh ${__dirname}/../update.sh snapshot`);
                 process.exit(0);
             }
         }
@@ -208,4 +224,16 @@ function parse_args(args) {
 }
 function show_help() {
     ora_1.default().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
+}
+function check_update(current) {
+    if (os_1.default.type() === 'Linux' || os_1.default.type().match(/BSD$/)) {
+        child_process_1.exec('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
+            if (err || !stdout)
+                return;
+            if ('v' + stdout !== current) {
+                // prettier-ignore
+                child_process_1.exec(`notify-send "New update available" "Try 'sudo npm up blih_cli -g' to update" -i "${__dirname}/../logo.png" -a "blih cli" -t 10000`);
+            }
+        });
+    }
 }

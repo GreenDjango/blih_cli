@@ -52,7 +52,7 @@ export async function clone_repo(api: BlihApi, repo_name: string, email: string)
 	spinner.color = 'blue'
 
 	try {
-		let repo_path = null
+		let repo_path
 		if (!(await ask_question('Git clone here ?')))
 			repo_path = await ask_input('Repository destination:')
 		if (repo_path === '') return
@@ -80,11 +80,11 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 	try {
 		const repo_list = await api.listRepositories()
 		spinner.stop()
-		let repo_path: string | null = null
 		const repo_nb = repo_list.length
+		let repo_path
 		if (!(await ask_question(`Git clone ${clor.info(repo_nb)} repositories here ?`)))
 			repo_path = await ask_input('Repository destination:')
-		if (repo_path !== null && !fs.existsSync(repo_path)) {
+		if (repo_path && !fs.existsSync(repo_path)) {
 			if (await ask_question('Path not exist, create ?'))
 				fs.mkdirSync(repo_path, { recursive: true })
 			else return
