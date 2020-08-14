@@ -19,6 +19,7 @@ const utils_1 = require("./utils");
 function options_menu(config) {
     return __awaiter(this, void 0, void 0, function* () {
         let should_quit = false;
+        yield spinner_option(config);
         while (!should_quit) {
             const choices = [
                 '↵ Back',
@@ -26,6 +27,7 @@ function options_menu(config) {
                 `Auto Ramassage-tek ACL: ${config.auto_acl ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Mode verbose: ${config.verbose ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
                 `Colors option`,
+                `Spinner option`,
                 'Reset all contact',
             ];
             const choice = yield ui_1.ask_list(choices, 'You want options ?');
@@ -43,6 +45,9 @@ function options_menu(config) {
                     yield colors_option(config);
                     break;
                 case choices[5]:
+                    yield spinner_option(config);
+                    break;
+                case choices[6]:
                     const valid = yield ui_1.ask_question(`Are you sure ?`);
                     if (valid)
                         config.contact = [];
@@ -58,11 +63,11 @@ exports.options_menu = options_menu;
 function colors_option(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const colorsKey = utils_1.clor.getColorsKey();
-        const color_choices = [...utils_1.colorsValue].map(key => {
+        const color_choices = [...utils_1.colorsValue].map((key) => {
             return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${chalk_1.default[key]('test ■')}`;
         });
         while (1) {
-            const choices = colorsKey.map(key => {
+            const choices = colorsKey.map((key) => {
                 return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${utils_1.clor[key]('current ■')}`;
             });
             const option = yield ui_1.ask_list(['↵ Back', ...choices], 'You want colors ?', true);
@@ -71,7 +76,7 @@ function colors_option(config) {
             const color = yield ui_1.ask_autocomplete(['↵ Back', ...color_choices], undefined, true);
             if (color === '↵ Back')
                 continue;
-            const idx = color_choices.findIndex(value => value === color);
+            const idx = color_choices.findIndex((value) => value === color);
             if (idx >= 0) {
                 switch (colorsKey[+option - 1]) {
                     case 'info':
@@ -83,5 +88,12 @@ function colors_option(config) {
                 config.colors = config.colors;
             }
         }
+    });
+}
+function spinner_option(config) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const new_spinner = yield ui_1.ask_spinner(['↵ Back', ...utils_1.spinner_names], `Current spinner '${config.spinner_name}', new :`);
+        if (new_spinner !== '↵ Back')
+            config.spinner_name = new_spinner;
     });
 }

@@ -13,24 +13,27 @@ export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
 export let VERBOSE = true
 
+// prettier-ignore
+export const spinner_names = new Set([
+	'dots', 'dots2', 'dots3', 'dots4', 'dots5', 'dots6', 'dots7', 'dots8',
+	'dots9', 'dots10', 'dots11', 'dots12', 'dots8Bit', 'line', 'line2',
+	'pipe', 'simpleDots', 'simpleDotsScrolling', 'star', 'star2', 'flip',
+	'hamburger', 'growVertical', 'growHorizontal', 'balloon', 'balloon2',
+	'noise', 'bounce', 'boxBounce', 'boxBounce2', 'triangle', 'arc', 'circle',
+	'squareCorners', 'circleQuarters', 'circleHalves', 'squish', 'toggle',
+	'toggle2', 'toggle3', 'toggle4', 'toggle5', 'toggle6', 'toggle7',
+	'toggle8', 'toggle9', 'toggle10', 'toggle11', 'toggle12', 'toggle13',
+	'arrow', 'arrow2', 'arrow3', 'bouncingBar', 'bouncingBall', 'smiley',
+	'monkey', 'hearts', 'clock', 'earth', 'material', 'moon', 'runner',
+	'pong', 'shark', 'dqpb', 'weather', 'christmas', 'grenade', 'point',
+	'layer', 'betaWave'
+])
+
+// prettier-ignore
 export const colorsValue = new Set([
-	'black',
-	'blackBright',
-	'blue',
-	'blueBright',
-	'cyan',
-	'cyanBright',
-	'green',
-	'greenBright',
-	'grey',
-	'magenta',
-	'magentaBright',
-	'red',
-	'redBright',
-	'white',
-	'whiteBright',
-	'yellow',
-	'yellowBright',
+	'black', 'blackBright', 'blue', 'blueBright', 'cyan', 'cyanBright',
+	'green', 'greenBright', 'grey', 'magenta', 'magentaBright', 'red',
+	'redBright', 'white', 'whiteBright', 'yellow', 'yellowBright'
 ])
 
 export class clor {
@@ -54,6 +57,7 @@ export class ConfigType {
 	private _verbose: boolean
 	private _contact: string[]
 	private _colors: { info: string }
+	private _spinner_name: string
 	public args: string[] | null
 	public repo: string[]
 
@@ -66,6 +70,7 @@ export class ConfigType {
 		this._verbose = true
 		this._contact = []
 		this._colors = COLORS
+		this._spinner_name = 'dots'
 		this.args = null
 		this.repo = []
 	}
@@ -79,6 +84,7 @@ export class ConfigType {
 			verbose: this.verbose,
 			contact: this.contact,
 			colors: this.colors,
+			spinner_name: this.spinner_name,
 		}
 	}
 
@@ -143,8 +149,20 @@ export class ConfigType {
 		return this._colors
 	}
 	set colors(colors) {
+		// TODO: parse & check if is valid color
 		COLORS = colors
 		this._colors = colors
+		this._triggerListener()
+	}
+	get spinner_name() {
+		return this._spinner_name
+	}
+	set spinner_name(spinner_name: string) {
+		if (!spinner_names.has(spinner_name)) {
+			console.error(`Config error: '${spinner_name}' is not a valid spinner_name`)
+			return
+		}
+		this._spinner_name = spinner_name
 		this._triggerListener()
 	}
 }
@@ -192,6 +210,9 @@ function parse_config(config: any) {
 				;(new_config.colors as any)[key] = config.colors[key]
 			}
 		})
+	}
+	if (config.spinner_name) {
+		new_config.spinner_name = config.spinner_name
 	}
 
 	new_config.addListener(write_config)
@@ -257,6 +278,14 @@ export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: st
 		child.stderr?.on('data', (data) => {
 			process.stderr.write(data)
 		})
+	})
+}
+
+export function resolveAfter(x: number) {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(x)
+		}, x)
 	})
 }
 

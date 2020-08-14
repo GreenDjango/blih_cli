@@ -31,12 +31,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clear_line = exports.ctext = exports.ask_input = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list = void 0;
+exports.clear_line = exports.ctext = exports.ask_spinner = exports.ask_input = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list = void 0;
 const inquirer = __importStar(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const utils_1 = require("./utils");
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'));
+inquirer.registerPrompt('listspinner', require('./inquirer_plugins').default);
 function ask_list(choices, message, return_index) {
     return __awaiter(this, void 0, void 0, function* () {
         const prompted = yield inquirer.prompt([
@@ -50,7 +51,7 @@ function ask_list(choices, message, return_index) {
         ]);
         is_verbose();
         if (return_index) {
-            const idx = choices.findIndex(value => value === prompted.list);
+            const idx = choices.findIndex((value) => value === prompted.list);
             if (idx >= 0)
                 return idx.toString();
             return '0';
@@ -135,7 +136,7 @@ function ask_autocomplete(source, message, suggestOnly) {
                     suggestOnly: suggestOnly ? false : true,
                     source: (answer, input) => __awaiter(this, void 0, void 0, function* () {
                         const regex_input = RegExp(input, 'i');
-                        return source.filter(value => regex_input.test(value));
+                        return source.filter((value) => regex_input.test(value));
                     }),
                 },
             ]);
@@ -194,6 +195,22 @@ function ask_input(message) {
     });
 }
 exports.ask_input = ask_input;
+function ask_spinner(choices, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const prompted = yield inquirer.prompt([
+            {
+                type: 'listspinner',
+                name: 'listspinner',
+                choices: choices,
+                message: message || '>',
+                pageSize: 10,
+            },
+        ]);
+        is_verbose();
+        return prompted.listspinner;
+    });
+}
+exports.ask_spinner = ask_spinner;
 function ctext(string) {
     const spaces = Math.floor(process.stdout.getWindowSize()[0] / 2 - string.length / 2);
     return Array(spaces + 1).join(' ') + string;

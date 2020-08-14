@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = void 0;
+exports.resolveAfter = exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.spinner_names = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = __importDefault(require("fs"));
 const child_process_1 = require("child_process");
@@ -26,24 +26,26 @@ exports.IS_DEBUG = get_is_debug_build();
 exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
 exports.VERBOSE = true;
+// prettier-ignore
+exports.spinner_names = new Set([
+    'dots', 'dots2', 'dots3', 'dots4', 'dots5', 'dots6', 'dots7', 'dots8',
+    'dots9', 'dots10', 'dots11', 'dots12', 'dots8Bit', 'line', 'line2',
+    'pipe', 'simpleDots', 'simpleDotsScrolling', 'star', 'star2', 'flip',
+    'hamburger', 'growVertical', 'growHorizontal', 'balloon', 'balloon2',
+    'noise', 'bounce', 'boxBounce', 'boxBounce2', 'triangle', 'arc', 'circle',
+    'squareCorners', 'circleQuarters', 'circleHalves', 'squish', 'toggle',
+    'toggle2', 'toggle3', 'toggle4', 'toggle5', 'toggle6', 'toggle7',
+    'toggle8', 'toggle9', 'toggle10', 'toggle11', 'toggle12', 'toggle13',
+    'arrow', 'arrow2', 'arrow3', 'bouncingBar', 'bouncingBall', 'smiley',
+    'monkey', 'hearts', 'clock', 'earth', 'material', 'moon', 'runner',
+    'pong', 'shark', 'dqpb', 'weather', 'christmas', 'grenade', 'point',
+    'layer', 'betaWave'
+]);
+// prettier-ignore
 exports.colorsValue = new Set([
-    'black',
-    'blackBright',
-    'blue',
-    'blueBright',
-    'cyan',
-    'cyanBright',
-    'green',
-    'greenBright',
-    'grey',
-    'magenta',
-    'magentaBright',
-    'red',
-    'redBright',
-    'white',
-    'whiteBright',
-    'yellow',
-    'yellowBright',
+    'black', 'blackBright', 'blue', 'blueBright', 'cyan', 'cyanBright',
+    'green', 'greenBright', 'grey', 'magenta', 'magentaBright', 'red',
+    'redBright', 'white', 'whiteBright', 'yellow', 'yellowBright'
 ]);
 class clor {
     // TODO: remove static getKeyValue = (key: string) => (obj: Record<string, any>) => obj[key]
@@ -65,6 +67,7 @@ class ConfigType {
         this._verbose = true;
         this._contact = [];
         this._colors = COLORS;
+        this._spinner_name = 'dots';
         this.args = null;
         this.repo = [];
     }
@@ -77,6 +80,7 @@ class ConfigType {
             verbose: this.verbose,
             contact: this.contact,
             colors: this.colors,
+            spinner_name: this.spinner_name,
         };
     }
     addListener(callback) {
@@ -137,8 +141,20 @@ class ConfigType {
         return this._colors;
     }
     set colors(colors) {
+        // TODO: parse & check if is valid color
         COLORS = colors;
         this._colors = colors;
+        this._triggerListener();
+    }
+    get spinner_name() {
+        return this._spinner_name;
+    }
+    set spinner_name(spinner_name) {
+        if (!exports.spinner_names.has(spinner_name)) {
+            console.error(`Config error: '${spinner_name}' is not a valid spinner_name`);
+            return;
+        }
+        this._spinner_name = spinner_name;
         this._triggerListener();
     }
 }
@@ -188,6 +204,9 @@ function parse_config(config) {
                 new_config.colors[key] = config.colors[key];
             }
         });
+    }
+    if (config.spinner_name) {
+        new_config.spinner_name = config.spinner_name;
     }
     new_config.addListener(write_config);
     return new_config;
@@ -269,6 +288,14 @@ function sh_live(cmd) {
     });
 }
 exports.sh_live = sh_live;
+function resolveAfter(x) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(x);
+        }, x);
+    });
+}
+exports.resolveAfter = resolveAfter;
 function get_app_version() {
     return __awaiter(this, void 0, void 0, function* () {
         try {

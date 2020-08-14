@@ -3,6 +3,7 @@ import chalk from 'chalk'
 import { VERBOSE } from './utils'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
+inquirer.registerPrompt('listspinner', require('./inquirer_plugins').default)
 
 export async function ask_list(choices: string[], message?: string, return_index?: boolean) {
 	const prompted: any = await inquirer.prompt([
@@ -16,7 +17,7 @@ export async function ask_list(choices: string[], message?: string, return_index
 	])
 	is_verbose()
 	if (return_index) {
-		const idx = choices.findIndex(value => value === prompted.list)
+		const idx = choices.findIndex((value) => value === prompted.list)
 		if (idx >= 0) return idx.toString()
 		return '0'
 	}
@@ -97,7 +98,7 @@ export async function ask_autocomplete(source: string[], message?: string, sugge
 				suggestOnly: suggestOnly ? false : true,
 				source: async (answer: any, input: any) => {
 					const regex_input = RegExp(input, 'i')
-					return source.filter(value => regex_input.test(value))
+					return source.filter((value) => regex_input.test(value))
 				},
 			},
 		])
@@ -153,6 +154,20 @@ export async function ask_input(message?: string) {
 	])
 	is_verbose()
 	return prompted.input as string
+}
+
+export async function ask_spinner(choices: string[], message?: string) {
+	const prompted: any = await inquirer.prompt([
+		{
+			type: 'listspinner',
+			name: 'listspinner',
+			choices: choices,
+			message: message || '>',
+			pageSize: 10,
+		},
+	])
+	is_verbose()
+	return prompted.listspinner as string
 }
 
 export function ctext(string: string) {
