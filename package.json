@@ -6,6 +6,14 @@
   },
   "version": "0.2.0",
   "description": "Blih CLI for Linux",
+  "keywords": [
+    "cli",
+    "prompt",
+    "tty",
+    "blih",
+    "git",
+    "command-line"
+  ],
   "main": "prod/index.js",
   "engines": {
     "node": ">=6"
@@ -19,7 +27,7 @@
     "chalk": "^4.1.0",
     "inquirer": "^6.5.2",
     "inquirer-autocomplete-prompt": "^1.0.2",
-    "inquirer-fuzzy-path": "^2.2.0",
+    "inquirer-fuzzy-path": "^2.3.0",
     "ora": "^5.0.0"
   },
   "devDependencies": {
