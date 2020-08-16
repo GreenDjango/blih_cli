@@ -1,9 +1,23 @@
 import * as inquirer from 'inquirer'
 import chalk from 'chalk'
 import { VERBOSE } from './utils'
+import { Projects } from './timeline_api'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
-inquirer.registerPrompt('listspinner', require('./inquirer_plugins').default)
+inquirer.registerPrompt('listspinner', require('./inquirer_plugins/ListSpinnerPrompt').default)
+inquirer.registerPrompt('timeline', require('./inquirer_plugins/TimelinePrompt').default)
+
+export async function ask_input(message?: string) {
+	const prompted = await inquirer.prompt([
+		{
+			type: 'input',
+			name: 'input',
+			message: message || '>',
+		},
+	])
+	is_verbose()
+	return prompted.input as string
+}
 
 export async function ask_list(choices: string[], message?: string, return_index?: boolean) {
 	const prompted: any = await inquirer.prompt([
@@ -22,6 +36,23 @@ export async function ask_list(choices: string[], message?: string, return_index
 		return '0'
 	}
 	return prompted.list as string
+}
+
+export async function ask_list_index<T>(
+	choices: { name: string; value: T; short: string }[],
+	message?: string
+) {
+	const prompted: any = await inquirer.prompt([
+		{
+			type: 'list',
+			choices: choices,
+			name: 'list',
+			message: message || '>',
+			pageSize: 10,
+		},
+	])
+	is_verbose()
+	return prompted.list as T
 }
 
 export async function ask_password() {
@@ -144,18 +175,6 @@ export async function ask_path(
 	return prompted.fuzzypath as string
 }
 
-export async function ask_input(message?: string) {
-	const prompted = await inquirer.prompt([
-		{
-			type: 'input',
-			name: 'input',
-			message: message || '>',
-		},
-	])
-	is_verbose()
-	return prompted.input as string
-}
-
 export async function ask_spinner(choices: string[], message?: string) {
 	const prompted: any = await inquirer.prompt([
 		{
@@ -167,6 +186,38 @@ export async function ask_spinner(choices: string[], message?: string) {
 		},
 	])
 	is_verbose()
+	return prompted.listspinner as string
+}
+
+export async function ask_timeline(choices: Projects[], message?: string) {
+	const new_choices: {
+		module: string
+		projects: { project: string; start: string; end: string }[]
+	}[] = []
+	// Group all project whith the same module together
+	choices.forEach((choice) => {
+		const idx = new_choices.findIndex((value2) => value2.module === choice.module)
+		if (idx >= 0)
+			new_choices[idx].projects.push({
+				project: choice.project,
+				start: choice.start,
+				end: choice.end,
+			})
+		else
+			new_choices.push({
+				module: choice.module,
+				projects: [{ project: choice.project, start: choice.start, end: choice.end }],
+			})
+	})
+	const prompted: any = await inquirer.prompt([
+		{
+			type: 'timeline',
+			name: 'timeline',
+			choices: new_choices,
+			message: message || '>',
+			pageSize: 9,
+		},
+	])
 	return prompted.listspinner as string
 }
 

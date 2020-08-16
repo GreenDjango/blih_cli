@@ -70,6 +70,7 @@ class ConfigType {
         this._contact = [];
         this._colors = COLORS;
         this.args = undefined;
+        this.timelines = [];
         this.repo = [];
     }
     to_json() {
@@ -119,7 +120,7 @@ class ConfigType {
         if (typeof spinner_name !== 'string')
             return;
         if (!exports.spinner_names.has(spinner_name)) {
-            console.error(`Config error: '${spinner_name}' is not a valid spinner_name`);
+            print_message(`Config error: '${spinner_name}' is not a valid spinner_name`, '', 'fail');
             return;
         }
         this._spinner_name = spinner_name;

@@ -1,4 +1,13 @@
 "use strict";
+/**
+ * Copyright (c) 2020 Blih CLI
+ *
+ * List spinner prompt plugin for inquirer
+ * (https://npmjs.com/package/inquirer)
+ *
+ * @summary List spinner prompt plugin for inquirer
+ * @author Theo <@GreenDjango>
+ */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };

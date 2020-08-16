@@ -1,3 +1,13 @@
+/**
+ * Copyright (c) 2020 Blih CLI
+ *
+ * List spinner prompt plugin for inquirer
+ * (https://npmjs.com/package/inquirer)
+ *
+ * @summary List spinner prompt plugin for inquirer
+ * @author Theo <@GreenDjango>
+ */
+
 /* tslint:disable */
 import chalk from 'chalk'
 import { Interface as ReadLineInterface } from 'readline'

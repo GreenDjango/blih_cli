@@ -1,0 +1,252 @@
+"use strict";
+/**
+ * Copyright (c) 2020 Blih CLI
+ *
+ * Timeline prompt plugin for inquirer
+ * (https://npmjs.com/package/inquirer)
+ *
+ * @summary Timeline prompt plugin for inquirer
+ * @author Theo <@GreenDjango>
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+/* tslint:disable */
+const chalk_1 = __importDefault(require("chalk"));
+const rxjs_1 = require("rxjs");
+const operators_1 = require("rxjs/operators");
+const base_1 = __importDefault(require("inquirer/lib/prompts/base"));
+const events_1 = __importDefault(require("inquirer/lib/utils/events"));
+const paginator_1 = __importDefault(require("inquirer/lib/utils/paginator"));
+// @ts-ignore
+const cli_cursor_1 = __importDefault(require("cli-cursor"));
+// @ts-ignore
+const run_async_1 = __importDefault(require("run-async"));
+// @ts-ignore
+const cli_width_1 = __importDefault(require("cli-width"));
+const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+const unitSize = '--------------------------';
+/**
+ * message: string, top content
+ * choices: { module: string; projects: { project: string; start: string; end: string }[]}[], timeline projects
+ * pageSize: number, size of list to show
+ * default: number | string, index or value to show first
+ */
+class TimelinePrompt extends base_1.default {
+    constructor(questions, rl, answers) {
+        var _a;
+        questions.choices = [...questions.choices].map((value) => {
+            value.name = value.module;
+            value.extra = value.projects.map((v) => {
+                const end_date = new Date(v.end);
+                end_date.setDate(end_date.getDate() + 1);
+                return { project: v.project, start: new Date(v.start), end: end_date };
+            });
+            delete value.module;
+            delete value.projects;
+            return value;
+        });
+        super(questions, rl, answers);
+        if (!this.opt.choices) {
+            this.throwParamError('choices');
+        }
+        this.longestName =
+            ((_a = this.opt.choices.realChoices.reduce((a, b) => {
+                return a.name.length > b.name.length ? a : b;
+            }).name) === null || _a === void 0 ? void 0 : _a.length) || 0;
+        this.showHelp = true;
+        this.selected = 0;
+        this.offsetX = 0;
+        this.done = undefined;
+        this.axeX = Array(13)
+            .fill(1)
+            .reduce((prev) => {
+            return prev + unitSize + '|';
+        }, '');
+        this.unitsX = months.reduce((prev, curr) => {
+            return (prev +
+                ' '.repeat(unitSize.length - Math.floor(curr.length / 2) - (prev.length % (unitSize.length + 1))) +
+                curr);
+        }, '');
+        this.axeX = '─'.repeat(this.longestName + 5) + '┤' + this.axeX;
+        this.unitsX = ' '.repeat(this.longestName + 4) + this.unitsX.replace(/^./, 'Aug');
+        const def = this.opt.default;
+        // If def is a Number, then use as index. Otherwise, check for value.
+        if (typeof def === 'number' && def >= 0 && def < this.opt.choices.realLength) {
+            this.selected = def;
+        }
+        else if (!(typeof def === 'number') && def != null) {
+            const index = this.opt.choices.realChoices.findIndex(({ value }) => value === def);
+            this.selected = Math.max(index, 0);
+        }
+        // Make sure no default is set (so it won't be printed)
+        this.opt.default = null;
+        this.paginator = new paginator_1.default(this.screen);
+    }
+    //Start the Inquiry session
+    _run(cb) {
+        this.done = cb;
+        const self = this;
+        const events = events_1.default(this.rl);
+        const eventsCustom = observeCustom(this.rl);
+        events.normalizedUpKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onUpKey.bind(this));
+        events.normalizedDownKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onDownKey.bind(this));
+        eventsCustom.normalizedLeftKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onLeftKey.bind(this));
+        eventsCustom.normalizedRightKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onRightKey.bind(this));
+        // @ts-ignore
+        events.numberKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onNumberKey.bind(this));
+        events.line
+            .pipe(operators_1.take(1), operators_1.map(this.getCurrentValue.bind(this)), operators_1.flatMap((value) => run_async_1.default(self.opt.filter)(value).catch((err) => err)))
+            .forEach(this.onSubmit.bind(this));
+        // Init the prompt
+        cli_cursor_1.default.hide();
+        this.render();
+        return this;
+    }
+    // Render the prompt to screen
+    render() {
+        // Render question
+        let message = this.getQuestion();
+        if (this.showHelp) {
+            message += chalk_1.default.dim('(Use arrow keys)');
+            this.showHelp = false;
+        }
+        // Render choices or answer depending on the state
+        if (this.status === 'answered') {
+            message += chalk_1.default.cyan(this.opt.choices.getChoice(this.selected).short);
+        }
+        else {
+            const choicesStr = this.listRender();
+            // @ts-ignore
+            const indexPosition = this.opt.choices.indexOf(this.opt.choices.getChoice(this.selected));
+            // prettier-ignore
+            // @ts-ignore
+            message += '\n' + this.paginator.paginate(choicesStr, indexPosition * 3 + 1, this.opt.pageSize);
+        }
+        const bottomContent = this.status === 'answered' ? undefined : this.bottomRender();
+        this.screen.render(message, bottomContent);
+    }
+    // Function for rendering list choices
+    listRender() {
+        let output = '';
+        let separatorOffset = 0;
+        const width = cli_width_1.default({ defaultWidth: 80, output: this.rl.output });
+        this.opt.choices.forEach((choice, i) => {
+            if (choice.type === 'separator') {
+                separatorOffset++;
+                output += '  ' + choice + '\n';
+                return;
+            }
+            if (choice.disabled) {
+                separatorOffset++;
+                output += '  - ' + choice.name;
+                output += ' (' + (typeof choice.disabled === 'string' ? choice.disabled : 'Disabled') + ')';
+                output += '\n';
+                return;
+            }
+            const isSelected = i - separatorOffset === this.selected;
+            let outLine = '─'.repeat(choice.name.length);
+            const offsetLine = ' '.repeat(this.longestName - choice.name.length);
+            let upLine = offsetLine + `  ╭─${outLine}─┤`;
+            let midLine = (isSelected ? '>' : ' ') + offsetLine + ' │ ' + choice.name + ' │';
+            let downLine = offsetLine + `  ╰─${outLine}─┤`;
+            choice.extra
+                .sort((a, b) => a.start.getTime() - b.start.getTime())
+                .forEach((val) => {
+                outLine = '─'.repeat(val.project.length);
+                upLine += ` ╭─${outLine}─╮`;
+                midLine += ` │ ${val.project} │`;
+                downLine += ` ╰─${outLine}─╯`;
+            });
+            let lines = applyOffset(upLine, this.offsetX, width) +
+                ' \n' +
+                applyOffset(midLine, this.offsetX, width) +
+                ' \n' +
+                applyOffset(downLine, this.offsetX, width);
+            if (isSelected)
+                lines = chalk_1.default.cyan(lines);
+            output += lines + ' \n';
+        });
+        return output.replace(/\n$/, '');
+    }
+    // Function for rendering bottom content
+    bottomRender() {
+        const width = cli_width_1.default({ defaultWidth: 80, output: this.rl.output });
+        const axe = applyOffset(this.axeX, this.offsetX, width);
+        const output = axe + ' \n' + applyOffset(this.unitsX, this.offsetX, width) + ' \n';
+        return output.replace(/\n$/, '');
+    }
+    /**
+     * When user press `enter` key
+     */
+    onSubmit(value) {
+        this.status = 'answered';
+        // Rerender prompt
+        this.render();
+        this.screen.done();
+        cli_cursor_1.default.show();
+        if (this.done)
+            this.done(value);
+    }
+    getCurrentValue() {
+        return this.opt.choices.getChoice(this.selected).value;
+    }
+    /**
+     * When user press a key
+     */
+    onUpKey() {
+        const len = this.opt.choices.realLength;
+        this.selected = this.selected > 0 ? this.selected - 1 : len - 1;
+        this.render();
+    }
+    onDownKey() {
+        const len = this.opt.choices.realLength;
+        this.selected = this.selected < len - 1 ? this.selected + 1 : 0;
+        this.render();
+    }
+    onLeftKey() {
+        if (this.offsetX >= 0)
+            return;
+        this.offsetX += 4;
+        this.render();
+    }
+    onRightKey() {
+        if (this.offsetX <= -200)
+            return;
+        this.offsetX -= 4;
+        this.render();
+    }
+    onNumberKey(input) {
+        if (input <= this.opt.choices.realLength) {
+            this.selected = input - 1;
+        }
+        this.render();
+    }
+}
+exports.default = TimelinePrompt;
+function applyOffset(line, offsetX, width) {
+    if (offsetX < 0) {
+        const regex = new RegExp('(?:(?:\\033[[0-9;]*m)*.?){1,' + Math.abs(offsetX) + '}');
+        // Real line length with Escape sequences (visual length)
+        const chunk = line.match(regex);
+        if (chunk) {
+            line = line.substr(chunk[0].length);
+        }
+    }
+    else
+        line = ' '.repeat(offsetX) + line;
+    // TODO : shift with Escape sequence when offsetX >= 0
+    return line.substr(0, width - 1);
+}
+function observeCustom(rl) {
+    var keypress = rxjs_1.fromEvent(rl.input, 'keypress', (value, key) => {
+        return { value: value, key: key || {} };
+    })
+        // Ignore `enter` key. On the readline, we only care about the `line` event.
+        .pipe(operators_1.filter(({ key }) => key.name !== 'enter' && key.name !== 'return'));
+    return {
+        normalizedLeftKey: keypress.pipe(operators_1.filter(({ key }) => key.name === 'left'), operators_1.share()),
+        normalizedRightKey: keypress.pipe(operators_1.filter(({ key }) => key.name === 'right'), operators_1.share()),
+    };
+}

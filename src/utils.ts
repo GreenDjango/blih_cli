@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import fs from 'fs'
 import { exec } from 'child_process'
 import { homedir } from 'os'
+import { Timeline } from './timeline_api'
 
 const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
 const CONFIG_FILE = '.cli_data.json'
@@ -60,6 +61,7 @@ export class ConfigType {
 	private _contact: string[]
 	private _colors: { info: string }
 	public args: string[] | undefined
+	public timelines: Timeline[]
 	public repo: string[]
 
 	constructor() {
@@ -74,6 +76,7 @@ export class ConfigType {
 		this._contact = []
 		this._colors = COLORS
 		this.args = undefined
+		this.timelines = []
 		this.repo = []
 	}
 
@@ -126,7 +129,7 @@ export class ConfigType {
 	set spinner_name(spinner_name: string) {
 		if (typeof spinner_name !== 'string') return
 		if (!spinner_names.has(spinner_name)) {
-			console.error(`Config error: '${spinner_name}' is not a valid spinner_name`)
+			print_message(`Config error: '${spinner_name}' is not a valid spinner_name`, '', 'fail')
 			return
 		}
 		this._spinner_name = spinner_name

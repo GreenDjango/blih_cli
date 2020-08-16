@@ -17,6 +17,7 @@ import {
 import { git_menu } from './git_menu'
 import { repo_menu, create_repo, change_acl } from './repository_menu'
 import { key_menu } from './key_menu'
+import { timeline_menu } from './timeline_menu'
 import { options_menu } from './options_menu'
 
 export const run = async () => {
@@ -50,6 +51,7 @@ export const run = async () => {
 		'Git clone',
 		'Repositories management',
 		'Keys management',
+		'Timeline explorer',
 		'Contacts list',
 		'Options',
 		'Exit',
@@ -68,12 +70,15 @@ export const run = async () => {
 				await key_menu(api)
 				break
 			case choices[3]:
-				await show_contact(config)
+				await timeline_menu(config)
 				break
 			case choices[4]:
-				await options_menu(config)
+				await show_contact(config)
 				break
 			case choices[5]:
+				await options_menu(config)
+				break
+			case choices[6]:
 			default:
 				should_quit = true
 		}

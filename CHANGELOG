@@ -3,6 +3,7 @@ blih_cli 1.0.0
 
 What's in?
 - Add spinners selection in option
+- Add new menu : Timeline explorer, where can see Epitech projects of the year
 - Check update at launch (can be disable in option)
 - Fix missing flag (-u, etc...) for debug build
 - Update Dependencies

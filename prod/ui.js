@@ -31,13 +31,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clear_line = exports.ctext = exports.ask_spinner = exports.ask_input = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list = void 0;
+exports.clear_line = exports.ctext = exports.ask_timeline = exports.ask_spinner = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list_index = exports.ask_list = exports.ask_input = void 0;
 const inquirer = __importStar(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
 const utils_1 = require("./utils");
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'));
-inquirer.registerPrompt('listspinner', require('./inquirer_plugins').default);
+inquirer.registerPrompt('listspinner', require('./inquirer_plugins/ListSpinnerPrompt').default);
+inquirer.registerPrompt('timeline', require('./inquirer_plugins/TimelinePrompt').default);
+function ask_input(message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const prompted = yield inquirer.prompt([
+            {
+                type: 'input',
+                name: 'input',
+                message: message || '>',
+            },
+        ]);
+        is_verbose();
+        return prompted.input;
+    });
+}
+exports.ask_input = ask_input;
 function ask_list(choices, message, return_index) {
     return __awaiter(this, void 0, void 0, function* () {
         const prompted = yield inquirer.prompt([
@@ -60,6 +75,22 @@ function ask_list(choices, message, return_index) {
     });
 }
 exports.ask_list = ask_list;
+function ask_list_index(choices, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const prompted = yield inquirer.prompt([
+            {
+                type: 'list',
+                choices: choices,
+                name: 'list',
+                message: message || '>',
+                pageSize: 10,
+            },
+        ]);
+        is_verbose();
+        return prompted.list;
+    });
+}
+exports.ask_list_index = ask_list_index;
 function ask_password() {
     return __awaiter(this, void 0, void 0, function* () {
         const prompted = yield inquirer.prompt([
@@ -181,20 +212,6 @@ function ask_path(message, filter, path, depth, folder) {
     });
 }
 exports.ask_path = ask_path;
-function ask_input(message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const prompted = yield inquirer.prompt([
-            {
-                type: 'input',
-                name: 'input',
-                message: message || '>',
-            },
-        ]);
-        is_verbose();
-        return prompted.input;
-    });
-}
-exports.ask_input = ask_input;
 function ask_spinner(choices, message) {
     return __awaiter(this, void 0, void 0, function* () {
         const prompted = yield inquirer.prompt([
@@ -211,6 +228,37 @@ function ask_spinner(choices, message) {
     });
 }
 exports.ask_spinner = ask_spinner;
+function ask_timeline(choices, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const new_choices = [];
+        // Group all project whith the same module together
+        choices.forEach((choice) => {
+            const idx = new_choices.findIndex((value2) => value2.module === choice.module);
+            if (idx >= 0)
+                new_choices[idx].projects.push({
+                    project: choice.project,
+                    start: choice.start,
+                    end: choice.end,
+                });
+            else
+                new_choices.push({
+                    module: choice.module,
+                    projects: [{ project: choice.project, start: choice.start, end: choice.end }],
+                });
+        });
+        const prompted = yield inquirer.prompt([
+            {
+                type: 'timeline',
+                name: 'timeline',
+                choices: new_choices,
+                message: message || '>',
+                pageSize: 9,
+            },
+        ]);
+        return prompted.listspinner;
+    });
+}
+exports.ask_timeline = ask_timeline;
 function ctext(string) {
     const spaces = Math.floor(process.stdout.getWindowSize()[0] / 2 - string.length / 2);
     return Array(spaces + 1).join(' ') + string;

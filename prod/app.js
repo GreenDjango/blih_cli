@@ -23,6 +23,7 @@ const utils_1 = require("./utils");
 const git_menu_1 = require("./git_menu");
 const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
+const timeline_menu_1 = require("./timeline_menu");
 const options_menu_1 = require("./options_menu");
 exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
     process.title = 'blih cli';
@@ -56,6 +57,7 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
         'Git clone',
         'Repositories management',
         'Keys management',
+        'Timeline explorer',
         'Contacts list',
         'Options',
         'Exit',
@@ -73,12 +75,15 @@ exports.run = () => __awaiter(void 0, void 0, void 0, function* () {
                 yield key_menu_1.key_menu(api);
                 break;
             case choices[3]:
-                yield show_contact(config);
+                yield timeline_menu_1.timeline_menu(config);
                 break;
             case choices[4]:
-                yield options_menu_1.options_menu(config);
+                yield show_contact(config);
                 break;
             case choices[5]:
+                yield options_menu_1.options_menu(config);
+                break;
+            case choices[6]:
             default:
                 should_quit = true;
         }
