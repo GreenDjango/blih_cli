@@ -19,8 +19,7 @@ or `sudo dnf install nodejs` for fedora)
 2. `sudo sh blih_cli/install.sh`
 3. `rm -rf blih_cli/`
 
-Enjoy with `blih_cli` !
-Optional: add `alias my_name="blih_cli"` in .bashrc file
+Enjoy with `blih_cli` or `bcli` !<br>Optional: add `alias my_name="blih_cli"` in .bashrc file
 
 ## 🔄 Update
 
