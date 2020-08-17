@@ -6,7 +6,7 @@
 		"outDir": "build",
 		"strict": true,
 		"resolveJsonModule": true,
-		"target": "es2015",
+		"target": "es2019",
 		"esModuleInterop": true
 	},
 	"compileOnSave": true,

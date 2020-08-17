@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -223,22 +214,20 @@ function parse_config(config) {
     new_config.addListener(write_config);
     return new_config;
 }
-function write_config(config_info) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (config_info && !config_info.save_token) {
-            config_info.token = undefined;
+async function write_config(config_info) {
+    if (config_info && !config_info.save_token) {
+        config_info.token = undefined;
+    }
+    try {
+        if (!fs_1.default.existsSync(CONFIG_FOLDER)) {
+            fs_1.default.mkdirSync(CONFIG_FOLDER, { recursive: true });
         }
-        try {
-            if (!fs_1.default.existsSync(CONFIG_FOLDER)) {
-                fs_1.default.mkdirSync(CONFIG_FOLDER, { recursive: true });
-            }
-            const config_json = JSON.stringify(config_info, undefined, 4);
-            fs_1.default.writeFileSync(CONFIG_PATH, config_json, 'utf8');
-        }
-        catch (err) {
-            print_message('Fail to save config file', err, 'error');
-        }
-    });
+        const config_json = JSON.stringify(config_info, undefined, 4);
+        fs_1.default.writeFileSync(CONFIG_PATH, config_json, 'utf8');
+    }
+    catch (err) {
+        print_message('Fail to save config file', err, 'error');
+    }
 }
 exports.write_config = write_config;
 function print_message(title, message, level) {
@@ -266,36 +255,32 @@ function print_message(title, message, level) {
     }
 }
 exports.print_message = print_message;
-function sh(cmd) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            child_process_1.exec(cmd, (err, stdout, stderr) => {
-                if (err)
-                    reject(err);
-                else
-                    resolve({ stdout, stderr });
-            });
+async function sh(cmd) {
+    return new Promise(function (resolve, reject) {
+        child_process_1.exec(cmd, (err, stdout, stderr) => {
+            if (err)
+                reject(err);
+            else
+                resolve({ stdout, stderr });
         });
     });
 }
 exports.sh = sh;
-function sh_live(cmd) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            var _a, _b;
-            const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
-                if (err)
-                    reject(err);
-                else
-                    resolve({ stdout, stderr });
-            });
-            //process.stdin?.on()
-            (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
-                process.stdout.write(data);
-            });
-            (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
-                process.stderr.write(data);
-            });
+async function sh_live(cmd) {
+    return new Promise(function (resolve, reject) {
+        var _a, _b;
+        const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
+            if (err)
+                reject(err);
+            else
+                resolve({ stdout, stderr });
+        });
+        //process.stdin?.on()
+        (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
+            process.stdout.write(data);
+        });
+        (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
+            process.stderr.write(data);
         });
     });
 }
@@ -308,23 +293,21 @@ function resolveAfter(x) {
     });
 }
 exports.resolveAfter = resolveAfter;
-function get_app_version() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            if (exports.IS_DEBUG) {
-                const res = yield sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`);
-                return res.stdout.split('\n')[0] || 'v0.0.0';
-            }
-            else {
-                const package_file = fs_1.default.readFileSync(PACKAGE_PATH, 'utf8');
-                const package_obj = JSON.parse(package_file);
-                return 'v' + (package_obj === null || package_obj === void 0 ? void 0 : package_obj.version);
-            }
+async function get_app_version() {
+    try {
+        if (exports.IS_DEBUG) {
+            const res = await sh(`cd ${__dirname}; git show --format="%H" --no-patch | git describe --tags`);
+            return res.stdout.split('\n')[0] || 'v0.0.0';
         }
-        catch (err) {
-            return 'v0.0.0';
+        else {
+            const package_file = fs_1.default.readFileSync(PACKAGE_PATH, 'utf8');
+            const package_obj = JSON.parse(package_file);
+            return 'v' + (package_obj === null || package_obj === void 0 ? void 0 : package_obj.version);
         }
-    });
+    }
+    catch (err) {
+        return 'v0.0.0';
+    }
 }
 function get_is_debug_build() {
     return fs_1.default.existsSync(`${__dirname}/../.npmignore`);
