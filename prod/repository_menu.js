@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.change_acl = exports.create_repo = exports.repo_menu = void 0;
+exports.acl_menu = exports.create_repo = exports.repo_menu = void 0;
 const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const ui_1 = require("./ui");
@@ -38,7 +38,7 @@ function repo_menu(api, config) {
                     yield delete_repo(api, config);
                     break;
                 case choices[3]:
-                    yield change_acl(api, config);
+                    yield acl_menu(api, config);
                     break;
                 case choices[4]:
                     yield show_repo(api, config);
@@ -64,7 +64,7 @@ function create_repo(api, config, repo_name) {
                 res = yield api.setACL(input, 'ramassage-tek', 'r');
                 spinner.succeed(chalk_1.default.green(res + ' (ramassage-tek)'));
             }
-            yield change_acl(api, config, input);
+            yield acl_menu(api, config, input);
             if (yield ui_1.ask_question(`Git clone ${input} ?`))
                 yield git_menu_1.clone_repo(api, input, config.email);
         }
@@ -93,22 +93,22 @@ function delete_repo(api, config) {
         }
     });
 }
-function change_acl(api, config, repo_name) {
+function acl_menu(api, config, repo_name) {
     return __awaiter(this, void 0, void 0, function* () {
-        const to_acl = repo_name || (yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true));
-        if (to_acl === '↵ Back')
+        const repo = repo_name || (yield ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true));
+        if (repo === '↵ Back')
             return;
         const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
         try {
-            let acl_list = yield api.getACL(to_acl);
+            let acl_list = (yield api.getACL(repo)).map((val) => to_ACL(val));
             spinner.stop();
-            let acl = yield acl_menu(acl_list, config);
+            let acl = yield change_acl(acl_list, config);
             while (acl) {
                 spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
-                const res = yield api.setACL(to_acl, acl.name, acl.rights);
-                acl_list = yield api.getACL(to_acl);
-                spinner.succeed(chalk_1.default.green(res) + ' ' + acl_to_string(acl));
-                acl = yield acl_menu(acl_list, config);
+                const res = yield api.setACL(repo, acl.name, acl.rights);
+                acl_list = (yield api.getACL(repo)).map((val) => to_ACL(val));
+                spinner.succeed(chalk_1.default.green(res) + ` ${acl.name} ${acl.rights_str}`);
+                acl = yield change_acl(acl_list, config);
             }
         }
         catch (err) {
@@ -116,18 +116,24 @@ function change_acl(api, config, repo_name) {
         }
     });
 }
-exports.change_acl = change_acl;
-function acl_menu(acl_list, config) {
+exports.acl_menu = acl_menu;
+function change_acl(acl_list, config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const ask = ['↵ Back', 'Add', ...acl_list.map((value) => acl_to_string(value))];
-        const idx = yield ui_1.ask_list(ask, 'Give ACL', true);
-        if (idx === '0')
+        const ask = [
+            { name: '↵ Back', value: undefined, short: '↵ Back' },
+            { name: 'Add', value: 'ADD', short: 'Add' },
+            ...acl_list.map((val) => {
+                const to_show = `${val.name} ${val.rights_str}`;
+                return { name: to_show, value: val, short: to_show };
+            }),
+        ];
+        const acl = yield ui_1.ask_list_index(ask, 'Give ACL');
+        if (!acl)
             return undefined;
-        if (idx === '1')
+        if (typeof acl === 'string')
             return yield ask_acl(config);
-        const acl = acl_list[+idx - 2];
-        acl.rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl), acl.name)).join('');
-        return acl;
+        const rights = (yield ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl.rights_bool, acl.name)).join('');
+        return to_ACL({ name: acl.name, rights });
     });
 }
 function ask_acl(config) {
@@ -138,20 +144,17 @@ function ask_acl(config) {
             config.contact.push(user);
             config.contact = config.contact;
         }
-        return { name: user, rights };
+        return to_ACL({ name: user, rights });
     });
 }
-function acl_to_string(acl) {
-    let rights = acl.rights[0] ? chalk_1.default.bold(acl.rights[0]) : '-';
-    rights += acl.rights[1] ? chalk_1.default.bold(acl.rights[1]) : '-';
-    rights += acl.rights[2] ? chalk_1.default.bold(acl.rights[2]) : '-';
-    return `${acl.name} ${rights}`;
-}
-function acl_to_bool(acl) {
-    const rights = [acl.rights[0] ? true : false];
-    rights.push(acl.rights[1] ? true : false);
-    rights.push(acl.rights[2] ? true : false);
-    return rights;
+function to_ACL(acl) {
+    const new_r = Object.assign(Object.assign({}, acl), { rights_bool: [acl.rights.includes('r'), acl.rights.includes('w'), acl.rights.includes('a')], rights_str: chalk_1.default.bold('deleted') });
+    if (new_r.rights_bool[0] || new_r.rights_bool[1] || new_r.rights_bool[2]) {
+        new_r.rights_str = new_r.rights_bool[0] ? chalk_1.default.bold('r') : '-';
+        new_r.rights_str += new_r.rights_bool[1] ? chalk_1.default.bold('w') : '-';
+        new_r.rights_str += new_r.rights_bool[2] ? chalk_1.default.bold('a') : '-';
+    }
+    return new_r;
 }
 function show_repo(api, config) {
     return __awaiter(this, void 0, void 0, function* () {

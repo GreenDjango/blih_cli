@@ -178,9 +178,9 @@ function fast_mode(api, config) {
         }
         else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
             if (config.args[2] === '-a')
-                yield repository_menu_1.change_acl(api, config, config.args[3]);
+                yield repository_menu_1.acl_menu(api, config, config.args[3]);
             else
-                yield repository_menu_1.change_acl(api, config, config.args[2].substr(6));
+                yield repository_menu_1.acl_menu(api, config, config.args[2].substr(6));
         }
         else
             show_help();

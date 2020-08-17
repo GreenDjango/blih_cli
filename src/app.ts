@@ -15,7 +15,7 @@ import {
 	sh_live,
 } from './utils'
 import { git_menu } from './git_menu'
-import { repo_menu, create_repo, change_acl } from './repository_menu'
+import { repo_menu, create_repo, acl_menu } from './repository_menu'
 import { key_menu } from './key_menu'
 import { timeline_menu } from './timeline_menu'
 import { options_menu } from './options_menu'
@@ -166,8 +166,8 @@ async function fast_mode(api: BlihApi, config: ConfigType) {
 	} else if (config.args[2] === '-c') {
 		await create_repo(api, config, config.args[3])
 	} else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
-		if (config.args[2] === '-a') await change_acl(api, config, config.args[3])
-		else await change_acl(api, config, config.args[2].substr(6))
+		if (config.args[2] === '-a') await acl_menu(api, config, config.args[3])
+		else await acl_menu(api, config, config.args[2].substr(6))
 	} else show_help()
 }
 

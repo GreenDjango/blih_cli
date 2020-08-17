@@ -1,11 +1,11 @@
 import ora from 'ora'
 import chalk from 'chalk'
-import { BlihApi } from './blih_api'
-import { ask_list, ask_question, ask_input, ask_qcm, ask_autocomplete } from './ui'
+import { BlihApi, ACL } from './blih_api'
+import { ask_list, ask_list_index, ask_question, ask_input, ask_qcm, ask_autocomplete } from './ui'
 import { ConfigType, clor, WAIT_MSG } from './utils'
 import { clone_repo } from './git_menu'
 
-type ACLType = { name: string; rights: string }
+type ACLType = ACL & { rights_bool: boolean[]; rights_str: string }
 
 export async function repo_menu(api: BlihApi, config: ConfigType) {
 	let should_quit = false
@@ -27,7 +27,7 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 				await delete_repo(api, config)
 				break
 			case choices[3]:
-				await change_acl(api, config)
+				await acl_menu(api, config)
 				break
 			case choices[4]:
 				await show_repo(api, config)
@@ -51,7 +51,7 @@ export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: 
 			res = await api.setACL(input, 'ramassage-tek', 'r')
 			spinner.succeed(chalk.green(res + ' (ramassage-tek)'))
 		}
-		await change_acl(api, config, input)
+		await acl_menu(api, config, input)
 		if (await ask_question(`Git clone ${input} ?`)) await clone_repo(api, input, config.email)
 	} catch (err) {
 		spinner.fail(chalk.red(err))
@@ -75,41 +75,48 @@ async function delete_repo(api: BlihApi, config: ConfigType) {
 	}
 }
 
-export async function change_acl(api: BlihApi, config: ConfigType, repo_name?: string) {
-	const to_acl = repo_name || (await ask_autocomplete(['↵ Back', ...config.repo], undefined, true))
-	if (to_acl === '↵ Back') return
+export async function acl_menu(api: BlihApi, config: ConfigType, repo_name?: string) {
+	const repo = repo_name || (await ask_autocomplete(['↵ Back', ...config.repo], undefined, true))
+	if (repo === '↵ Back') return
 	const spinner = ora().start(chalk.green(WAIT_MSG))
 
 	try {
-		let acl_list = await api.getACL(to_acl)
+		let acl_list = (await api.getACL(repo)).map((val) => to_ACL(val))
 		spinner.stop()
-		let acl = await acl_menu(acl_list, config)
+		let acl = await change_acl(acl_list, config)
 		while (acl) {
 			spinner.start(chalk.green(WAIT_MSG))
-			const res = await api.setACL(to_acl, acl.name, acl.rights)
-			acl_list = await api.getACL(to_acl)
-			spinner.succeed(chalk.green(res) + ' ' + acl_to_string(acl))
-			acl = await acl_menu(acl_list, config)
+			const res = await api.setACL(repo, acl.name, acl.rights)
+			acl_list = (await api.getACL(repo)).map((val) => to_ACL(val))
+			spinner.succeed(chalk.green(res) + ` ${acl.name} ${acl.rights_str}`)
+			acl = await change_acl(acl_list, config)
 		}
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}
 }
 
-async function acl_menu(acl_list: ACLType[], config: ConfigType) {
-	const ask = ['↵ Back', 'Add', ...acl_list.map((value) => acl_to_string(value))]
-	const idx = await ask_list(ask, 'Give ACL', true)
+async function change_acl(acl_list: ACLType[], config: ConfigType) {
+	const ask = [
+		{ name: '↵ Back', value: undefined, short: '↵ Back' },
+		{ name: 'Add', value: 'ADD', short: 'Add' },
+		...acl_list.map((val) => {
+			const to_show = `${val.name} ${val.rights_str}`
+			return { name: to_show, value: val, short: to_show }
+		}),
+	] as { name: string; value: ACLType | string | undefined; short: string }[]
 
-	if (idx === '0') return undefined
-	if (idx === '1') return await ask_acl(config)
-	const acl = acl_list[+idx - 2]
-	acl.rights = (
-		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl_to_bool(acl), acl.name)
+	const acl = await ask_list_index(ask, 'Give ACL')
+	if (!acl) return undefined
+	if (typeof acl === 'string') return await ask_acl(config)
+
+	const rights = (
+		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl.rights_bool, acl.name)
 	).join('')
-	return acl
+	return to_ACL({ name: acl.name, rights })
 }
 
-async function ask_acl(config: ConfigType) {
+async function ask_acl(config: ConfigType): Promise<ACLType> {
 	const user = await ask_autocomplete(['ramassage-tek', ...config.contact], 'Enter new email')
 	const rights = (
 		await ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)
@@ -118,21 +125,21 @@ async function ask_acl(config: ConfigType) {
 		config.contact.push(user)
 		config.contact = config.contact
 	}
-	return { name: user, rights } as ACLType
+	return to_ACL({ name: user, rights })
 }
 
-function acl_to_string(acl: ACLType) {
-	let rights = acl.rights[0] ? chalk.bold(acl.rights[0]) : '-'
-	rights += acl.rights[1] ? chalk.bold(acl.rights[1]) : '-'
-	rights += acl.rights[2] ? chalk.bold(acl.rights[2]) : '-'
-	return `${acl.name} ${rights}`
-}
-
-function acl_to_bool(acl: ACLType) {
-	const rights = [acl.rights[0] ? true : false]
-	rights.push(acl.rights[1] ? true : false)
-	rights.push(acl.rights[2] ? true : false)
-	return rights
+function to_ACL(acl: ACL): ACLType {
+	const new_r = {
+		...acl,
+		rights_bool: [acl.rights.includes('r'), acl.rights.includes('w'), acl.rights.includes('a')],
+		rights_str: chalk.bold('deleted'),
+	}
+	if (new_r.rights_bool[0] || new_r.rights_bool[1] || new_r.rights_bool[2]) {
+		new_r.rights_str = new_r.rights_bool[0] ? chalk.bold('r') : '-'
+		new_r.rights_str += new_r.rights_bool[1] ? chalk.bold('w') : '-'
+		new_r.rights_str += new_r.rights_bool[2] ? chalk.bold('a') : '-'
+	}
+	return new_r
 }
 
 async function show_repo(api: BlihApi, config: ConfigType) {
