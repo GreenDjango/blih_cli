@@ -52,7 +52,7 @@ export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: 
 			spinner.succeed(chalk.green(res + ' (ramassage-tek)'))
 		}
 		await acl_menu(api, config, input)
-		if (await ask_question(`Git clone ${input} ?`)) await clone_repo(api, input, config.email)
+		if (await ask_question(`Git clone ${input} ?`)) await clone_repo(input, config.email)
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

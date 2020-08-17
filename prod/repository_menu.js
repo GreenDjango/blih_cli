@@ -54,7 +54,7 @@ async function create_repo(api, config, repo_name) {
         }
         await acl_menu(api, config, input);
         if (await ui_1.ask_question(`Git clone ${input} ?`))
-            await git_menu_1.clone_repo(api, input, config.email);
+            await git_menu_1.clone_repo(input, config.email);
     }
     catch (err) {
         spinner.fail(chalk_1.default.red(err));

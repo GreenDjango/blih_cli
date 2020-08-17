@@ -14,10 +14,10 @@ export async function git_menu(api: BlihApi, config: ConfigType) {
 
 		switch (choice) {
 			case choices[1]:
-				await clone_my_repo(api, config)
+				await clone_my_repo(config)
 				break
 			case choices[2]:
-				await clone_other_repo(api, config)
+				await clone_other_repo(config)
 				break
 			case choices[3]:
 				await clone_all_repo(api, config)
@@ -29,14 +29,14 @@ export async function git_menu(api: BlihApi, config: ConfigType) {
 	}
 }
 
-async function clone_my_repo(api: BlihApi, config: ConfigType) {
+async function clone_my_repo(config: ConfigType) {
 	const repo_name = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
 
 	if (repo_name === '↵ Back') return
-	await clone_repo(api, repo_name, config.email)
+	await clone_repo(repo_name, config.email)
 }
 
-async function clone_other_repo(api: BlihApi, config: ConfigType) {
+async function clone_other_repo(config: ConfigType) {
 	const repo_name = await ask_input('Repository name ?')
 	const email = await ask_autocomplete(config.contact, 'Enter repository email')
 
@@ -44,25 +44,26 @@ async function clone_other_repo(api: BlihApi, config: ConfigType) {
 		config.contact.push(email)
 		config.contact = config.contact
 	}
-	await clone_repo(api, repo_name, email)
+	await clone_repo(repo_name, email)
 }
 
-export async function clone_repo(api: BlihApi, repo_name: string, email: string) {
+export async function clone_repo(repo_name: string, email: string) {
+	const pwd = process.cwd()
 	const spinner = ora()
 	spinner.color = 'blue'
 
 	try {
-		let repo_path
-		if (!(await ask_question('Git clone here ?')))
-			repo_path = await ask_input('Repository destination:')
-		if (repo_path === '') return
-		if (repo_path && !fs.existsSync(repo_path)) {
-			if (await ask_question('Path not exist, create ?'))
-				fs.mkdirSync(repo_path, { recursive: true })
-			else return
+		if (!(await ask_question('Git clone here ?'))) {
+			const repo_path = await ask_input('Repository destination:')
+			if (repo_path === '') return
+			if (!fs.existsSync(repo_path)) {
+				if (await ask_question('Path not exist, create ?'))
+					fs.mkdirSync(repo_path, { recursive: true })
+				else return
+			}
 			process.chdir(repo_path)
 		}
-		spinner.start(chalk.green('Clone ') + clor.info(repo_name) + chalk.green(' repository...'))
+		spinner.start(chalk.green(`Clone '${clor.info(repo_name)}' repository...`))
 		await sh(`git clone git@git.epitech.eu:/${email}/${repo_name}`)
 		spinner.succeed(
 			chalk.green(`Repository ${process.cwd()}/`) + clor.info(repo_name) + chalk.green('/ clone')
@@ -70,9 +71,11 @@ export async function clone_repo(api: BlihApi, repo_name: string, email: string)
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}
+	process.chdir(pwd)
 }
 
 async function clone_all_repo(api: BlihApi, config: ConfigType) {
+	const pwd = process.cwd()
 	const spinner = ora()
 	spinner.color = 'blue'
 	spinner.start(chalk.green(WAIT_MSG))
@@ -81,25 +84,23 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 		const repo_list = await api.listRepositories()
 		spinner.stop()
 		const repo_nb = repo_list.length
-		let repo_path
-		if (!(await ask_question(`Git clone ${clor.info(repo_nb)} repositories here ?`)))
-			repo_path = await ask_input('Repository destination:')
-		if (repo_path && !fs.existsSync(repo_path)) {
-			if (await ask_question('Path not exist, create ?'))
-				fs.mkdirSync(repo_path, { recursive: true })
-			else return
+		if (!(await ask_question(`Git clone ${clor.info(repo_nb)} repositories here ?`))) {
+			const repo_path = await ask_input('Repository destination:')
+			if (repo_path === '') return
+			if (!fs.existsSync(repo_path)) {
+				if (await ask_question('Path not exist, create ?'))
+					fs.mkdirSync(repo_path, { recursive: true })
+				else return
+			}
+			process.chdir(repo_path)
 		}
-		const cd = repo_path ? `cd ${repo_path}; ` : ''
-
-		for (let idx = 0; idx < repo_nb; idx++) {
+		for (const [idx, repo] of repo_list.entries()) {
 			spinner.stop()
 			spinner.start(
-				chalk.green(
-					`(${idx}/${repo_nb}): Clone '${repo_list[idx].name}' in ${repo_path || process.cwd()}...`
-				)
+				chalk.green(`(${idx}/${repo_nb}): Clone '${clor.info(repo.name)}' in ${process.cwd()}...`)
 			)
 			try {
-				await sh(`${cd}git clone git@git.epitech.eu:/${config.email}/${repo_list[idx].name}`)
+				await sh(`git clone git@git.epitech.eu:/${config.email}/${repo.name}`)
 			} catch (err) {
 				spinner.fail(chalk.red(err))
 			}
@@ -108,4 +109,5 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}
+	process.chdir(pwd)
 }
