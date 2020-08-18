@@ -1,9 +1,8 @@
-import ora from 'ora'
 import chalk from 'chalk'
 import { homedir } from 'os'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_question, ask_path, ask_input } from './ui'
+import { ask_list, ask_question, ask_path, ask_input, spin } from './ui'
 import { clor, WAIT_MSG, sh } from './utils'
 
 const HOME_DIR = homedir()
@@ -33,8 +32,7 @@ export async function key_menu(api: BlihApi) {
 
 async function add_key(api: BlihApi) {
 	const new_ssh = await ask_question('Create new ssh key ?')
-	const spinner = ora()
-	spinner.color = 'blue'
+	const spinner = spin({ color: 'blue' })
 
 	try {
 		let path = ''
@@ -67,14 +65,13 @@ async function add_key(api: BlihApi) {
 }
 
 async function delete_key(api: BlihApi) {
-	const spinner = ora().start(chalk.green(WAIT_MSG))
-	spinner.color = 'blue'
+	const spinner = spin({ color: 'blue' }).start(chalk.green(WAIT_MSG))
 
 	try {
 		const key_list = await api.listKeys()
 		spinner.stop()
 		const choice = await ask_list(
-			['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))],
+			['↵ Back', ...key_list.map((value) => value.name + ' ...' + value.data.substr(-20))],
 			'Select a key'
 		)
 		if (choice === '↵ Back' || !(await ask_question('Are you sure ?'))) return
@@ -88,14 +85,13 @@ async function delete_key(api: BlihApi) {
 }
 
 async function show_key(api: BlihApi) {
-	const spinner = ora().start(chalk.green(WAIT_MSG))
-	spinner.color = 'blue'
+	const spinner = spin({ color: 'blue' }).start(chalk.green(WAIT_MSG))
 
 	try {
 		const key_list = await api.listKeys()
 		spinner.stop()
 		const idx = await ask_list(
-			['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))],
+			['↵ Back', ...key_list.map((value) => value.name + ' ...' + value.data.substr(-20))],
 			undefined,
 			true
 		)

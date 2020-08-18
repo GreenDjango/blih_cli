@@ -1,9 +1,11 @@
 import * as inquirer from 'inquirer'
 import chalk from 'chalk'
-import { VERBOSE } from './utils'
+import ora, { Options } from 'ora'
+import { VERBOSE, SPINNER } from './utils'
 import { Projects } from './timeline_api'
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
+inquirer.registerPrompt('path', require('./inquirer_plugins/PathPrompt').default)
 inquirer.registerPrompt('listspinner', require('./inquirer_plugins/ListSpinnerPrompt').default)
 inquirer.registerPrompt('timeline', require('./inquirer_plugins/TimelinePrompt').default)
 
@@ -154,7 +156,7 @@ export async function ask_path(
 				type: 'fuzzypath',
 				name: 'fuzzypath',
 				message: message || '>',
-				itemType: folder ? 'folder' : 'file',
+				itemType: folder === undefined ? undefined : folder ? 'directory' : 'file',
 				depthLimit: depth || 4,
 				rootPath: path ? path : undefined,
 				suggestOnly: true,
@@ -173,6 +175,27 @@ export async function ask_path(
 		if (!prompted.fuzzypath) console.log(chalk.yellow('Use tab for select'))
 	} while (!prompted.fuzzypath)
 	return prompted.fuzzypath as string
+}
+
+export async function ask_local_path(message?: string, path?: string, folder?: boolean) {
+	let prompted: any
+	do {
+		prompted = await inquirer.prompt([
+			{
+				type: 'path',
+				name: 'path',
+				message: message || '>',
+				itemType: folder === undefined ? undefined : folder ? 'directory' : 'file',
+				rootPath: path ? path : undefined,
+				suggestOnly: true,
+				excludePath: undefined,
+				excludeFilter: undefined,
+			},
+		])
+		is_verbose()
+		if (!prompted.path) console.log(chalk.yellow('Use tab for select'))
+	} while (!prompted.path)
+	return prompted.path as string
 }
 
 export async function ask_spinner(choices: string[], message?: string) {
@@ -236,4 +259,8 @@ export function clear_line(up_line?: boolean) {
 		process.stdout.moveCursor(0, -1)
 		process.stdout.clearLine(0)
 	}
+}
+
+export function spin(opt?: Options) {
+	return ora({ spinner: SPINNER as any, ...opt })
 }

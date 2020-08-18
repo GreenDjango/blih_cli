@@ -1,7 +1,14 @@
-import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi, ACL } from './blih_api'
-import { ask_list, ask_list_index, ask_question, ask_input, ask_qcm, ask_autocomplete } from './ui'
+import {
+	ask_list,
+	ask_list_index,
+	ask_question,
+	ask_input,
+	ask_qcm,
+	ask_autocomplete,
+	spin,
+} from './ui'
 import { ConfigType, clor, WAIT_MSG } from './utils'
 import { clone_repo } from './git_menu'
 
@@ -41,7 +48,7 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 
 export async function create_repo(api: BlihApi, config: ConfigType, repo_name?: string) {
 	const input = repo_name || (await ask_input('Repository name'))
-	const spinner = ora().start(chalk.green(WAIT_MSG))
+	const spinner = spin().start(chalk.green(WAIT_MSG))
 	try {
 		let res = await api.createRepository(input)
 		config.repo.push(input)
@@ -64,7 +71,7 @@ async function delete_repo(api: BlihApi, config: ConfigType) {
 	const valid = await ask_question(`Delete ${to_delete} ?`)
 
 	if (valid) {
-		const spinner = ora().start(chalk.green(WAIT_MSG))
+		const spinner = spin().start(chalk.green(WAIT_MSG))
 		try {
 			const res = await api.deleteRepository(to_delete)
 			config.repo = config.repo.filter((value) => value !== to_delete)
@@ -78,7 +85,7 @@ async function delete_repo(api: BlihApi, config: ConfigType) {
 export async function acl_menu(api: BlihApi, config: ConfigType, repo_name?: string) {
 	const repo = repo_name || (await ask_autocomplete(['↵ Back', ...config.repo], undefined, true))
 	if (repo === '↵ Back') return
-	const spinner = ora().start(chalk.green(WAIT_MSG))
+	const spinner = spin().start(chalk.green(WAIT_MSG))
 
 	try {
 		let acl_list = (await api.getACL(repo)).map((val) => to_ACL(val))
@@ -145,7 +152,7 @@ function to_ACL(acl: ACL): ACLType {
 async function show_repo(api: BlihApi, config: ConfigType) {
 	const repo = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
 	if (repo === '↵ Back') return
-	const spinner = ora().start(chalk.green(WAIT_MSG))
+	const spinner = spin().start(chalk.green(WAIT_MSG))
 
 	try {
 		const repo_info = await api.repositoryInfo(repo)

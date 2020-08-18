@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveAfter = exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.spinner_names = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = void 0;
+exports.resolveAfter = exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.spinner_names = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = exports.SPINNER = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = __importDefault(require("fs"));
 const child_process_1 = require("child_process");
@@ -13,6 +13,7 @@ const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
 const PACKAGE_PATH = `${__dirname}/../package.json`;
 let COLORS = { info: 'blue' };
+exports.SPINNER = 'dots';
 exports.IS_DEBUG = get_is_debug_build();
 exports.APP_VERSION = get_app_version();
 exports.WAIT_MSG = 'Process...';
@@ -53,7 +54,7 @@ class ConfigType {
         this._listen = undefined;
         this._email = '';
         this._token = '';
-        this._spinner_name = 'dots';
+        this._spinner_name = exports.SPINNER;
         this._save_token = false;
         this._auto_acl = true;
         this._verbose = true;
@@ -114,6 +115,7 @@ class ConfigType {
             print_message(`Config error: '${spinner_name}' is not a valid spinner_name`, '', 'fail');
             return;
         }
+        exports.SPINNER = spinner_name;
         this._spinner_name = spinner_name;
         this._triggerListener();
     }

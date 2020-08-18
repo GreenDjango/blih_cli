@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const os_1 = __importDefault(require("os"));
 const child_process_1 = require("child_process");
-const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const blih_api_1 = require("./blih_api");
 const ui_1 = require("./ui");
@@ -84,8 +83,7 @@ exports.run = async () => {
 async function login(config) {
     let api;
     let error = false;
-    const spinner = ora_1.default().start(chalk_1.default.green('Check Blih server...'));
-    spinner.color = 'blue';
+    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green('Check Blih server...'));
     try {
         let time = 0;
         if (!process.env.BLIH_CLI_CONFIG_SKIP)
@@ -211,7 +209,7 @@ async function parse_args(args) {
     }
 }
 function show_help() {
-    ora_1.default().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
+    ui_1.spin().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
 }
 function check_update(current) {
     if (os_1.default.type() === 'Linux' || os_1.default.type().match(/BSD$/)) {

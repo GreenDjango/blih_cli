@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.timeline_menu = void 0;
 const chalk_1 = __importDefault(require("chalk"));
-const ora_1 = __importDefault(require("ora"));
 const timeline_api_1 = require("./timeline_api");
 const ui_1 = require("./ui");
 const utils_1 = require("./utils");
@@ -34,8 +33,7 @@ async function timeline_menu(config) {
 }
 exports.timeline_menu = timeline_menu;
 async function fetch_timelines(config) {
-    const spinner = ora_1.default().start(chalk_1.default.green('Fetch timelines...'));
-    spinner.spinner = config.spinner_name;
+    const spinner = ui_1.spin().start(chalk_1.default.green('Fetch timelines...'));
     const timelineApi = new timeline_api_1.TimelineApi();
     let error = 0;
     let errorMsg = '';

@@ -22,12 +22,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clear_line = exports.ctext = exports.ask_timeline = exports.ask_spinner = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list_index = exports.ask_list = exports.ask_input = void 0;
+exports.spin = exports.clear_line = exports.ctext = exports.ask_timeline = exports.ask_spinner = exports.ask_local_path = exports.ask_path = exports.ask_autocomplete = exports.ask_question = exports.ask_qcm = exports.ask_email = exports.ask_password = exports.ask_list_index = exports.ask_list = exports.ask_input = void 0;
 const inquirer = __importStar(require("inquirer"));
 const chalk_1 = __importDefault(require("chalk"));
+const ora_1 = __importDefault(require("ora"));
 const utils_1 = require("./utils");
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'));
+inquirer.registerPrompt('path', require('./inquirer_plugins/PathPrompt').default);
 inquirer.registerPrompt('listspinner', require('./inquirer_plugins/ListSpinnerPrompt').default);
 inquirer.registerPrompt('timeline', require('./inquirer_plugins/TimelinePrompt').default);
 async function ask_input(message) {
@@ -162,7 +164,7 @@ async function ask_path(message, filter, path, depth, folder) {
                 type: 'fuzzypath',
                 name: 'fuzzypath',
                 message: message || '>',
-                itemType: folder ? 'folder' : 'file',
+                itemType: folder === undefined ? undefined : folder ? 'directory' : 'file',
                 depthLimit: depth || 4,
                 rootPath: path ? path : undefined,
                 suggestOnly: true,
@@ -185,6 +187,28 @@ async function ask_path(message, filter, path, depth, folder) {
     return prompted.fuzzypath;
 }
 exports.ask_path = ask_path;
+async function ask_local_path(message, path, folder) {
+    let prompted;
+    do {
+        prompted = await inquirer.prompt([
+            {
+                type: 'path',
+                name: 'path',
+                message: message || '>',
+                itemType: folder === undefined ? undefined : folder ? 'directory' : 'file',
+                rootPath: path ? path : undefined,
+                suggestOnly: true,
+                excludePath: undefined,
+                excludeFilter: undefined,
+            },
+        ]);
+        is_verbose();
+        if (!prompted.path)
+            console.log(chalk_1.default.yellow('Use tab for select'));
+    } while (!prompted.path);
+    return prompted.path;
+}
+exports.ask_local_path = ask_local_path;
 async function ask_spinner(choices, message) {
     const prompted = await inquirer.prompt([
         {
@@ -245,3 +269,7 @@ function clear_line(up_line) {
     }
 }
 exports.clear_line = clear_line;
+function spin(opt) {
+    return ora_1.default({ spinner: utils_1.SPINNER, ...opt });
+}
+exports.spin = spin;

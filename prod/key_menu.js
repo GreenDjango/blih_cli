@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.key_menu = void 0;
-const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const os_1 = require("os");
 const fs_1 = __importDefault(require("fs"));
@@ -35,8 +34,7 @@ async function key_menu(api) {
 exports.key_menu = key_menu;
 async function add_key(api) {
     const new_ssh = await ui_1.ask_question('Create new ssh key ?');
-    const spinner = ora_1.default();
-    spinner.color = 'blue';
+    const spinner = ui_1.spin({ color: 'blue' });
     try {
         let path = '';
         if (new_ssh) {
@@ -69,12 +67,11 @@ async function add_key(api) {
     }
 }
 async function delete_key(api) {
-    const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
-    spinner.color = 'blue';
+    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const key_list = await api.listKeys();
         spinner.stop();
-        const choice = await ui_1.ask_list(['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))], 'Select a key');
+        const choice = await ui_1.ask_list(['↵ Back', ...key_list.map((value) => value.name + ' ...' + value.data.substr(-20))], 'Select a key');
         if (choice === '↵ Back' || !(await ui_1.ask_question('Are you sure ?')))
             return;
         const key = choice.split(' ')[0];
@@ -87,12 +84,11 @@ async function delete_key(api) {
     }
 }
 async function show_key(api) {
-    const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
-    spinner.color = 'blue';
+    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const key_list = await api.listKeys();
         spinner.stop();
-        const idx = await ui_1.ask_list(['↵ Back', ...key_list.map(value => value.name + ' ...' + value.data.substr(-20))], undefined, true);
+        const idx = await ui_1.ask_list(['↵ Back', ...key_list.map((value) => value.name + ' ...' + value.data.substr(-20))], undefined, true);
         if (idx === '0')
             return;
         const key = key_list[+idx - 1];

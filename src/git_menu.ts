@@ -1,8 +1,7 @@
-import ora from 'ora'
 import chalk from 'chalk'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_autocomplete, ask_question, ask_input } from './ui'
+import { ask_list, ask_autocomplete, ask_local_path, ask_question, ask_input, spin } from './ui'
 import { ConfigType, clor, sh, WAIT_MSG } from './utils'
 
 export async function git_menu(api: BlihApi, config: ConfigType) {
@@ -49,18 +48,12 @@ async function clone_other_repo(config: ConfigType) {
 
 export async function clone_repo(repo_name: string, email: string) {
 	const pwd = process.cwd()
-	const spinner = ora()
-	spinner.color = 'blue'
+	const spinner = spin({ color: 'blue' })
 
 	try {
 		if (!(await ask_question('Git clone here ?'))) {
-			const repo_path = await ask_input('Repository destination:')
-			if (repo_path === '') return
-			if (!fs.existsSync(repo_path)) {
-				if (await ask_question('Path not exist, create ?'))
-					fs.mkdirSync(repo_path, { recursive: true })
-				else return
-			}
+			const repo_path = await ask_path_for_clone()
+			if (!repo_path) return
 			process.chdir(repo_path)
 		}
 		spinner.start(chalk.green(`Clone '${clor.info(repo_name)}' repository...`))
@@ -76,22 +69,15 @@ export async function clone_repo(repo_name: string, email: string) {
 
 async function clone_all_repo(api: BlihApi, config: ConfigType) {
 	const pwd = process.cwd()
-	const spinner = ora()
-	spinner.color = 'blue'
-	spinner.start(chalk.green(WAIT_MSG))
+	const spinner = spin({ color: 'blue' }).start(chalk.green(WAIT_MSG))
 
 	try {
 		const repo_list = await api.listRepositories()
 		spinner.stop()
 		const repo_nb = repo_list.length
 		if (!(await ask_question(`Git clone ${clor.info(repo_nb)} repositories here ?`))) {
-			const repo_path = await ask_input('Repository destination:')
-			if (repo_path === '') return
-			if (!fs.existsSync(repo_path)) {
-				if (await ask_question('Path not exist, create ?'))
-					fs.mkdirSync(repo_path, { recursive: true })
-				else return
-			}
+			const repo_path = await ask_path_for_clone()
+			if (!repo_path) return
 			process.chdir(repo_path)
 		}
 		for (const [idx, repo] of repo_list.entries()) {
@@ -110,4 +96,14 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 		spinner.fail(chalk.red(err))
 	}
 	process.chdir(pwd)
+}
+
+async function ask_path_for_clone() {
+	const repo_path = await ask_local_path('Repository destination:', undefined, true)
+	if (repo_path === '') return undefined
+	if (!fs.existsSync(repo_path)) {
+		if (await ask_question('Path not exist, create ?')) fs.mkdirSync(repo_path, { recursive: true })
+		else return undefined
+	}
+	return repo_path
 }

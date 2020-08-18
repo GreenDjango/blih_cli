@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.acl_menu = exports.create_repo = exports.repo_menu = void 0;
-const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const ui_1 = require("./ui");
 const utils_1 = require("./utils");
@@ -42,7 +41,7 @@ async function repo_menu(api, config) {
 exports.repo_menu = repo_menu;
 async function create_repo(api, config, repo_name) {
     const input = repo_name || (await ui_1.ask_input('Repository name'));
-    const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         let res = await api.createRepository(input);
         config.repo.push(input);
@@ -67,7 +66,7 @@ async function delete_repo(api, config) {
         return;
     const valid = await ui_1.ask_question(`Delete ${to_delete} ?`);
     if (valid) {
-        const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
+        const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
         try {
             const res = await api.deleteRepository(to_delete);
             config.repo = config.repo.filter((value) => value !== to_delete);
@@ -82,7 +81,7 @@ async function acl_menu(api, config, repo_name) {
     const repo = repo_name || (await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true));
     if (repo === '↵ Back')
         return;
-    const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         let acl_list = (await api.getACL(repo)).map((val) => to_ACL(val));
         spinner.stop();
@@ -143,7 +142,7 @@ async function show_repo(api, config) {
     const repo = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
     if (repo === '↵ Back')
         return;
-    const spinner = ora_1.default().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const repo_info = await api.repositoryInfo(repo);
         const creation_date = new Date(0);

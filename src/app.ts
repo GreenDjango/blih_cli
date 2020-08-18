@@ -1,9 +1,8 @@
 import os from 'os'
 import { exec } from 'child_process'
-import ora from 'ora'
 import chalk from 'chalk'
 import { BlihApi } from './blih_api'
-import { ask_list, ask_email, ask_password, ask_question } from './ui'
+import { ask_list, ask_email, ask_password, ask_question, spin } from './ui'
 import {
 	ConfigType,
 	IS_DEBUG,
@@ -89,9 +88,8 @@ export const run = async () => {
 async function login(config: ConfigType) {
 	let api
 	let error = false
-	const spinner = ora().start(chalk.green('Check Blih server...'))
+	const spinner = spin({ color: 'blue' }).start(chalk.green('Check Blih server...'))
 
-	spinner.color = 'blue'
 	try {
 		let time = 0
 		if (!process.env.BLIH_CLI_CONFIG_SKIP) time = await BlihApi.ping()
@@ -206,7 +204,7 @@ async function parse_args(args: string[]) {
 }
 
 function show_help() {
-	ora().info(
+	spin().info(
 		clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`')
 	)
 }

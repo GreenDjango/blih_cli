@@ -9,6 +9,7 @@ const CONFIG_FILE = '.cli_data.json'
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`
 const PACKAGE_PATH = `${__dirname}/../package.json`
 let COLORS = { info: 'blue' }
+export let SPINNER = 'dots'
 export const IS_DEBUG = get_is_debug_build()
 export const APP_VERSION = get_app_version()
 export const WAIT_MSG = 'Process...'
@@ -68,7 +69,7 @@ export class ConfigType {
 		this._listen = undefined
 		this._email = ''
 		this._token = ''
-		this._spinner_name = 'dots'
+		this._spinner_name = SPINNER
 		this._save_token = false
 		this._auto_acl = true
 		this._verbose = true
@@ -132,6 +133,7 @@ export class ConfigType {
 			print_message(`Config error: '${spinner_name}' is not a valid spinner_name`, '', 'fail')
 			return
 		}
+		SPINNER = spinner_name
 		this._spinner_name = spinner_name
 		this._triggerListener()
 	}

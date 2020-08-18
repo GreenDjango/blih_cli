@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clone_repo = exports.git_menu = void 0;
-const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = __importDefault(require("fs"));
 const ui_1 = require("./ui");
@@ -48,19 +47,12 @@ async function clone_other_repo(config) {
 }
 async function clone_repo(repo_name, email) {
     const pwd = process.cwd();
-    const spinner = ora_1.default();
-    spinner.color = 'blue';
+    const spinner = ui_1.spin({ color: 'blue' });
     try {
         if (!(await ui_1.ask_question('Git clone here ?'))) {
-            const repo_path = await ui_1.ask_input('Repository destination:');
-            if (repo_path === '')
+            const repo_path = await ask_path_for_clone();
+            if (!repo_path)
                 return;
-            if (!fs_1.default.existsSync(repo_path)) {
-                if (await ui_1.ask_question('Path not exist, create ?'))
-                    fs_1.default.mkdirSync(repo_path, { recursive: true });
-                else
-                    return;
-            }
             process.chdir(repo_path);
         }
         spinner.start(chalk_1.default.green(`Clone '${utils_1.clor.info(repo_name)}' repository...`));
@@ -75,23 +67,15 @@ async function clone_repo(repo_name, email) {
 exports.clone_repo = clone_repo;
 async function clone_all_repo(api, config) {
     const pwd = process.cwd();
-    const spinner = ora_1.default();
-    spinner.color = 'blue';
-    spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const repo_list = await api.listRepositories();
         spinner.stop();
         const repo_nb = repo_list.length;
         if (!(await ui_1.ask_question(`Git clone ${utils_1.clor.info(repo_nb)} repositories here ?`))) {
-            const repo_path = await ui_1.ask_input('Repository destination:');
-            if (repo_path === '')
+            const repo_path = await ask_path_for_clone();
+            if (!repo_path)
                 return;
-            if (!fs_1.default.existsSync(repo_path)) {
-                if (await ui_1.ask_question('Path not exist, create ?'))
-                    fs_1.default.mkdirSync(repo_path, { recursive: true });
-                else
-                    return;
-            }
             process.chdir(repo_path);
         }
         for (const [idx, repo] of repo_list.entries()) {
@@ -110,4 +94,16 @@ async function clone_all_repo(api, config) {
         spinner.fail(chalk_1.default.red(err));
     }
     process.chdir(pwd);
+}
+async function ask_path_for_clone() {
+    const repo_path = await ui_1.ask_local_path('Repository destination:', undefined, true);
+    if (repo_path === '')
+        return undefined;
+    if (!fs_1.default.existsSync(repo_path)) {
+        if (await ui_1.ask_question('Path not exist, create ?'))
+            fs_1.default.mkdirSync(repo_path, { recursive: true });
+        else
+            return undefined;
+    }
+    return repo_path;
 }

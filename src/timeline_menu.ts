@@ -1,7 +1,6 @@
 import chalk from 'chalk'
-import ora from 'ora'
 import { TimelineApi } from './timeline_api'
-import { ask_list_index, ask_timeline } from './ui'
+import { ask_list_index, ask_timeline, spin } from './ui'
 import { ConfigType, print_message } from './utils'
 
 export async function timeline_menu(config: ConfigType) {
@@ -34,8 +33,7 @@ export async function timeline_menu(config: ConfigType) {
 }
 
 async function fetch_timelines(config: ConfigType) {
-	const spinner = ora().start(chalk.green('Fetch timelines...'))
-	spinner.spinner = config.spinner_name as any
+	const spinner = spin().start(chalk.green('Fetch timelines...'))
 
 	const timelineApi = new TimelineApi()
 	let error = 0
