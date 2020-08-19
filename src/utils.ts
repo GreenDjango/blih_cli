@@ -60,6 +60,7 @@ export class ConfigType {
 	private _verbose: boolean
 	private _check_update: boolean
 	private _contact: string[]
+	private _cloning_options: string[]
 	private _colors: { info: string }
 	public args: string[] | undefined
 	public timelines: Timeline[]
@@ -75,6 +76,7 @@ export class ConfigType {
 		this._verbose = true
 		this._check_update = true
 		this._contact = []
+		this._cloning_options = ['--depth=1']
 		this._colors = COLORS
 		this.args = undefined
 		this.timelines = []
@@ -91,6 +93,7 @@ export class ConfigType {
 			verbose: this.verbose,
 			check_update: this.check_update,
 			contact: this.contact,
+			cloning_options: this.cloning_options,
 			colors: this.colors,
 		}
 	}
@@ -174,7 +177,24 @@ export class ConfigType {
 		return this._contact
 	}
 	set contact(contact: string[]) {
+		if (typeof contact !== 'object') return
 		this._contact = contact
+		this._triggerListener()
+	}
+	get cloning_options() {
+		return this._cloning_options
+	}
+	set cloning_options(cloning_options: string[]) {
+		if (typeof cloning_options !== 'object') return
+		this._cloning_options = cloning_options.filter((val) => {
+			if (/[\$`|><;]/.test(val)) {
+				// prettier-ignore
+				print_message('Config error: ' + JSON.stringify(val) + ' contains banned characters. eg: $`|><;', '', 'fail')
+				return false
+			}
+			if (!val) return false
+			return true
+		})
 		this._triggerListener()
 	}
 	get colors() {
@@ -218,6 +238,7 @@ function parse_config(config: any) {
 	new_config.verbose = config?.verbose
 	new_config.check_update = config?.check_update
 	new_config.contact = config?.contact
+	new_config.cloning_options = config?.cloning_options
 	if (config?.colors) {
 		clor.getColorsKey().forEach((key) => {
 			if (colorsValue.has(config.colors[key])) {

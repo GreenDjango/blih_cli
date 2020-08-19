@@ -32,7 +32,7 @@ async function clone_my_repo(config: ConfigType) {
 	const repo_name = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
 
 	if (repo_name === '↵ Back') return
-	await clone_repo(repo_name, config.email)
+	await clone_repo(repo_name, config.email, config.cloning_options[0])
 }
 
 async function clone_other_repo(config: ConfigType) {
@@ -43,10 +43,10 @@ async function clone_other_repo(config: ConfigType) {
 		config.contact.push(email)
 		config.contact = config.contact
 	}
-	await clone_repo(repo_name, email)
+	await clone_repo(repo_name, email, config.cloning_options[0])
 }
 
-export async function clone_repo(repo_name: string, email: string) {
+export async function clone_repo(repo_name: string, email: string, clone_args?: string) {
 	const pwd = process.cwd()
 	const spinner = spin({ color: 'blue' })
 
@@ -57,7 +57,7 @@ export async function clone_repo(repo_name: string, email: string) {
 			process.chdir(repo_path)
 		}
 		spinner.start(chalk.green(`Clone '${clor.info(repo_name)}' repository...`))
-		await sh(`git clone git@git.epitech.eu:/${email}/${repo_name}`)
+		await sh(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`)
 		spinner.succeed(
 			chalk.green(`Repository ${process.cwd()}/`) + clor.info(repo_name) + chalk.green('/ clone')
 		)
@@ -85,8 +85,9 @@ async function clone_all_repo(api: BlihApi, config: ConfigType) {
 			spinner.start(
 				chalk.green(`(${idx}/${repo_nb}): Clone '${clor.info(repo.name)}' in ${process.cwd()}...`)
 			)
+			const clone_args = config.cloning_options[0] || ''
 			try {
-				await sh(`git clone git@git.epitech.eu:/${config.email}/${repo.name}`)
+				await sh(`git clone ${clone_args} git@git.epitech.eu:/${config.email}/${repo.name}`)
 			} catch (err) {
 				spinner.fail(chalk.red(err))
 			}

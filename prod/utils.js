@@ -60,6 +60,7 @@ class ConfigType {
         this._verbose = true;
         this._check_update = true;
         this._contact = [];
+        this._cloning_options = ['--depth=1'];
         this._colors = COLORS;
         this.args = undefined;
         this.timelines = [];
@@ -75,6 +76,7 @@ class ConfigType {
             verbose: this.verbose,
             check_update: this.check_update,
             contact: this.contact,
+            cloning_options: this.cloning_options,
             colors: this.colors,
         };
     }
@@ -160,7 +162,27 @@ class ConfigType {
         return this._contact;
     }
     set contact(contact) {
+        if (typeof contact !== 'object')
+            return;
         this._contact = contact;
+        this._triggerListener();
+    }
+    get cloning_options() {
+        return this._cloning_options;
+    }
+    set cloning_options(cloning_options) {
+        if (typeof cloning_options !== 'object')
+            return;
+        this._cloning_options = cloning_options.filter((val) => {
+            if (/[\$`|><;]/.test(val)) {
+                // prettier-ignore
+                print_message('Config error: ' + JSON.stringify(val) + ' contains banned characters. eg: $`|><;', '', 'fail');
+                return false;
+            }
+            if (!val)
+                return false;
+            return true;
+        });
         this._triggerListener();
     }
     get colors() {
@@ -205,6 +227,7 @@ function parse_config(config) {
     new_config.verbose = config === null || config === void 0 ? void 0 : config.verbose;
     new_config.check_update = config === null || config === void 0 ? void 0 : config.check_update;
     new_config.contact = config === null || config === void 0 ? void 0 : config.contact;
+    new_config.cloning_options = config === null || config === void 0 ? void 0 : config.cloning_options;
     if (config === null || config === void 0 ? void 0 : config.colors) {
         clor.getColorsKey().forEach((key) => {
             if (exports.colorsValue.has(config.colors[key])) {

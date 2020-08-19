@@ -34,7 +34,7 @@ async function clone_my_repo(config) {
     const repo_name = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
     if (repo_name === '↵ Back')
         return;
-    await clone_repo(repo_name, config.email);
+    await clone_repo(repo_name, config.email, config.cloning_options[0]);
 }
 async function clone_other_repo(config) {
     const repo_name = await ui_1.ask_input('Repository name ?');
@@ -43,9 +43,9 @@ async function clone_other_repo(config) {
         config.contact.push(email);
         config.contact = config.contact;
     }
-    await clone_repo(repo_name, email);
+    await clone_repo(repo_name, email, config.cloning_options[0]);
 }
-async function clone_repo(repo_name, email) {
+async function clone_repo(repo_name, email, clone_args) {
     const pwd = process.cwd();
     const spinner = ui_1.spin({ color: 'blue' });
     try {
@@ -56,7 +56,7 @@ async function clone_repo(repo_name, email) {
             process.chdir(repo_path);
         }
         spinner.start(chalk_1.default.green(`Clone '${utils_1.clor.info(repo_name)}' repository...`));
-        await utils_1.sh(`git clone git@git.epitech.eu:/${email}/${repo_name}`);
+        await utils_1.sh(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`);
         spinner.succeed(chalk_1.default.green(`Repository ${process.cwd()}/`) + utils_1.clor.info(repo_name) + chalk_1.default.green('/ clone'));
     }
     catch (err) {
@@ -81,8 +81,9 @@ async function clone_all_repo(api, config) {
         for (const [idx, repo] of repo_list.entries()) {
             spinner.stop();
             spinner.start(chalk_1.default.green(`(${idx}/${repo_nb}): Clone '${utils_1.clor.info(repo.name)}' in ${process.cwd()}...`));
+            const clone_args = config.cloning_options[0] || '';
             try {
-                await utils_1.sh(`git clone git@git.epitech.eu:/${config.email}/${repo.name}`);
+                await utils_1.sh(`git clone ${clone_args} git@git.epitech.eu:/${config.email}/${repo.name}`);
             }
             catch (err) {
                 spinner.fail(chalk_1.default.red(err));

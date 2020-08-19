@@ -18,6 +18,7 @@ async function options_menu(config) {
             `Check update at launch: ${config.check_update ? chalk_1.default.green.bold('✔') : chalk_1.default.red.bold('✗')}`,
             `Colors option`,
             `Spinner option`,
+            `Cloning options`,
             'Reset all contact',
         ];
         const choice = await ui_1.ask_list(choices, 'You want options ?');
@@ -41,6 +42,9 @@ async function options_menu(config) {
                 await spinner_option(config);
                 break;
             case choices[7]:
+                await cloning_options(config);
+                break;
+            case choices[8]:
                 const valid = await ui_1.ask_question(`Are you sure ?`);
                 if (valid)
                     config.contact = [];
@@ -84,4 +88,36 @@ async function spinner_option(config) {
     const new_spinner = await ui_1.ask_spinner(['↵ Back', ...utils_1.spinner_names], `Current spinner '${config.spinner_name}', new :`);
     if (new_spinner !== '↵ Back')
         config.spinner_name = new_spinner;
+}
+async function cloning_options(config) {
+    while (1) {
+        const choice = await ui_1.ask_list_index([
+            { name: '↵ Back', value: undefined },
+            { name: 'Add preset', value: -1 },
+            ...config.cloning_options.map((val, idx) => {
+                if (!idx)
+                    return { name: chalk_1.default.bold(`default: ${JSON.stringify(val)}`), value: idx };
+                return { name: `${idx}) ${JSON.stringify(val)}`, value: idx };
+            }),
+        ]);
+        if (typeof choice !== 'number')
+            break;
+        if (choice === -1)
+            config.cloning_options = [...config.cloning_options, await ui_1.ask_input('New preset')];
+        else {
+            const choice2 = await ui_1.ask_list(['↵ Back', 'Set by default', 'Erase']);
+            if (choice2 === '↵ Back') {
+                1;
+            }
+            else if (choice2 === 'Set by default' && choice) {
+                const def = config.cloning_options[0];
+                config.cloning_options[0] = config.cloning_options[choice];
+                config.cloning_options[choice] = def;
+            }
+            else if (choice2 === 'Erase' && (await ui_1.ask_question(`Are you sure ?`))) {
+                config.cloning_options.splice(choice, 1);
+                config.cloning_options = config.cloning_options;
+            }
+        }
+    }
 }

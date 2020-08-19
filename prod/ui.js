@@ -68,7 +68,11 @@ async function ask_list_index(choices, message) {
     const prompted = await inquirer.prompt([
         {
             type: 'list',
-            choices: choices,
+            choices: choices.map((val) => {
+                if (!val.short)
+                    val.short = val.name;
+                return val;
+            }),
             name: 'list',
             message: message || '>',
             pageSize: 10,

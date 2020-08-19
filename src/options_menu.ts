@@ -1,5 +1,12 @@
 import chalk from 'chalk'
-import { ask_list, ask_question, ask_autocomplete, ask_spinner } from './ui'
+import {
+	ask_input,
+	ask_list,
+	ask_list_index,
+	ask_question,
+	ask_autocomplete,
+	ask_spinner,
+} from './ui'
 import { ConfigType, clor, colorsValue, spinner_names } from './utils'
 
 export async function options_menu(config: ConfigType) {
@@ -16,6 +23,7 @@ export async function options_menu(config: ConfigType) {
 			}`,
 			`Colors option`,
 			`Spinner option`,
+			`Cloning options`,
 			'Reset all contact',
 		]
 		const choice = await ask_list(choices, 'You want options ?')
@@ -39,6 +47,9 @@ export async function options_menu(config: ConfigType) {
 				await spinner_option(config)
 				break
 			case choices[7]:
+				await cloning_options(config)
+				break
+			case choices[8]:
 				const valid = await ask_question(`Are you sure ?`)
 				if (valid) config.contact = []
 				break
@@ -86,4 +97,36 @@ async function spinner_option(config: ConfigType) {
 		`Current spinner '${config.spinner_name}', new :`
 	)
 	if (new_spinner !== '↵ Back') config.spinner_name = new_spinner
+}
+
+async function cloning_options(config: ConfigType) {
+	while (1) {
+		const choice = await ask_list_index([
+			{ name: '↵ Back', value: undefined },
+			{ name: 'Add preset', value: -1 },
+			...config.cloning_options.map((val, idx) => {
+				if (!idx) return { name: chalk.bold(`default: ${JSON.stringify(val)}`), value: idx }
+				return { name: `${idx}) ${JSON.stringify(val)}`, value: idx }
+			}),
+		])
+
+		if (typeof choice !== 'number') break
+
+		if (choice === -1)
+			config.cloning_options = [...config.cloning_options, await ask_input('New preset')]
+		else {
+			const choice2 = await ask_list(['↵ Back', 'Set by default', 'Erase'])
+
+			if (choice2 === '↵ Back') {
+				1
+			} else if (choice2 === 'Set by default' && choice) {
+				const def = config.cloning_options[0]
+				config.cloning_options[0] = config.cloning_options[choice]
+				config.cloning_options[choice] = def
+			} else if (choice2 === 'Erase' && (await ask_question(`Are you sure ?`))) {
+				config.cloning_options.splice(choice, 1)
+				config.cloning_options = config.cloning_options
+			}
+		}
+	}
 }

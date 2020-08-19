@@ -41,13 +41,16 @@ export async function ask_list(choices: string[], message?: string, return_index
 }
 
 export async function ask_list_index<T>(
-	choices: { name: string; value: T; short: string }[],
+	choices: { name: string; value: T; short?: string }[],
 	message?: string
 ) {
 	const prompted: any = await inquirer.prompt([
 		{
 			type: 'list',
-			choices: choices,
+			choices: choices.map((val) => {
+				if (!val.short) val.short = val.name
+				return val
+			}),
 			name: 'list',
 			message: message || '>',
 			pageSize: 10,
