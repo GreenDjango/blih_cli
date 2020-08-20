@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import fs from 'fs'
 import { BlihApi } from './blih_api'
 import { ask_list, ask_autocomplete, ask_local_path, ask_question, ask_input, spin } from './ui'
-import { ConfigType, clor, sh, WAIT_MSG } from './utils'
+import { ConfigType, clor, sh, sh_live, WAIT_MSG } from './utils'
 
 export async function git_menu(api: BlihApi, config: ConfigType) {
 	let should_quit = false
@@ -56,8 +56,10 @@ export async function clone_repo(repo_name: string, email: string, clone_args?: 
 			if (!repo_path) return
 			process.chdir(repo_path)
 		}
-		spinner.start(chalk.green(`Clone '${clor.info(repo_name)}' repository...`))
-		await sh(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`)
+		spinner.text = chalk.green(`Clone '${clor.info(repo_name)}' repository...`)
+		// TODO : start spinner if ssh fingerprint isn't ask, (cf: dead lock with spinner because ssh print in /dev/tty)
+		console.log(spinner.frame())
+		await sh_live(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`)
 		spinner.succeed(
 			chalk.green(`Repository ${process.cwd()}/`) + clor.info(repo_name) + chalk.green('/ clone')
 		)

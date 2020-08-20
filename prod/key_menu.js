@@ -12,7 +12,13 @@ const utils_1 = require("./utils");
 const HOME_DIR = os_1.homedir();
 async function key_menu(api) {
     let should_quit = false;
-    const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list'];
+    const choices = [
+        '↵ Back',
+        'Add key',
+        'Delete key',
+        'Show keys list',
+        'Add Epitech to known hosts',
+    ];
     while (!should_quit) {
         const choice = await ui_1.ask_list(choices, 'Manage your SSH keys');
         switch (choice) {
@@ -24,6 +30,9 @@ async function key_menu(api) {
                 break;
             case choices[3]:
                 await show_key(api);
+                break;
+            case choices[4]:
+                await add_host();
                 break;
             case choices[0]:
             default:
@@ -93,6 +102,16 @@ async function show_key(api) {
             return;
         const key = key_list[+idx - 1];
         spinner.info(utils_1.clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`));
+    }
+    catch (err) {
+        spinner.fail(chalk_1.default.red(err));
+    }
+}
+async function add_host() {
+    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
+    try {
+        await utils_1.sh('ssh -o StrictHostKeyChecking=no git@git.epitech.eu uptime; [ 128 = $? ]');
+        spinner.succeed(chalk_1.default.green("'git.epitech.eu' add to known hosts"));
     }
     catch (err) {
         spinner.fail(chalk_1.default.red(err));

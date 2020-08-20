@@ -302,12 +302,29 @@ export async function sh_live(cmd: string): Promise<{ stdout: string; stderr: st
 			if (err) reject(err)
 			else resolve({ stdout, stderr })
 		})
-		//process.stdin?.on()
+		child.stdout?.pipe(process.stdout)
+		child.stderr?.pipe(process.stderr)
+	})
+}
+
+export async function sh_callback(
+	cmd: string,
+	callback?: (std: 'stdin' | 'stdout' | 'stderr', data: string) => any
+): Promise<{ stdout: string; stderr: string }> {
+	return new Promise(function (resolve, reject) {
+		const child = exec(cmd, (err, stdout, stderr) => {
+			if (err) reject(err)
+			else resolve({ stdout, stderr })
+		})
+
+		child.stdin?.on('data', (data) => {
+			if (callback) callback('stdin', data)
+		})
 		child.stdout?.on('data', (data) => {
-			process.stdout.write(data)
+			if (callback) callback('stdout', data)
 		})
 		child.stderr?.on('data', (data) => {
-			process.stderr.write(data)
+			if (callback) callback('stderr', data)
 		})
 	})
 }

@@ -9,7 +9,13 @@ const HOME_DIR = homedir()
 
 export async function key_menu(api: BlihApi) {
 	let should_quit = false
-	const choices = ['↵ Back', 'Add key', 'Delete key', 'Show keys list']
+	const choices = [
+		'↵ Back',
+		'Add key',
+		'Delete key',
+		'Show keys list',
+		'Add Epitech to known hosts',
+	]
 
 	while (!should_quit) {
 		const choice = await ask_list(choices, 'Manage your SSH keys')
@@ -22,6 +28,9 @@ export async function key_menu(api: BlihApi) {
 				break
 			case choices[3]:
 				await show_key(api)
+				break
+			case choices[4]:
+				await add_host()
 				break
 			case choices[0]:
 			default:
@@ -98,6 +107,17 @@ async function show_key(api: BlihApi) {
 		if (idx === '0') return
 		const key = key_list[+idx - 1]
 		spinner.info(clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`))
+	} catch (err) {
+		spinner.fail(chalk.red(err))
+	}
+}
+
+async function add_host() {
+	const spinner = spin({ color: 'blue' }).start(chalk.green(WAIT_MSG))
+
+	try {
+		await sh('ssh -o StrictHostKeyChecking=no git@git.epitech.eu uptime; [ 128 = $? ]')
+		spinner.succeed(chalk.green("'git.epitech.eu' add to known hosts"))
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

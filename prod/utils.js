@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolveAfter = exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.spinner_names = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = exports.SPINNER = void 0;
+exports.resolveAfter = exports.sh_callback = exports.sh_live = exports.sh = exports.print_message = exports.write_config = exports.open_config = exports.ConfigType = exports.clor = exports.colorsValue = exports.spinner_names = exports.VERBOSE = exports.WAIT_MSG = exports.APP_VERSION = exports.IS_DEBUG = exports.SPINNER = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = __importDefault(require("fs"));
 const child_process_1 = require("child_process");
@@ -300,16 +300,35 @@ async function sh_live(cmd) {
             else
                 resolve({ stdout, stderr });
         });
-        //process.stdin?.on()
-        (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
-            process.stdout.write(data);
-        });
-        (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
-            process.stderr.write(data);
-        });
+        (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.pipe(process.stderr);
     });
 }
 exports.sh_live = sh_live;
+async function sh_callback(cmd, callback) {
+    return new Promise(function (resolve, reject) {
+        var _a, _b, _c;
+        const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
+            if (err)
+                reject(err);
+            else
+                resolve({ stdout, stderr });
+        });
+        (_a = child.stdin) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
+            if (callback)
+                callback('stdin', data);
+        });
+        (_b = child.stdout) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
+            if (callback)
+                callback('stdout', data);
+        });
+        (_c = child.stderr) === null || _c === void 0 ? void 0 : _c.on('data', (data) => {
+            if (callback)
+                callback('stderr', data);
+        });
+    });
+}
+exports.sh_callback = sh_callback;
 function resolveAfter(x) {
     return new Promise((resolve) => {
         setTimeout(() => {

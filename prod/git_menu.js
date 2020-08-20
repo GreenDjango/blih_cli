@@ -55,8 +55,10 @@ async function clone_repo(repo_name, email, clone_args) {
                 return;
             process.chdir(repo_path);
         }
-        spinner.start(chalk_1.default.green(`Clone '${utils_1.clor.info(repo_name)}' repository...`));
-        await utils_1.sh(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`);
+        spinner.text = chalk_1.default.green(`Clone '${utils_1.clor.info(repo_name)}' repository...`);
+        // TODO : start spinner if ssh fingerprint isn't ask, (cf: dead lock with spinner because ssh print in /dev/tty)
+        console.log(spinner.frame());
+        await utils_1.sh_live(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`);
         spinner.succeed(chalk_1.default.green(`Repository ${process.cwd()}/`) + utils_1.clor.info(repo_name) + chalk_1.default.green('/ clone'));
     }
     catch (err) {
