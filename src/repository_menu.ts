@@ -9,7 +9,8 @@ import {
 	ask_autocomplete,
 	spin,
 } from './ui'
-import { ConfigType, clor, WAIT_MSG } from './utils'
+import { md_parser } from './markdown_parser'
+import { ConfigType, clor, sh, WAIT_MSG } from './utils'
 import { clone_repo } from './git_menu'
 
 type ACLType = ACL & { rights_bool: boolean[]; rights_str: string }
@@ -22,6 +23,7 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 		'Delete repository',
 		'Change ACL',
 		'Show repositories list',
+		'Show repository preview',
 	]
 
 	while (!should_quit) {
@@ -37,7 +39,10 @@ export async function repo_menu(api: BlihApi, config: ConfigType) {
 				await acl_menu(api, config)
 				break
 			case choices[4]:
-				await show_repo(api, config)
+				await show_repo_info(api, config)
+				break
+			case choices[5]:
+				await show_repo_preview(config)
 				break
 			case choices[0]:
 			default:
@@ -149,7 +154,7 @@ function to_ACL(acl: ACL): ACLType {
 	return new_r
 }
 
-async function show_repo(api: BlihApi, config: ConfigType) {
+async function show_repo_info(api: BlihApi, config: ConfigType) {
 	const repo = await ask_autocomplete(['↵ Back', ...config.repo], undefined, true)
 	if (repo === '↵ Back') return
 	const spinner = spin().start(chalk.green(WAIT_MSG))
@@ -158,7 +163,9 @@ async function show_repo(api: BlihApi, config: ConfigType) {
 		const repo_info = await api.repositoryInfo(repo)
 		const creation_date = new Date(0)
 		creation_date.setUTCSeconds(repo_info.creation_time)
-		const repo_acl = (await api.getACL(repo)).map((value) => `${value.name} - ${value.rights}`)
+		const repo_acl = (await api.getACL(repo)).map(
+			(value) => `${value.name} - ${to_ACL(value).rights_str}`
+		)
 		if (!repo_acl.length) repo_acl.push('no sharing')
 		spinner.info(
 			clor.info(
@@ -170,6 +177,24 @@ async function show_repo(api: BlihApi, config: ConfigType) {
 					`\n  Share:	${repo_acl.join('\n		')}`
 			)
 		)
+	} catch (err) {
+		spinner.fail(chalk.red(err))
+	}
+}
+
+async function show_repo_preview(config: ConfigType) {
+	const repo = await ask_autocomplete(['↵ Back', ...config.repo], 'Select for see README.md', true)
+	if (repo === '↵ Back') return
+	const spinner = spin().start(chalk.green(WAIT_MSG))
+
+	try {
+		// git_menu.tar > extract to stdout
+		const remote = await sh(
+			`git archive --remote=git@git.epitech.eu:${config.email}/${repo} HEAD README.md | tar -xO`
+		)
+		const md_term = md_parser(remote.stdout)
+		spinner.stop()
+		console.log(md_term + '\n')
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

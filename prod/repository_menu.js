@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.acl_menu = exports.create_repo = exports.repo_menu = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const ui_1 = require("./ui");
+const markdown_parser_1 = require("./markdown_parser");
 const utils_1 = require("./utils");
 const git_menu_1 = require("./git_menu");
 async function repo_menu(api, config) {
@@ -16,6 +17,7 @@ async function repo_menu(api, config) {
         'Delete repository',
         'Change ACL',
         'Show repositories list',
+        'Show repository preview',
     ];
     while (!should_quit) {
         const choice = await ui_1.ask_list(choices, 'Repository');
@@ -30,7 +32,10 @@ async function repo_menu(api, config) {
                 await acl_menu(api, config);
                 break;
             case choices[4]:
-                await show_repo(api, config);
+                await show_repo_info(api, config);
+                break;
+            case choices[5]:
+                await show_repo_preview(config);
                 break;
             case choices[0]:
             default:
@@ -138,7 +143,7 @@ function to_ACL(acl) {
     }
     return new_r;
 }
-async function show_repo(api, config) {
+async function show_repo_info(api, config) {
     const repo = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
     if (repo === '↵ Back')
         return;
@@ -147,7 +152,7 @@ async function show_repo(api, config) {
         const repo_info = await api.repositoryInfo(repo);
         const creation_date = new Date(0);
         creation_date.setUTCSeconds(repo_info.creation_time);
-        const repo_acl = (await api.getACL(repo)).map((value) => `${value.name} - ${value.rights}`);
+        const repo_acl = (await api.getACL(repo)).map((value) => `${value.name} - ${to_ACL(value).rights_str}`);
         if (!repo_acl.length)
             repo_acl.push('no sharing');
         spinner.info(utils_1.clor.info(`Name:		${repo_info.name}` +
@@ -156,6 +161,22 @@ async function show_repo(api, config) {
             `\n  Creation:	${creation_date.toLocaleString()}` +
             `\n  Public:	${repo_info.public}` +
             `\n  Share:	${repo_acl.join('\n		')}`));
+    }
+    catch (err) {
+        spinner.fail(chalk_1.default.red(err));
+    }
+}
+async function show_repo_preview(config) {
+    const repo = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], 'Select for see README.md', true);
+    if (repo === '↵ Back')
+        return;
+    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    try {
+        // git_menu.tar > extract to stdout
+        const remote = await utils_1.sh(`git archive --remote=git@git.epitech.eu:${config.email}/${repo} HEAD README.md | tar -xO`);
+        const md_term = markdown_parser_1.md_parser(remote.stdout);
+        spinner.stop();
+        console.log(md_term + '\n');
     }
     catch (err) {
         spinner.fail(chalk_1.default.red(err));
