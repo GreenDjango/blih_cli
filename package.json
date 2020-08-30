@@ -4,7 +4,7 @@
     "npmjs": "blih_cli",
     "github": "@greendjango/blih_cli"
   },
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Blih CLI for Linux",
   "keywords": [
     "cli",
@@ -39,7 +39,7 @@
     "lint": "tslint --project tsconfig.json",
     "buildDev": "tsc; chmod a+x build/index.js",
     "buildProd": "rm -rf build prod; npm run buildDev -s; cp -r build prod",
-    "dev" : "env BLIH_CLI_CONFIG_SKIP=true ./build/index.js",
+    "dev": "env BLIH_CLI_CONFIG_SKIP=true ./build/index.js",
     "update": "npm outdated || exit 0"
   },
   "man": "./man/json.1",
