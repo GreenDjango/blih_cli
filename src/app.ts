@@ -213,7 +213,7 @@ function check_update(current: string) {
 	if (os.type() === 'Linux' || os.type().match(/BSD$/)) {
 		exec('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
 			if (err || !stdout) return
-			if ('v' + stdout !== current) {
+			if (stdout.includes(current.slice(1)) === false) {
 				// prettier-ignore
 				exec(`notify-send "New update available" "Try 'sudo npm up blih_cli -g' to update" -i "${__dirname}/../logo.png" -a "blih cli" -t 10000`)
 			}
