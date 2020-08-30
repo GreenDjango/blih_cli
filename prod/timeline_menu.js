@@ -11,10 +11,6 @@ const utils_1 = require("./utils");
 async function timeline_menu(config) {
     if (!config.timelines.length)
         await fetch_timelines(config);
-    /*await ask_timeline(
-        config.timelines[0].projects.filter((value) => value.bttf !== true),
-        `Promo ${config.timelines[0].promo}`
-    )*/
     let should_quit = false;
     const choices = config.timelines
         .sort((a, b) => a.promo - b.promo)
@@ -23,7 +19,7 @@ async function timeline_menu(config) {
     });
     choices.unshift({ name: '↵ Back', value: undefined, short: '↵ Back' });
     while (!should_quit) {
-        const choice = await ui_1.ask_list_index(choices, 'Explore Epitech timelines');
+        const choice = await ui_1.ask_list_index(choices, 'Explore Epitech timelines (Beta test)');
         if (!choice) {
             should_quit = true;
             continue;
@@ -37,59 +33,13 @@ async function fetch_timelines(config) {
     const timelineApi = new timeline_api_1.TimelineApi();
     let error = 0;
     let errorMsg = '';
-    /*
-    config.timelines.push({
-        promo: 2022,
-        semester: 5,
-        projects: [
-            {
-                module: 'B5 - FR - Écrits Professionnels',
-                project: 'Mémo professionel',
-                start: '2019-10-28',
-                end: '2019-11-17',
-                bttf: false,
-            },
-            {
-                module: 'B5 - FR - Écrits Professionnels',
-                project: 'Avocat du diable',
-                start: '2019-09-16',
-                end: '2019-10-06',
-                bttf: false,
-            },
-            {
-                module: 'B5 - FR - Écrits Professionnels',
-                project: '3 emails',
-                start: '2019-10-07',
-                end: '2019-10-27',
-                bttf: false,
-            },
-            {
-                module: 'B5 - AppDev - AREA',
-                project: 'AREA',
-                start: '2020-01-06',
-                end: '2020-03-01',
-                bttf: false,
-            },
-            {
-                module: 'B5 - AppDev - Dashboard',
-                project: 'Dashboard',
-                start: '2019-10-28',
-                end: '2019-11-17',
-                bttf: false,
-            },
-        ],
-    })
-    spinner.stop()
-    return*/
     config.timelines = [];
     await Promise.all(timeline_api_1.TimelineApi.timelines.map(async (value) => {
         try {
             const timeline_info = await timelineApi.getTimeline(value);
-            /* TODO : remove 'B5 -' before module name
-            timeline_info.projects = timeline_info.projects.map((proj) => {
-                proj.module = proj.module.split('-').slice(1).join().trim()
-                return proj
-            })*/
+            timeline_info.projects.forEach((proj) => {
+                proj.module = proj.module.replace(/^B\d* *- */m, '');
+            });
             if (timeline_info)
                 config.timelines.push(timeline_info);
         }

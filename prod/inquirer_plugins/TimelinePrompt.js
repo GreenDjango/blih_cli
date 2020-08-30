@@ -25,24 +25,26 @@ const cli_cursor_1 = __importDefault(require("cli-cursor"));
 const run_async_1 = __importDefault(require("run-async"));
 // @ts-ignore
 const cli_width_1 = __importDefault(require("cli-width"));
-const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-const unitSize = '--------------------------';
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const unitSize = '------------------------------------------------------';
 /**
- * message: string, top content
- * choices: { module: string; projects: { project: string; start: string; end: string }[]}[], timeline projects
- * pageSize: number, size of list to show
- * default: number | string, index or value to show first
+ * @param message string, top content
+ * @param choices: { module: string; projects: { project: string; start: string; end: string }[]}[], timeline projects
+ * @param pageSize: number, size of list to show
+ * @param default: number | string, index or value to show first
  */
 class TimelinePrompt extends base_1.default {
     constructor(questions, rl, answers) {
-        var _a;
         questions.choices = [...questions.choices].map((value) => {
             value.name = value.module;
-            value.extra = value.projects.map((v) => {
+            value.type = value.type || 'choice';
+            value.extra = value.projects
+                .map((v) => {
                 const end_date = new Date(v.end);
                 end_date.setDate(end_date.getDate() + 1);
                 return { project: v.project, start: new Date(v.start), end: end_date };
-            });
+            })
+                .sort((a, b) => a.start.getTime() - b.start.getTime());
             delete value.module;
             delete value.projects;
             return value;
@@ -51,26 +53,16 @@ class TimelinePrompt extends base_1.default {
         if (!this.opt.choices) {
             this.throwParamError('choices');
         }
-        this.longestName =
-            ((_a = this.opt.choices.realChoices.reduce((a, b) => {
-                return a.name.length > b.name.length ? a : b;
-            }).name) === null || _a === void 0 ? void 0 : _a.length) || 0;
         this.showHelp = true;
         this.selected = 0;
         this.offsetX = 0;
         this.done = undefined;
-        this.axeX = Array(13)
-            .fill(1)
-            .reduce((prev) => {
-            return prev + unitSize + '|';
-        }, '');
-        this.unitsX = months.reduce((prev, curr) => {
-            return (prev +
-                ' '.repeat(unitSize.length - Math.floor(curr.length / 2) - (prev.length % (unitSize.length + 1))) +
-                curr);
-        }, '');
-        this.axeX = '─'.repeat(this.longestName + 5) + '┤' + this.axeX;
-        this.unitsX = ' '.repeat(this.longestName + 4) + this.unitsX.replace(/^./, 'Aug');
+        this.axeX = '';
+        this.unitsX = '';
+        this.longestName = 0;
+        this.oldestDate = undefined;
+        this.latestDate = undefined;
+        this.setup();
         const def = this.opt.default;
         // If def is a Number, then use as index. Otherwise, check for value.
         if (typeof def === 'number' && def >= 0 && def < this.opt.choices.realLength) {
@@ -83,6 +75,37 @@ class TimelinePrompt extends base_1.default {
         // Make sure no default is set (so it won't be printed)
         this.opt.default = null;
         this.paginator = new paginator_1.default(this.screen);
+    }
+    setup() {
+        // set longestName, oldestDate, latestDate
+        this.opt.choices.forEach((choice) => {
+            var _a, _b;
+            if (choice.type !== 'choice')
+                return;
+            const extra = choice.extra;
+            if (choice.name.length > this.longestName)
+                this.longestName = choice.name.length;
+            if (!this.oldestDate || this.oldestDate > ((_a = extra[0]) === null || _a === void 0 ? void 0 : _a.start)) {
+                this.oldestDate = (_b = extra[0]) === null || _b === void 0 ? void 0 : _b.start;
+            }
+            const latest = extra.reduce((a, b) => (a.end > b.end ? a : b));
+            if (!this.latestDate || this.latestDate < (latest === null || latest === void 0 ? void 0 : latest.end))
+                this.latestDate = latest === null || latest === void 0 ? void 0 : latest.end;
+        });
+        if (!this.oldestDate || !this.latestDate) {
+            this.oldestDate = new Date();
+            this.latestDate = new Date(this.oldestDate.getFullYear(), this.oldestDate.getMonth() + 3);
+        }
+        const monthLength = getBetweenMonth(this.oldestDate, this.latestDate) + 1;
+        this.axeX = '─'.repeat(this.longestName + 5) + '┤' + `${unitSize}|`.repeat(monthLength);
+        for (let i = 0; i <= monthLength; i++) {
+            const month = months[(this.oldestDate.getMonth() + i) % 12];
+            this.unitsX +=
+                ' '.repeat(unitSize.length -
+                    Math.floor(month.length / 2) -
+                    (this.unitsX.length % (unitSize.length + 1))) + month;
+        }
+        this.unitsX = ' '.repeat(this.longestName + 4) + this.unitsX.replace(/ */, '');
     }
     //Start the Inquiry session
     _run(cb) {
@@ -103,6 +126,15 @@ class TimelinePrompt extends base_1.default {
         cli_cursor_1.default.hide();
         this.render();
         return this;
+    }
+    getAbsPos(d) {
+        const monthDiff = getBetweenMonth(this.oldestDate, d);
+        //Day 0 is the last day in the previous month
+        const dayInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const monthOffset = Math.round((unitSize.length + 1) * (d.getDate() / dayInMonth));
+        if (monthDiff === 0)
+            return monthOffset;
+        return monthOffset + (unitSize.length + 1) * monthDiff;
     }
     // Render the prompt to screen
     render() {
@@ -145,28 +177,37 @@ class TimelinePrompt extends base_1.default {
                 output += '\n';
                 return;
             }
-            const isSelected = i - separatorOffset === this.selected;
-            let outLine = '─'.repeat(choice.name.length);
-            const offsetLine = ' '.repeat(this.longestName - choice.name.length);
-            let upLine = offsetLine + `  ╭─${outLine}─┤`;
-            let midLine = (isSelected ? '>' : ' ') + offsetLine + ' │ ' + choice.name + ' │';
-            let downLine = offsetLine + `  ╰─${outLine}─┤`;
-            choice.extra
-                .sort((a, b) => a.start.getTime() - b.start.getTime())
-                .forEach((val) => {
-                outLine = '─'.repeat(val.project.length);
-                upLine += ` ╭─${outLine}─╮`;
-                midLine += ` │ ${val.project} │`;
-                downLine += ` ╰─${outLine}─╯`;
+            let upLine = '';
+            let midLine = '';
+            let downLine = '';
+            choice.extra.forEach((val) => {
+                let pos = this.getAbsPos(val.start);
+                const length = this.getAbsPos(val.end) - pos - 4;
+                if (midLine.length > pos)
+                    pos = midLine.length;
+                const offsetPos = ' '.repeat(pos - midLine.length);
+                const outLineLength = val.project.length > length ? val.project.length : length;
+                const outLine = '─'.repeat(outLineLength);
+                upLine += `${offsetPos}╭─${outLine}─╮`;
+                midLine +=
+                    `${offsetPos}│ ${val.project}` + ' '.repeat(outLineLength - val.project.length) + ' │';
+                downLine += `${offsetPos}╰─${outLine}─╯`;
             });
-            let lines = applyOffset(upLine, this.offsetX, width) +
-                ' \n' +
-                applyOffset(midLine, this.offsetX, width) +
-                ' \n' +
-                applyOffset(downLine, this.offsetX, width);
+            const isSelected = i - separatorOffset === this.selected;
+            const outLine = '─'.repeat(choice.name.length);
+            const offsetLine = ' '.repeat(this.longestName - choice.name.length);
+            upLine = offsetLine + `  ╭─${outLine}─┤` + upLine;
+            midLine = (isSelected ? '>' : ' ') + offsetLine + ' │ ' + choice.name + ' │' + midLine;
+            downLine = offsetLine + `  ╰─${outLine}─┤` + downLine;
+            // If one line is empty (just '\n'), paginator remove it
+            let lines = (applyOffset(upLine, this.offsetX, width) || ' ') +
+                '\n' +
+                (applyOffset(midLine, this.offsetX, width) || ' ') +
+                '\n' +
+                (applyOffset(downLine, this.offsetX, width) || ' ');
             if (isSelected)
                 lines = chalk_1.default.cyan(lines);
-            output += lines + ' \n';
+            output += lines + '\n';
         });
         return output.replace(/\n$/, '');
     }
@@ -208,13 +249,13 @@ class TimelinePrompt extends base_1.default {
     onLeftKey() {
         if (this.offsetX >= 0)
             return;
-        this.offsetX += 4;
+        this.offsetX += 8;
         this.render();
     }
     onRightKey() {
-        if (this.offsetX <= -200)
+        if (this.offsetX <= -this.axeX.length)
             return;
-        this.offsetX -= 4;
+        this.offsetX -= 8;
         this.render();
     }
     onNumberKey(input) {
@@ -225,19 +266,32 @@ class TimelinePrompt extends base_1.default {
     }
 }
 exports.default = TimelinePrompt;
+function getBetweenMonth(a, b) {
+    return (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+}
+/**
+ *
+ * eg: 'my lonnnnnng line', -1, 9
+ * remove left offset: 'y lonnnnnng line'
+ * match term length: 'y lonnnnn'
+ */
 function applyOffset(line, offsetX, width) {
-    if (offsetX < 0) {
-        const regex = new RegExp('(?:(?:\\033[[0-9;]*m)*.?){1,' + Math.abs(offsetX) + '}');
-        // Real line length with Escape sequences (visual length)
-        const chunk = line.match(regex);
-        if (chunk) {
-            line = line.substr(chunk[0].length);
-        }
+    let newLine = line;
+    // Real line length with Escape sequences (visual length) for left remove
+    const regexLeft = new RegExp('(?:(?:\\033[[0-9;]*m)*.?){0,' + Math.abs(offsetX) + '}');
+    const chunkLeft = newLine.match(regexLeft);
+    if (chunkLeft) {
+        newLine = newLine.substr(chunkLeft[0].length);
     }
-    else
-        line = ' '.repeat(offsetX) + line;
+    // width - 1 is for terminal length - \n
+    const regexSub = new RegExp('(?:(?:\\033[[0-9;]*m)*.?){0,' + Math.floor(width > 0 ? width - 1 : 0) + '}');
+    const chunkSub = newLine.match(regexSub);
+    if (chunkSub) {
+        newLine = chunkSub[0];
+    }
+    // offsetX >= 0 is lock by default
     // TODO : shift with Escape sequence when offsetX >= 0
-    return line.substr(0, width - 1);
+    return newLine;
 }
 function observeCustom(rl) {
     var keypress = rxjs_1.fromEvent(rl.input, 'keypress', (value, key) => {
