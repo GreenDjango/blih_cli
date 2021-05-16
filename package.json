@@ -40,7 +40,8 @@
     "buildDev": "tsc; chmod a+x build/index.js",
     "buildProd": "rm -rf build prod; npm run buildDev -s; cp -r build prod",
     "dev": "env BLIH_CLI_CONFIG_SKIP=true ./build/index.js",
-    "update": "npm outdated || exit 0"
+    "update": "npm outdated || exit 0",
+    "unzipMan": "gunzip -c man/manpage.1.gz > man/manpage.1"
   },
   "man": "./man/json.1",
   "repository": {
