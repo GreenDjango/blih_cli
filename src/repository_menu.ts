@@ -196,7 +196,7 @@ async function show_repo_preview(config: ConfigType) {
 		spinner.stop()
 		console.log(md_term + '\n')
 	} catch (err) {
-		if (/remote: fatal: pathspec 'README\.md' did not match any files/.test((<any>err).message || ''))
+		if (/remote: fatal: pathspec 'README\.md' did not match any files/.test(err?.message || ''))
 			spinner.fail(chalk.red("Error: 'README.md' file was not found on the repository"))
 		else spinner.fail(chalk.red(err))
 	}

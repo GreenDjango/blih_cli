@@ -35,7 +35,7 @@ async function fetch_timelines(config: ConfigType) {
 	const spinner = spin().start(chalk.green('Fetch timelines...'))
 
 	const timelineApi = new TimelineApi()
-	let errorList : string[] = []
+	const errorList : string[] = []
 
 	config.timelines = []
 	await Promise.all(
