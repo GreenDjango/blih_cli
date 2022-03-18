@@ -29,9 +29,14 @@ class TimelineApi {
      */
     constructor() {
         this._timelineFiles = Object.freeze([
+            'timeline-2021.json',
             'timeline-2022.json',
             'timeline-2023.json',
+            'timeline-2023-msc.json',
             'timeline-2024.json',
+            'timeline-2025.json',
+            'timeline-2026.json',
+            'timeline-2026-s2.json',
         ]);
         this._api = axios_1.default.create(options);
         this._api.interceptors.response.use((rep) => rep, responseErrorInterceptor);
@@ -82,4 +87,13 @@ class TimelineApi {
     }
 }
 exports.TimelineApi = TimelineApi;
-TimelineApi.timelines = Object.freeze(['2022', '2023', '2024']);
+TimelineApi.timelines = Object.freeze([
+    '2021',
+    '2022',
+    '2023',
+    '2023-MSC',
+    '2024',
+    '2025',
+    '2026-S1',
+    '2026-S2',
+]);

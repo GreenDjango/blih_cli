@@ -12,10 +12,12 @@ async function timeline_menu(config) {
     if (!config.timelines.length)
         await fetch_timelines(config);
     let should_quit = false;
+    console.log(config.timelines.map(a => a.promo));
     const choices = config.timelines
-        .sort((a, b) => a.promo - b.promo)
+        .map((val) => ({ ...val, name: `Promo ${val.promo} S${val.semester}` }))
+        .sort((a, b) => String(a.name).localeCompare(String(b.name)))
         .map((val) => {
-        return { name: `Promo ${val.promo}`, value: val, short: `Promo ${val.promo}` };
+        return { name: val.name, value: val, short: val.name };
     });
     choices.unshift({ name: '↵ Back', value: undefined, short: '↵ Back' });
     while (!should_quit) {
@@ -31,8 +33,7 @@ exports.timeline_menu = timeline_menu;
 async function fetch_timelines(config) {
     const spinner = ui_1.spin().start(chalk_1.default.green('Fetch timelines...'));
     const timelineApi = new timeline_api_1.TimelineApi();
-    let error = 0;
-    let errorMsg = '';
+    let errorList = [];
     config.timelines = [];
     await Promise.all(timeline_api_1.TimelineApi.timelines.map(async (value) => {
         try {
@@ -44,15 +45,12 @@ async function fetch_timelines(config) {
                 config.timelines.push(timeline_info);
         }
         catch (err) {
-            error++;
-            if (errorMsg)
-                errorMsg += '\n' + err;
-            else
-                errorMsg += err;
+            const prettyError = value + ': ' + err;
+            errorList.push(prettyError);
         }
     }));
     spinner.stop();
-    if (error) {
-        utils_1.print_message(errorMsg, '', 'fail');
+    if (errorList.length) {
+        utils_1.print_message(errorList.join('\n'), '', 'fail');
     }
 }

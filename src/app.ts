@@ -97,7 +97,6 @@ async function login(config: ConfigType) {
 	} catch (err) {
 		spinner.stop()
 		print_message('Blih server down', '', 'fail')
-		process.exit(2)
 	}
 	do {
 		if (!config.email) {
@@ -116,12 +115,14 @@ async function login(config: ConfigType) {
 			spinner.stop()
 		} catch (err) {
 			spinner.stop()
-			print_message('Fail to login', err, 'fail')
+			print_message('Fail to login', String(err), 'fail')
 			if (err === 'Bad token') config.email = ''
 			config.token = ''
 			error = true
+			if (err === 'certificate has expired') error = false
 		}
 	} while (error || !api)
+
 	if (config.verbose && !config.args) {
 		print_message(`Found ${chalk.cyan(config.repo.length)} repositories`, '', 'message')
 	}

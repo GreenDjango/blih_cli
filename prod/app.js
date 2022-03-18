@@ -93,7 +93,6 @@ async function login(config) {
     catch (err) {
         spinner.stop();
         utils_1.print_message('Blih server down', '', 'fail');
-        process.exit(2);
     }
     do {
         if (!config.email) {
@@ -113,11 +112,13 @@ async function login(config) {
         }
         catch (err) {
             spinner.stop();
-            utils_1.print_message('Fail to login', err, 'fail');
+            utils_1.print_message('Fail to login', String(err), 'fail');
             if (err === 'Bad token')
                 config.email = '';
             config.token = '';
             error = true;
+            if (err === 'certificate has expired')
+                error = false;
         }
     } while (error || !api);
     if (config.verbose && !config.args) {

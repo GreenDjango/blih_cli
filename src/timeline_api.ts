@@ -37,11 +37,25 @@ axios.defaults.adapter = require('axios/lib/adapters/http')
 export class TimelineApi {
 	private _api: AxiosInstance
 	private readonly _timelineFiles = Object.freeze([
+		'timeline-2021.json',
 		'timeline-2022.json',
 		'timeline-2023.json',
+		'timeline-2023-msc.json',
 		'timeline-2024.json',
+		'timeline-2025.json',
+		'timeline-2026.json',
+		'timeline-2026-s2.json',
 	])
-	public static readonly timelines = Object.freeze(['2022', '2023', '2024'])
+	public static readonly timelines = Object.freeze([
+		'2021',
+		'2022',
+		'2023',
+		'2023-MSC',
+		'2024',
+		'2025',
+		'2026-S1',
+		'2026-S2',
+	])
 
 	/**
 	 * Constructor
