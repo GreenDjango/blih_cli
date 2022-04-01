@@ -4,7 +4,7 @@
     "npmjs": "blih_cli",
     "github": "@greendjango/blih_cli"
   },
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Blih CLI for Linux",
   "keywords": [
     "cli",
