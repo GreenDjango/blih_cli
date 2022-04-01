@@ -111,16 +111,16 @@ class TimelinePrompt extends base_1.default {
     _run(cb) {
         this.done = cb;
         const self = this;
-        const events = events_1.default(this.rl);
+        const events = (0, events_1.default)(this.rl);
         const eventsCustom = observeCustom(this.rl);
-        events.normalizedUpKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onUpKey.bind(this));
-        events.normalizedDownKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onDownKey.bind(this));
-        eventsCustom.normalizedLeftKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onLeftKey.bind(this));
-        eventsCustom.normalizedRightKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onRightKey.bind(this));
+        events.normalizedUpKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onUpKey.bind(this));
+        events.normalizedDownKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onDownKey.bind(this));
+        eventsCustom.normalizedLeftKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onLeftKey.bind(this));
+        eventsCustom.normalizedRightKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onRightKey.bind(this));
         // @ts-ignore
-        events.numberKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onNumberKey.bind(this));
+        events.numberKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onNumberKey.bind(this));
         events.line
-            .pipe(operators_1.take(1), operators_1.map(this.getCurrentValue.bind(this)), operators_1.flatMap((value) => run_async_1.default(self.opt.filter)(value).catch((err) => err)))
+            .pipe((0, operators_1.take)(1), (0, operators_1.map)(this.getCurrentValue.bind(this)), (0, operators_1.flatMap)((value) => (0, run_async_1.default)(self.opt.filter)(value).catch((err) => err)))
             .forEach(this.onSubmit.bind(this));
         // Init the prompt
         cli_cursor_1.default.hide();
@@ -163,7 +163,7 @@ class TimelinePrompt extends base_1.default {
     listRender() {
         let output = '';
         let separatorOffset = 0;
-        const width = cli_width_1.default({ defaultWidth: 80, output: this.rl.output });
+        const width = (0, cli_width_1.default)({ defaultWidth: 80, output: this.rl.output });
         this.opt.choices.forEach((choice, i) => {
             if (choice.type === 'separator') {
                 separatorOffset++;
@@ -213,7 +213,7 @@ class TimelinePrompt extends base_1.default {
     }
     // Function for rendering bottom content
     bottomRender() {
-        const width = cli_width_1.default({ defaultWidth: 80, output: this.rl.output });
+        const width = (0, cli_width_1.default)({ defaultWidth: 80, output: this.rl.output });
         const axe = applyOffset(this.axeX, this.offsetX, width);
         const output = axe + ' \n' + applyOffset(this.unitsX, this.offsetX, width) + ' \n';
         return output.replace(/\n$/, '');
@@ -294,13 +294,13 @@ function applyOffset(line, offsetX, width) {
     return newLine;
 }
 function observeCustom(rl) {
-    var keypress = rxjs_1.fromEvent(rl.input, 'keypress', (value, key) => {
+    var keypress = (0, rxjs_1.fromEvent)(rl.input, 'keypress', (value, key) => {
         return { value: value, key: key || {} };
     })
         // Ignore `enter` key. On the readline, we only care about the `line` event.
-        .pipe(operators_1.filter(({ key }) => key.name !== 'enter' && key.name !== 'return'));
+        .pipe((0, operators_1.filter)(({ key }) => key.name !== 'enter' && key.name !== 'return'));
     return {
-        normalizedLeftKey: keypress.pipe(operators_1.filter(({ key }) => key.name === 'left'), operators_1.share()),
-        normalizedRightKey: keypress.pipe(operators_1.filter(({ key }) => key.name === 'right'), operators_1.share()),
+        normalizedLeftKey: keypress.pipe((0, operators_1.filter)(({ key }) => key.name === 'left'), (0, operators_1.share)()),
+        normalizedRightKey: keypress.pipe((0, operators_1.filter)(({ key }) => key.name === 'right'), (0, operators_1.share)()),
     };
 }

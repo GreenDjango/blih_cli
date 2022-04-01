@@ -12,7 +12,7 @@ async function git_menu(api, config) {
     let should_quit = false;
     const choices = ['↵ Back', 'My repository', 'Other repository', 'All my repositories'];
     while (!should_quit) {
-        const choice = await ui_1.ask_list(choices, 'Git clone repositories');
+        const choice = await (0, ui_1.ask_list)(choices, 'Git clone repositories');
         switch (choice) {
             case choices[1]:
                 await clone_my_repo(config);
@@ -31,14 +31,14 @@ async function git_menu(api, config) {
 }
 exports.git_menu = git_menu;
 async function clone_my_repo(config) {
-    const repo_name = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
+    const repo_name = await (0, ui_1.ask_autocomplete)(['↵ Back', ...config.repo], undefined, true);
     if (repo_name === '↵ Back')
         return;
     await clone_repo(repo_name, config.email, config.cloning_options[0]);
 }
 async function clone_other_repo(config) {
-    const repo_name = await ui_1.ask_input('Repository name ?');
-    const email = await ui_1.ask_autocomplete(config.contact, 'Enter repository email');
+    const repo_name = await (0, ui_1.ask_input)('Repository name ?');
+    const email = await (0, ui_1.ask_autocomplete)(config.contact, 'Enter repository email');
     if (!config.contact.some((value) => value === email)) {
         config.contact.push(email);
         config.contact = config.contact;
@@ -47,9 +47,9 @@ async function clone_other_repo(config) {
 }
 async function clone_repo(repo_name, email, clone_args) {
     const pwd = process.cwd();
-    const spinner = ui_1.spin({ color: 'blue' });
+    const spinner = (0, ui_1.spin)({ color: 'blue' });
     try {
-        if (!(await ui_1.ask_question('Git clone here ?'))) {
+        if (!(await (0, ui_1.ask_question)('Git clone here ?'))) {
             const repo_path = await ask_path_for_clone();
             if (!repo_path)
                 return;
@@ -58,7 +58,7 @@ async function clone_repo(repo_name, email, clone_args) {
         spinner.text = chalk_1.default.green(`Clone '${utils_1.clor.info(repo_name)}' repository...`);
         // TODO : start spinner if ssh fingerprint isn't ask, (cf: dead lock with spinner because ssh print in /dev/tty)
         console.log(spinner.frame());
-        await utils_1.sh_live(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`);
+        await (0, utils_1.sh_live)(`git clone ${clone_args || ''} git@git.epitech.eu:/${email}/${repo_name}`);
         spinner.succeed(chalk_1.default.green(`Repository ${process.cwd()}/`) + utils_1.clor.info(repo_name) + chalk_1.default.green('/ clone'));
     }
     catch (err) {
@@ -69,12 +69,12 @@ async function clone_repo(repo_name, email, clone_args) {
 exports.clone_repo = clone_repo;
 async function clone_all_repo(api, config) {
     const pwd = process.cwd();
-    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = (0, ui_1.spin)({ color: 'blue' }).start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const repo_list = await api.listRepositories();
         spinner.stop();
         const repo_nb = repo_list.length;
-        if (!(await ui_1.ask_question(`Git clone ${utils_1.clor.info(repo_nb)} repositories here ?`))) {
+        if (!(await (0, ui_1.ask_question)(`Git clone ${utils_1.clor.info(repo_nb)} repositories here ?`))) {
             const repo_path = await ask_path_for_clone();
             if (!repo_path)
                 return;
@@ -85,7 +85,7 @@ async function clone_all_repo(api, config) {
             spinner.start(chalk_1.default.green(`(${idx}/${repo_nb}): Clone '${utils_1.clor.info(repo.name)}' in ${process.cwd()}...`));
             const clone_args = config.cloning_options[0] || '';
             try {
-                await utils_1.sh(`git clone ${clone_args} git@git.epitech.eu:/${config.email}/${repo.name}`);
+                await (0, utils_1.sh)(`git clone ${clone_args} git@git.epitech.eu:/${config.email}/${repo.name}`);
             }
             catch (err) {
                 spinner.fail(chalk_1.default.red(err));
@@ -99,11 +99,11 @@ async function clone_all_repo(api, config) {
     process.chdir(pwd);
 }
 async function ask_path_for_clone() {
-    const repo_path = await ui_1.ask_local_path('Repository destination:', undefined, true);
+    const repo_path = await (0, ui_1.ask_local_path)('Repository destination:', undefined, true);
     if (repo_path === '')
         return undefined;
     if (!fs_1.default.existsSync(repo_path)) {
-        if (await ui_1.ask_question('Path not exist, create ?'))
+        if (await (0, ui_1.ask_question)('Path not exist, create ?'))
             fs_1.default.mkdirSync(repo_path, { recursive: true });
         else
             return undefined;

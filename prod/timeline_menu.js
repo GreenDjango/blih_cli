@@ -21,19 +21,19 @@ async function timeline_menu(config) {
     });
     choices.unshift({ name: '↵ Back', value: undefined, short: '↵ Back' });
     while (!should_quit) {
-        const choice = await ui_1.ask_list_index(choices, 'Explore Epitech timelines (Beta test)');
+        const choice = await (0, ui_1.ask_list_index)(choices, 'Explore Epitech timelines (Beta test)');
         if (!choice) {
             should_quit = true;
             continue;
         }
-        await ui_1.ask_timeline(choice.projects.filter((value) => value.bttf !== true), `Promo ${choice.promo}`);
+        await (0, ui_1.ask_timeline)(choice.projects.filter((value) => value.bttf !== true), `Promo ${choice.promo}`);
     }
 }
 exports.timeline_menu = timeline_menu;
 async function fetch_timelines(config) {
-    const spinner = ui_1.spin().start(chalk_1.default.green('Fetch timelines...'));
+    const spinner = (0, ui_1.spin)().start(chalk_1.default.green('Fetch timelines...'));
     const timelineApi = new timeline_api_1.TimelineApi();
-    let errorList = [];
+    const errorList = [];
     config.timelines = [];
     await Promise.all(timeline_api_1.TimelineApi.timelines.map(async (value) => {
         try {
@@ -51,6 +51,6 @@ async function fetch_timelines(config) {
     }));
     spinner.stop();
     if (errorList.length) {
-        utils_1.print_message(errorList.join('\n'), '', 'fail');
+        (0, utils_1.print_message)(errorList.join('\n'), '', 'fail');
     }
 }

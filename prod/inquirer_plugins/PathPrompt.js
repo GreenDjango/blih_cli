@@ -46,9 +46,9 @@ class PathPrompt extends inquirer_autocomplete_prompt_1.default {
                 // @ts-ignore
                 const choice = choices_1.default.prototype.getChoice.call(this.currentChoices, choiceIndex);
                 return {
-                    value: strip_ansi_1.default(choice.value),
-                    name: strip_ansi_1.default(choice.name || 'Empty'),
-                    short: strip_ansi_1.default(choice.name || 'Empty'),
+                    value: (0, strip_ansi_1.default)(choice.value),
+                    name: (0, strip_ansi_1.default)(choice.name || 'Empty'),
+                    short: (0, strip_ansi_1.default)(choice.name || 'Empty'),
                 };
             };
         });
@@ -57,12 +57,13 @@ class PathPrompt extends inquirer_autocomplete_prompt_1.default {
      * When user press `enter` key
      */
     onSubmit(line) {
-        super.onSubmit(strip_ansi_1.default(line));
+        super.onSubmit((0, strip_ansi_1.default)(line));
     }
 }
 exports.default = PathPrompt;
 function getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, defaultItem) {
-    const pathDir = (searchTerm === null || searchTerm === void 0 ? void 0 : searchTerm.includes('/')) ? searchTerm.substring(0, searchTerm.lastIndexOf('/') + 1)
+    const pathDir = (searchTerm === null || searchTerm === void 0 ? void 0 : searchTerm.includes('/'))
+        ? searchTerm.substring(0, searchTerm.lastIndexOf('/') + 1)
         : rootPath;
     const nodeList = [pathDir].map((nodePath) => {
         if (excludePath(nodePath)) {
@@ -71,10 +72,10 @@ function getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, de
         try {
             const res = [];
             const currentNode = itemType === 'file' ? [] : ['.', '..'];
-            currentNode.push(...fs_1.readdirSync(nodePath));
+            currentNode.push(...(0, fs_1.readdirSync)(nodePath));
             currentNode.forEach((val) => {
                 let realPath = path_1.default.join(nodePath, val);
-                const stat = fs_1.statSync(realPath);
+                const stat = (0, fs_1.statSync)(realPath);
                 if ((itemType === 'directory' && stat.isFile()) ||
                     (itemType === 'file' && stat.isDirectory()))
                     return;

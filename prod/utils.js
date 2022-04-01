@@ -8,7 +8,7 @@ const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = __importDefault(require("fs"));
 const child_process_1 = require("child_process");
 const os_1 = require("os");
-const CONFIG_FOLDER = os_1.homedir() + '/.config/blih_cli';
+const CONFIG_FOLDER = (0, os_1.homedir)() + '/.config/blih_cli';
 const CONFIG_FILE = '.cli_data.json';
 const CONFIG_PATH = `${CONFIG_FOLDER}/${CONFIG_FILE}`;
 const PACKAGE_PATH = `${__dirname}/../package.json`;
@@ -282,7 +282,7 @@ function print_message(title, message, level) {
 exports.print_message = print_message;
 async function sh(cmd) {
     return new Promise(function (resolve, reject) {
-        child_process_1.exec(cmd, (err, stdout, stderr) => {
+        (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
             if (err)
                 reject(err);
             else
@@ -294,7 +294,7 @@ exports.sh = sh;
 async function sh_live(cmd) {
     return new Promise(function (resolve, reject) {
         var _a, _b;
-        const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
+        const child = (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
             if (err)
                 reject(err);
             else
@@ -308,7 +308,7 @@ exports.sh_live = sh_live;
 async function sh_callback(cmd, callback) {
     return new Promise(function (resolve, reject) {
         var _a, _b, _c;
-        const child = child_process_1.exec(cmd, (err, stdout, stderr) => {
+        const child = (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
             if (err)
                 reject(err);
             else

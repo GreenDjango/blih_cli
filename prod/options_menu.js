@@ -21,7 +21,7 @@ async function options_menu(config) {
             `Cloning options`,
             'Reset all contact',
         ];
-        const choice = await ui_1.ask_list(choices, 'You want options ?');
+        const choice = await (0, ui_1.ask_list)(choices, 'You want options ?');
         switch (choice) {
             case choices[1]:
                 config.save_token = !config.save_token;
@@ -45,7 +45,7 @@ async function options_menu(config) {
                 await cloning_options(config);
                 break;
             case choices[8]:
-                const valid = await ui_1.ask_question(`Are you sure ?`);
+                const valid = await (0, ui_1.ask_question)(`Are you sure ?`);
                 if (valid)
                     config.contact = [];
                 break;
@@ -65,10 +65,10 @@ async function colors_option(config) {
         const choices = colorsKey.map((key) => {
             return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${utils_1.clor[key]('current ■')}`;
         });
-        const option = await ui_1.ask_list(['↵ Back', ...choices], 'You want colors ?', true);
+        const option = await (0, ui_1.ask_list)(['↵ Back', ...choices], 'You want colors ?', true);
         if (option === '0')
             return;
-        const color = await ui_1.ask_autocomplete(['↵ Back', ...color_choices], undefined, true);
+        const color = await (0, ui_1.ask_autocomplete)(['↵ Back', ...color_choices], undefined, true);
         if (color === '↵ Back')
             continue;
         const idx = color_choices.findIndex((value) => value === color);
@@ -85,13 +85,13 @@ async function colors_option(config) {
     }
 }
 async function spinner_option(config) {
-    const new_spinner = await ui_1.ask_spinner(['↵ Back', ...utils_1.spinner_names], `Current spinner '${config.spinner_name}', new :`);
+    const new_spinner = await (0, ui_1.ask_spinner)(['↵ Back', ...utils_1.spinner_names], `Current spinner '${config.spinner_name}', new :`);
     if (new_spinner !== '↵ Back')
         config.spinner_name = new_spinner;
 }
 async function cloning_options(config) {
     while (1) {
-        const choice = await ui_1.ask_list_index([
+        const choice = await (0, ui_1.ask_list_index)([
             { name: '↵ Back', value: undefined },
             { name: 'Add preset', value: -1 },
             ...config.cloning_options.map((val, idx) => {
@@ -103,9 +103,9 @@ async function cloning_options(config) {
         if (typeof choice !== 'number')
             break;
         if (choice === -1)
-            config.cloning_options = [...config.cloning_options, await ui_1.ask_input('New preset')];
+            config.cloning_options = [...config.cloning_options, await (0, ui_1.ask_input)('New preset')];
         else {
-            const choice2 = await ui_1.ask_list(['↵ Back', 'Set by default', 'Erase']);
+            const choice2 = await (0, ui_1.ask_list)(['↵ Back', 'Set by default', 'Erase']);
             if (choice2 === '↵ Back') {
                 1;
             }
@@ -114,7 +114,7 @@ async function cloning_options(config) {
                 config.cloning_options[0] = config.cloning_options[choice];
                 config.cloning_options[choice] = def;
             }
-            else if (choice2 === 'Erase' && (await ui_1.ask_question(`Are you sure ?`))) {
+            else if (choice2 === 'Erase' && (await (0, ui_1.ask_question)(`Are you sure ?`))) {
                 config.cloning_options.splice(choice, 1);
                 config.cloning_options = config.cloning_options;
             }

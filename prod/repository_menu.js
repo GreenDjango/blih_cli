@@ -20,7 +20,7 @@ async function repo_menu(api, config) {
         'Show repository preview',
     ];
     while (!should_quit) {
-        const choice = await ui_1.ask_list(choices, 'Repository');
+        const choice = await (0, ui_1.ask_list)(choices, 'Repository');
         switch (choice) {
             case choices[1]:
                 await create_repo(api, config);
@@ -45,8 +45,8 @@ async function repo_menu(api, config) {
 }
 exports.repo_menu = repo_menu;
 async function create_repo(api, config, repo_name) {
-    const input = repo_name || (await ui_1.ask_input('Repository name'));
-    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const input = repo_name || (await (0, ui_1.ask_input)('Repository name'));
+    const spinner = (0, ui_1.spin)().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         let res = await api.createRepository(input);
         config.repo.push(input);
@@ -57,8 +57,8 @@ async function create_repo(api, config, repo_name) {
             spinner.succeed(chalk_1.default.green(res + ' (ramassage-tek)'));
         }
         await acl_menu(api, config, input);
-        if (await ui_1.ask_question(`Git clone ${input} ?`))
-            await git_menu_1.clone_repo(input, config.email);
+        if (await (0, ui_1.ask_question)(`Git clone ${input} ?`))
+            await (0, git_menu_1.clone_repo)(input, config.email);
     }
     catch (err) {
         spinner.fail(chalk_1.default.red(err));
@@ -66,12 +66,12 @@ async function create_repo(api, config, repo_name) {
 }
 exports.create_repo = create_repo;
 async function delete_repo(api, config) {
-    const to_delete = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
+    const to_delete = await (0, ui_1.ask_autocomplete)(['↵ Back', ...config.repo], undefined, true);
     if (to_delete === '↵ Back')
         return;
-    const valid = await ui_1.ask_question(`Delete ${to_delete} ?`);
+    const valid = await (0, ui_1.ask_question)(`Delete ${to_delete} ?`);
     if (valid) {
-        const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+        const spinner = (0, ui_1.spin)().start(chalk_1.default.green(utils_1.WAIT_MSG));
         try {
             const res = await api.deleteRepository(to_delete);
             config.repo = config.repo.filter((value) => value !== to_delete);
@@ -83,10 +83,10 @@ async function delete_repo(api, config) {
     }
 }
 async function acl_menu(api, config, repo_name) {
-    const repo = repo_name || (await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true));
+    const repo = repo_name || (await (0, ui_1.ask_autocomplete)(['↵ Back', ...config.repo], undefined, true));
     if (repo === '↵ Back')
         return;
-    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = (0, ui_1.spin)().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         let acl_list = (await api.getACL(repo)).map((val) => to_ACL(val));
         spinner.stop();
@@ -113,17 +113,17 @@ async function change_acl(acl_list, config) {
             return { name: to_show, value: val, short: to_show };
         }),
     ];
-    const acl = await ui_1.ask_list_index(ask, 'Give ACL');
+    const acl = await (0, ui_1.ask_list_index)(ask, 'Give ACL');
     if (!acl)
         return undefined;
     if (typeof acl === 'string')
         return await ask_acl(config);
-    const rights = (await ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl.rights_bool, acl.name)).join('');
+    const rights = (await (0, ui_1.ask_qcm)(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], acl.rights_bool, acl.name)).join('');
     return to_ACL({ name: acl.name, rights });
 }
 async function ask_acl(config) {
-    const user = await ui_1.ask_autocomplete(['ramassage-tek', ...config.contact], 'Enter new email');
-    const rights = (await ui_1.ask_qcm(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)).join('');
+    const user = await (0, ui_1.ask_autocomplete)(['ramassage-tek', ...config.contact], 'Enter new email');
+    const rights = (await (0, ui_1.ask_qcm)(['Read', 'Write', 'Admin'], ['r', 'w', 'a'], [false, false, false], user)).join('');
     if (user !== 'ramassage-tek' && !config.contact.some((value) => value === user)) {
         config.contact.push(user);
         config.contact = config.contact;
@@ -144,10 +144,10 @@ function to_ACL(acl) {
     return new_r;
 }
 async function show_repo_info(api, config) {
-    const repo = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], undefined, true);
+    const repo = await (0, ui_1.ask_autocomplete)(['↵ Back', ...config.repo], undefined, true);
     if (repo === '↵ Back')
         return;
-    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = (0, ui_1.spin)().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         const repo_info = await api.repositoryInfo(repo);
         const creation_date = new Date(0);
@@ -167,19 +167,19 @@ async function show_repo_info(api, config) {
     }
 }
 async function show_repo_preview(config) {
-    const repo = await ui_1.ask_autocomplete(['↵ Back', ...config.repo], 'Select for see README.md', true);
+    const repo = await (0, ui_1.ask_autocomplete)(['↵ Back', ...config.repo], 'Select for see README.md', true);
     if (repo === '↵ Back')
         return;
-    const spinner = ui_1.spin().start(chalk_1.default.green(utils_1.WAIT_MSG));
+    const spinner = (0, ui_1.spin)().start(chalk_1.default.green(utils_1.WAIT_MSG));
     try {
         // git_menu.tar > extract to stdout
-        const remote = await utils_1.sh(`git archive --remote=git@git.epitech.eu:${config.email}/${repo} HEAD README.md | tar -xO`);
-        const md_term = markdown_parser_1.md_parser(remote.stdout);
+        const remote = await (0, utils_1.sh)(`git archive --remote=git@git.epitech.eu:${config.email}/${repo} HEAD README.md | tar -xO`);
+        const md_term = (0, markdown_parser_1.md_parser)(remote.stdout);
         spinner.stop();
         console.log(md_term + '\n');
     }
     catch (err) {
-        if (/remote: fatal: pathspec 'README\.md' did not match any files/.test(err.message || ''))
+        if (/remote: fatal: pathspec 'README\.md' did not match any files/.test((err === null || err === void 0 ? void 0 : err.message) || ''))
             spinner.fail(chalk_1.default.red("Error: 'README.md' file was not found on the repository"));
         else
             spinner.fail(chalk_1.default.red(err));

@@ -57,13 +57,13 @@ class ListSpinnerPrompt extends base_1.default {
     _run(cb) {
         this.done = cb;
         const self = this;
-        const events = events_1.default(this.rl);
-        events.normalizedUpKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onUpKey.bind(this));
-        events.normalizedDownKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onDownKey.bind(this));
+        const events = (0, events_1.default)(this.rl);
+        events.normalizedUpKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onUpKey.bind(this));
+        events.normalizedDownKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onDownKey.bind(this));
         // @ts-ignore
-        events.numberKey.pipe(operators_1.takeUntil(events.line)).forEach(this.onNumberKey.bind(this));
+        events.numberKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onNumberKey.bind(this));
         events.line
-            .pipe(operators_1.take(1), operators_1.map(this.getCurrentValue.bind(this)), operators_1.flatMap((value) => run_async_1.default(self.opt.filter)(value).catch((err) => err)))
+            .pipe((0, operators_1.take)(1), (0, operators_1.map)(this.getCurrentValue.bind(this)), (0, operators_1.flatMap)((value) => (0, run_async_1.default)(self.opt.filter)(value).catch((err) => err)))
             .forEach(this.onSubmit.bind(this));
         // Init the prompt
         cli_cursor_1.default.hide();

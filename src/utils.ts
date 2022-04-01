@@ -217,7 +217,7 @@ export function open_config() {
 		} else {
 			config = {}
 		}
-	} catch (err) {
+	} catch (err: any) {
 		print_message('Fail to open config file', err, 'error')
 	}
 	return parse_config(config)
@@ -261,7 +261,7 @@ export async function write_config(config_info: any) {
 		}
 		const config_json = JSON.stringify(config_info, undefined, 4)
 		fs.writeFileSync(CONFIG_PATH, config_json, 'utf8')
-	} catch (err) {
+	} catch (err: any) {
 		print_message('Fail to save config file', err, 'error')
 	}
 }

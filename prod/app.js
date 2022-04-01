@@ -15,11 +15,11 @@ const repository_menu_1 = require("./repository_menu");
 const key_menu_1 = require("./key_menu");
 const timeline_menu_1 = require("./timeline_menu");
 const options_menu_1 = require("./options_menu");
-exports.run = async () => {
+const run = async () => {
     process.title = 'blih cli';
     if (process.argv.length > 2)
         await parse_args(process.argv);
-    const config = utils_1.open_config();
+    const config = (0, utils_1.open_config)();
     if (!utils_1.IS_DEBUG && config.check_update)
         check_update(await utils_1.APP_VERSION);
     if (process.argv.length > 2)
@@ -53,37 +53,38 @@ exports.run = async () => {
         'Exit',
     ];
     while (!should_quit) {
-        const choice = await ui_1.ask_list(choices, "Let's do some works");
+        const choice = await (0, ui_1.ask_list)(choices, "Let's do some works");
         switch (choice) {
             case choices[0]:
-                await git_menu_1.git_menu(api, config);
+                await (0, git_menu_1.git_menu)(api, config);
                 break;
             case choices[1]:
-                await repository_menu_1.repo_menu(api, config);
+                await (0, repository_menu_1.repo_menu)(api, config);
                 break;
             case choices[2]:
-                await key_menu_1.key_menu(api);
+                await (0, key_menu_1.key_menu)(api);
                 break;
             case choices[3]:
-                await timeline_menu_1.timeline_menu(config);
+                await (0, timeline_menu_1.timeline_menu)(config);
                 break;
             case choices[4]:
                 await show_contact(config);
                 break;
             case choices[5]:
-                await options_menu_1.options_menu(config);
+                await (0, options_menu_1.options_menu)(config);
                 break;
             case choices[6]:
             default:
                 should_quit = true;
         }
     }
-    await utils_1.write_config(config.to_json());
+    await (0, utils_1.write_config)(config.to_json());
 };
+exports.run = run;
 async function login(config) {
     let api;
     let error = false;
-    const spinner = ui_1.spin({ color: 'blue' }).start(chalk_1.default.green('Check Blih server...'));
+    const spinner = (0, ui_1.spin)({ color: 'blue' }).start(chalk_1.default.green('Check Blih server...'));
     try {
         let time = 0;
         if (!process.env.BLIH_CLI_CONFIG_SKIP)
@@ -92,15 +93,15 @@ async function login(config) {
     }
     catch (err) {
         spinner.stop();
-        utils_1.print_message('Blih server down', '', 'fail');
+        (0, utils_1.print_message)('Blih server down', '', 'fail');
     }
     do {
         if (!config.email) {
-            config.email = await ui_1.ask_email();
+            config.email = await (0, ui_1.ask_email)();
         }
-        utils_1.print_message(`Login with: ${chalk_1.default.cyan(config.email)}`, '', 'message');
+        (0, utils_1.print_message)(`Login with: ${chalk_1.default.cyan(config.email)}`, '', 'message');
         if (!config.token) {
-            config.token = blih_api_1.BlihApi.hashPassword(await ui_1.ask_password());
+            config.token = blih_api_1.BlihApi.hashPassword(await (0, ui_1.ask_password)());
         }
         spinner.start(chalk_1.default.green('Try to login...'));
         try {
@@ -112,7 +113,7 @@ async function login(config) {
         }
         catch (err) {
             spinner.stop();
-            utils_1.print_message('Fail to login', String(err), 'fail');
+            (0, utils_1.print_message)('Fail to login', String(err), 'fail');
             if (err === 'Bad token')
                 config.email = '';
             config.token = '';
@@ -122,7 +123,7 @@ async function login(config) {
         }
     } while (error || !api);
     if (config.verbose && !config.args) {
-        utils_1.print_message(`Found ${chalk_1.default.cyan(config.repo.length)} repositories`, '', 'message');
+        (0, utils_1.print_message)(`Found ${chalk_1.default.cyan(config.repo.length)} repositories`, '', 'message');
     }
     return api;
 }
@@ -132,20 +133,20 @@ async function show_contact(config) {
         const choices = [...config.contact];
         choices.unshift('Add email');
         choices.unshift('↵ Back');
-        const choice = await ui_1.ask_list(choices, 'Some friends (email is auto add)');
+        const choice = await (0, ui_1.ask_list)(choices, 'Some friends (email is auto add)');
         switch (choice) {
             case choices[0]:
                 should_quit = true;
                 break;
             case choices[1]:
-                const new_address = await ui_1.ask_email();
+                const new_address = await (0, ui_1.ask_email)();
                 if (!config.contact.some((value) => value === new_address)) {
                     config.contact.push(new_address);
                     config.contact = config.contact;
                 }
                 break;
             default:
-                const valid = await ui_1.ask_question(`Remove ${choice} ?`);
+                const valid = await (0, ui_1.ask_question)(`Remove ${choice} ?`);
                 if (valid) {
                     config.contact = config.contact.filter((value) => value !== choice);
                 }
@@ -159,13 +160,13 @@ async function fast_mode(api, config) {
         return;
     }
     else if (config.args[2] === '-c') {
-        await repository_menu_1.create_repo(api, config, config.args[3]);
+        await (0, repository_menu_1.create_repo)(api, config, config.args[3]);
     }
     else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
         if (config.args[2] === '-a')
-            await repository_menu_1.acl_menu(api, config, config.args[3]);
+            await (0, repository_menu_1.acl_menu)(api, config, config.args[3]);
         else
-            await repository_menu_1.acl_menu(api, config, config.args[2].substr(6));
+            await (0, repository_menu_1.acl_menu)(api, config, config.args[2].substr(6));
     }
     else
         show_help();
@@ -173,7 +174,7 @@ async function fast_mode(api, config) {
 async function parse_args(args) {
     if (args[2]) {
         if (args[2] === '-h' || args[2] === '-H' || args[2] === '--help') {
-            await utils_1.sh_live('man blih_cli');
+            await (0, utils_1.sh_live)('man blih_cli');
             process.exit(0);
         }
         if (args[2] === '-v' || args[2] === '-V' || args[2] === '--version') {
@@ -186,16 +187,16 @@ async function parse_args(args) {
         }
         if (args[2] === '-u' || args[2] === '-U' || args[2] === '--update' || args[2] === '--UPDATE') {
             if (utils_1.IS_DEBUG)
-                await utils_1.sh_live(`sudo sh ${__dirname}/../update.sh`);
+                await (0, utils_1.sh_live)(`sudo sh ${__dirname}/../update.sh`);
             else
                 console.log('Use: `sudo npm up blih_cli -g`');
             process.exit(0);
         }
         if (args[2] === '--uninstall') {
             if (utils_1.IS_DEBUG) {
-                if (!(await ui_1.ask_question('Uninstall blih_cli ?')))
+                if (!(await (0, ui_1.ask_question)('Uninstall blih_cli ?')))
                     process.exit(0);
-                await utils_1.sh_live(`sudo sh ${__dirname}/../uninstall.sh`);
+                await (0, utils_1.sh_live)(`sudo sh ${__dirname}/../uninstall.sh`);
             }
             else
                 console.log('Use: `sudo npm un blih_cli -g`');
@@ -204,22 +205,22 @@ async function parse_args(args) {
         if (!utils_1.IS_DEBUG)
             return;
         if (args[2] === '--snapshot') {
-            await utils_1.sh_live(`sudo sh ${__dirname}/../update.sh snapshot`);
+            await (0, utils_1.sh_live)(`sudo sh ${__dirname}/../update.sh snapshot`);
             process.exit(0);
         }
     }
 }
 function show_help() {
-    ui_1.spin().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
+    (0, ui_1.spin)().info(utils_1.clor.info('Invalid option\n  Usage blih_cli -[aci] [OPTION]...' + '\n  or use `man blih_cli`'));
 }
 function check_update(current) {
     if (os_1.default.type() === 'Linux' || os_1.default.type().match(/BSD$/)) {
-        child_process_1.exec('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
+        (0, child_process_1.exec)('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
             if (err || !stdout)
                 return;
             if (stdout.includes(current.slice(1)) === false) {
                 // prettier-ignore
-                child_process_1.exec(`notify-send "New update available" "Try 'sudo npm up blih_cli -g' to update" -i "${__dirname}/../logo.png" -a "blih cli" -t 10000`);
+                (0, child_process_1.exec)(`notify-send "New update available" "Try 'sudo npm up blih_cli -g' to update" -i "${__dirname}/../logo.png" -a "blih cli" -t 10000`);
             }
         });
     }
