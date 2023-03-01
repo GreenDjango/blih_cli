@@ -1,14 +1,31 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"outDir": "build",
-		"strict": true,
-		"resolveJsonModule": true,
-		"target": "es2019",
-		"esModuleInterop": true
-	},
-	"compileOnSave": true,
-	"include": ["src"]
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "module": "commonjs",
+    "target": "es2020",
+    "outDir": "build",
+    "moduleResolution": "node",
+
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "checkJs": true,
+
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "importsNotUsedAsValues": "error"
+  },
+  "compileOnSave": true,
+  "include": ["src"]
 }

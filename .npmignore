@@ -1,4 +1,3 @@
- 
 # Logs
 logs
 *.log
@@ -11,15 +10,6 @@ yarn-error.log*
 
 # Build folder
 build/
-
-# Dev stuf
-tests/
-src/
-tsconfig.json
-tslint.json
-.prettierrc.json
-.github/
-*.sh
 
 # Runtime data
 pids
@@ -68,3 +58,15 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# ide
+.vscode
+
+# Dev stuf
+tests/
+src/
+tsconfig.json
+.prettierrc.json
+.eslintrc.json
+.github/
+*.sh
