@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import fs from 'fs'
-import { BlihApi } from './blih_api'
+import type { BlihApi } from './blih_api'
 import { ask_list, ask_autocomplete, ask_local_path, ask_question, ask_input, spin } from './ui'
 import { ConfigType, clor, sh, sh_live, WAIT_MSG } from './utils'
 

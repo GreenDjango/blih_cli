@@ -45,8 +45,7 @@ async function options_menu(config) {
                 await cloning_options(config);
                 break;
             case choices[8]:
-                const valid = await (0, ui_1.ask_question)(`Are you sure ?`);
-                if (valid)
+                if (await (0, ui_1.ask_question)(`Are you sure ?`))
                     config.contact = [];
                 break;
             case choices[0]:
@@ -61,7 +60,7 @@ async function colors_option(config) {
     const color_choices = [...utils_1.colorsValue].map((key) => {
         return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${chalk_1.default[key]('test ■')}`;
     });
-    while (1) {
+    while (true) {
         const choices = colorsKey.map((key) => {
             return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${utils_1.clor[key]('current ■')}`;
         });

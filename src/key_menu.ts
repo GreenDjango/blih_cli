@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { homedir } from 'os'
 import fs from 'fs'
-import { BlihApi } from './blih_api'
+import type { BlihApi } from './blih_api'
 import { ask_list, ask_question, ask_path, ask_input, spin } from './ui'
 import { clor, WAIT_MSG, sh } from './utils'
 
@@ -85,6 +85,7 @@ async function delete_key(api: BlihApi) {
 		)
 		if (choice === '↵ Back' || !(await ask_question('Are you sure ?'))) return
 		const key = choice.split(' ')[0]
+		if (key === undefined) return
 		spinner.start(chalk.green(WAIT_MSG))
 		const res = await api.deleteKey(key)
 		spinner.succeed(chalk.green(res))
@@ -106,7 +107,7 @@ async function show_key(api: BlihApi) {
 		)
 		if (idx === '0') return
 		const key = key_list[+idx - 1]
-		spinner.info(clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`))
+		spinner.info(clor.info(`Name:		${key?.name}` + `\n  Data:		${key?.data}`))
 	} catch (err) {
 		spinner.fail(chalk.red(err))
 	}

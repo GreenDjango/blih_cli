@@ -32,11 +32,11 @@ const run = async () => {
             chalk_1.default.grey.italic(`  ${await utils_1.APP_VERSION}\n`));
     }
     if (utils_1.IS_DEBUG)
-        console.log(`DEBUG VERSION, skip: ${process.env.BLIH_CLI_CONFIG_SKIP}`);
+        console.log(`DEBUG VERSION, skip: ${process.env['BLIH_CLI_CONFIG_SKIP']}`);
     const api = await login(config);
     if (config.args)
         await fast_mode(api, config);
-    process.stdin.on('keypress', async (str, key) => {
+    process.stdin.on('keypress', async (_str, key) => {
         if (key.ctrl && key.name === 'l') {
             console.clear();
         }
@@ -87,7 +87,7 @@ async function login(config) {
     const spinner = (0, ui_1.spin)({ color: 'blue' }).start(chalk_1.default.green('Check Blih server...'));
     try {
         let time = 0;
-        if (!process.env.BLIH_CLI_CONFIG_SKIP)
+        if (!process.env['BLIH_CLI_CONFIG_SKIP'])
             time = await blih_api_1.BlihApi.ping();
         spinner.succeed(chalk_1.default.green('Blih server up: ') + chalk_1.default.cyan(time + 'ms'));
     }
@@ -106,7 +106,7 @@ async function login(config) {
         spinner.start(chalk_1.default.green('Try to login...'));
         try {
             api = new blih_api_1.BlihApi({ email: config.email, token: config.token });
-            if (!process.env.BLIH_CLI_CONFIG_SKIP)
+            if (!process.env['BLIH_CLI_CONFIG_SKIP'])
                 config.repo = (await api.listRepositories()).map((value) => value.name);
             error = false;
             spinner.stop();
@@ -134,22 +134,21 @@ async function show_contact(config) {
         choices.unshift('Add email');
         choices.unshift('↵ Back');
         const choice = await (0, ui_1.ask_list)(choices, 'Some friends (email is auto add)');
-        switch (choice) {
-            case choices[0]:
-                should_quit = true;
-                break;
-            case choices[1]:
-                const new_address = await (0, ui_1.ask_email)();
-                if (!config.contact.some((value) => value === new_address)) {
-                    config.contact.push(new_address);
-                    config.contact = config.contact;
-                }
-                break;
-            default:
-                const valid = await (0, ui_1.ask_question)(`Remove ${choice} ?`);
-                if (valid) {
-                    config.contact = config.contact.filter((value) => value !== choice);
-                }
+        if (choice === choices[0]) {
+            should_quit = true;
+        }
+        else if (choice === choices[1]) {
+            const new_address = await (0, ui_1.ask_email)();
+            if (!config.contact.some((value) => value === new_address)) {
+                config.contact.push(new_address);
+                config.contact = config.contact;
+            }
+        }
+        else {
+            const valid = await (0, ui_1.ask_question)(`Remove ${choice} ?`);
+            if (valid) {
+                config.contact = config.contact.filter((value) => value !== choice);
+            }
         }
     }
 }
@@ -162,7 +161,7 @@ async function fast_mode(api, config) {
     else if (config.args[2] === '-c') {
         await (0, repository_menu_1.create_repo)(api, config, config.args[3]);
     }
-    else if (config.args[2] === '-a' || config.args[2].substr(0, 6) === '--acl=') {
+    else if (config.args[2] === '-a' || config.args[2]?.substr(0, 6) === '--acl=') {
         if (config.args[2] === '-a')
             await (0, repository_menu_1.acl_menu)(api, config, config.args[3]);
         else
@@ -215,7 +214,7 @@ function show_help() {
 }
 function check_update(current) {
     if (os_1.default.type() === 'Linux' || os_1.default.type().match(/BSD$/)) {
-        (0, child_process_1.exec)('npm v blih_cli@latest version --silent', (err, stdout, stderr) => {
+        (0, child_process_1.exec)('npm v blih_cli@latest version --silent', (err, stdout) => {
             if (err || !stdout)
                 return;
             if (stdout.includes(current.slice(1)) === false) {

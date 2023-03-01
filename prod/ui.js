@@ -151,7 +151,7 @@ async function ask_autocomplete(source, message, suggestOnly) {
                 message: message || '>',
                 pageSize: 10,
                 suggestOnly: suggestOnly ? false : true,
-                source: async (answer, input) => {
+                source: async (_answer, input) => {
                     const regex_input = RegExp(input, 'i');
                     return source.filter((value) => regex_input.test(value));
                 },
@@ -237,7 +237,7 @@ async function ask_timeline(choices, message) {
     choices.forEach((choice) => {
         const idx = new_choices.findIndex((value2) => value2.module === choice.module);
         if (idx >= 0)
-            new_choices[idx].projects.push({
+            new_choices[idx]?.projects.push({
                 project: choice.project,
                 start: choice.start,
                 end: choice.end,

@@ -12,7 +12,6 @@ async function timeline_menu(config) {
     if (!config.timelines.length)
         await fetch_timelines(config);
     let should_quit = false;
-    console.log(config.timelines.map(a => a.promo));
     const choices = config.timelines
         .map((val) => ({ ...val, name: `Promo ${val.promo} S${val.semester}` }))
         .sort((a, b) => String(a.name).localeCompare(String(b.name)))

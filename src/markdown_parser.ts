@@ -34,7 +34,7 @@ export function md_parser(to_md: string) {
 	const arr: any = {}
 	const gex = /^ *(\d+)\. .*$/gm
 	for (let res = gex.exec(src); res !== null; res = gex.exec(src)) {
-		arr[gex.lastIndex + 1] = parseInt(res[1])
+		arr[gex.lastIndex + 1] = parseInt(res[1] ?? '1')
 	}
 	src = src.replace(/^ *(\d+)\. (.*)$/gm, (_: string, p1: string, p2: string, idx: number) => {
 		const new_list_nb = typeof arr[idx] === 'number' ? (arr[idx] || 0) + 1 : parseInt(p1)
@@ -87,8 +87,8 @@ function cli_width() {
 	if (opts.output?.columns) {
 		return opts.output.columns
 	}
-	if (process.env.CLI_WIDTH) {
-		const width = parseInt(process.env.CLI_WIDTH, 10)
+	if (process.env['CLI_WIDTH']) {
+		const width = parseInt(process.env['CLI_WIDTH'], 10)
 		if (!isNaN(width) && width !== 0) {
 			return width
 		}

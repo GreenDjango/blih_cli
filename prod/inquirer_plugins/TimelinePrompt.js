@@ -12,14 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/* tslint:disable */
 const chalk_1 = __importDefault(require("chalk"));
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const base_1 = __importDefault(require("inquirer/lib/prompts/base"));
 const events_1 = __importDefault(require("inquirer/lib/utils/events"));
 const paginator_1 = __importDefault(require("inquirer/lib/utils/paginator"));
-// @ts-ignore
 const cli_cursor_1 = __importDefault(require("cli-cursor"));
 // @ts-ignore
 const run_async_1 = __importDefault(require("run-async"));
@@ -56,12 +54,12 @@ class TimelinePrompt extends base_1.default {
         this.showHelp = true;
         this.selected = 0;
         this.offsetX = 0;
-        this.done = undefined;
+        this.done = null;
         this.axeX = '';
         this.unitsX = '';
         this.longestName = 0;
-        this.oldestDate = undefined;
-        this.latestDate = undefined;
+        this.oldestDate = null;
+        this.latestDate = null;
         this.setup();
         const def = this.opt.default;
         // If def is a Number, then use as index. Otherwise, check for value.
@@ -79,18 +77,17 @@ class TimelinePrompt extends base_1.default {
     setup() {
         // set longestName, oldestDate, latestDate
         this.opt.choices.forEach((choice) => {
-            var _a, _b;
             if (choice.type !== 'choice')
                 return;
             const extra = choice.extra;
             if (choice.name.length > this.longestName)
                 this.longestName = choice.name.length;
-            if (!this.oldestDate || this.oldestDate > ((_a = extra[0]) === null || _a === void 0 ? void 0 : _a.start)) {
-                this.oldestDate = (_b = extra[0]) === null || _b === void 0 ? void 0 : _b.start;
+            if (!this.oldestDate || (extra[0]?.start && this.oldestDate > extra[0].start)) {
+                this.oldestDate = extra[0]?.start ?? null;
             }
             const latest = extra.reduce((a, b) => (a.end > b.end ? a : b));
-            if (!this.latestDate || this.latestDate < (latest === null || latest === void 0 ? void 0 : latest.end))
-                this.latestDate = latest === null || latest === void 0 ? void 0 : latest.end;
+            if (!this.latestDate || this.latestDate < latest?.end)
+                this.latestDate = latest?.end;
         });
         if (!this.oldestDate || !this.latestDate) {
             this.oldestDate = new Date();
@@ -99,7 +96,7 @@ class TimelinePrompt extends base_1.default {
         const monthLength = getBetweenMonth(this.oldestDate, this.latestDate) + 1;
         this.axeX = '─'.repeat(this.longestName + 5) + '┤' + `${unitSize}|`.repeat(monthLength);
         for (let i = 0; i <= monthLength; i++) {
-            const month = months[(this.oldestDate.getMonth() + i) % 12];
+            const month = months[(this.oldestDate.getMonth() + i) % 12] ?? '';
             this.unitsX +=
                 ' '.repeat(unitSize.length -
                     Math.floor(month.length / 2) -
@@ -117,8 +114,6 @@ class TimelinePrompt extends base_1.default {
         events.normalizedDownKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onDownKey.bind(this));
         eventsCustom.normalizedLeftKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onLeftKey.bind(this));
         eventsCustom.normalizedRightKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onRightKey.bind(this));
-        // @ts-ignore
-        events.numberKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onNumberKey.bind(this));
         events.line
             .pipe((0, operators_1.take)(1), (0, operators_1.map)(this.getCurrentValue.bind(this)), (0, operators_1.flatMap)((value) => (0, run_async_1.default)(self.opt.filter)(value).catch((err) => err)))
             .forEach(this.onSubmit.bind(this));
@@ -128,7 +123,7 @@ class TimelinePrompt extends base_1.default {
         return this;
     }
     getAbsPos(d) {
-        const monthDiff = getBetweenMonth(this.oldestDate, d);
+        const monthDiff = getBetweenMonth(this.oldestDate ?? new Date(), d);
         //Day 0 is the last day in the previous month
         const dayInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
         const monthOffset = Math.round((unitSize.length + 1) * (d.getDate() / dayInMonth));
@@ -150,11 +145,8 @@ class TimelinePrompt extends base_1.default {
         }
         else {
             const choicesStr = this.listRender();
-            // @ts-ignore
             const indexPosition = this.opt.choices.indexOf(this.opt.choices.getChoice(this.selected));
-            // prettier-ignore
-            // @ts-ignore
-            message += '\n' + this.paginator.paginate(choicesStr, indexPosition * 3 + 1, this.opt.pageSize);
+            message += '\n' + this.paginator.paginate(choicesStr, indexPosition * 3 + 1);
         }
         const bottomContent = this.status === 'answered' ? undefined : this.bottomRender();
         this.screen.render(message, bottomContent);
@@ -258,12 +250,6 @@ class TimelinePrompt extends base_1.default {
         this.offsetX -= 8;
         this.render();
     }
-    onNumberKey(input) {
-        if (input <= this.opt.choices.realLength) {
-            this.selected = input - 1;
-        }
-        this.render();
-    }
 }
 exports.default = TimelinePrompt;
 function getBetweenMonth(a, b) {
@@ -294,7 +280,7 @@ function applyOffset(line, offsetX, width) {
     return newLine;
 }
 function observeCustom(rl) {
-    var keypress = (0, rxjs_1.fromEvent)(rl.input, 'keypress', (value, key) => {
+    const keypress = (0, rxjs_1.fromEvent)(rl.input, 'keypress', (value, key) => {
         return { value: value, key: key || {} };
     })
         // Ignore `enter` key. On the readline, we only care about the `line` event.

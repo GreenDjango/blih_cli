@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { BlihApi, ACL } from './blih_api'
+import type { BlihApi, ACL } from './blih_api'
 import {
 	ask_list,
 	ask_list_index,

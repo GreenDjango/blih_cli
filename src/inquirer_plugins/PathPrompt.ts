@@ -9,14 +9,13 @@
  * @author Theo <@GreenDjango>
  */
 
-/* tslint:disable */
-import { Interface as ReadLineInterface } from 'readline'
-import { Answers, Question } from 'inquirer'
+import type { Interface as ReadLineInterface } from 'readline'
+import type { Answers, Question } from 'inquirer'
 import { readdirSync, statSync } from 'fs'
 import path from 'path'
 import Choices from 'inquirer/lib/objects/choices'
-// @ts-ignore
 import InquirerAutocomplete from 'inquirer-autocomplete-prompt'
+// @ts-ignore
 import stripAnsi from 'strip-ansi'
 import style from 'ansi-styles'
 import fuzzy from 'fuzzy'
@@ -38,7 +37,7 @@ type Options = Question & {
  * suggestOnly: boolean
  * default: number | string, index or value to show first
  */
-export default class PathPrompt extends InquirerAutocomplete {
+export default class PathPrompt<T extends Answers> extends InquirerAutocomplete<T> {
 	constructor(question: Options, rl: ReadLineInterface, answers: Answers) {
 		const {
 			itemType = 'any',
@@ -46,18 +45,17 @@ export default class PathPrompt extends InquirerAutocomplete {
 			excludePath = () => false,
 			excludeFilter = false as any,
 		} = question
-		const questionBase = Object.assign({}, question, {
+		const questionBase = {
+			...question,
 			source: async (_: Answers, searchTerm: string) =>
 				getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, question.default),
-		})
-		super(questionBase, rl, answers)
+		}
+		super(questionBase as any, rl, answers)
 	}
 
-	search(searchTerm: string) {
+	override search(searchTerm: string) {
 		return super.search(searchTerm).then(() => {
-			// @ts-ignore
 			this.currentChoices.getChoice = (choiceIndex) => {
-				// @ts-ignore
 				const choice = Choices.prototype.getChoice.call(this.currentChoices, choiceIndex)
 				return {
 					value: stripAnsi(choice.value),
@@ -71,7 +69,7 @@ export default class PathPrompt extends InquirerAutocomplete {
 	/**
 	 * When user press `enter` key
 	 */
-	onSubmit(line: string) {
+	override onSubmit(line: string) {
 		super.onSubmit(stripAnsi(line))
 	}
 }
@@ -80,7 +78,7 @@ function getPaths(
 	rootPath: string,
 	searchTerm: string,
 	excludePath: (path: string) => boolean,
-	excludeFilter: (path: string) => boolean,
+	excludeFilter: ((path: string) => boolean) | undefined,
 	itemType: 'any' | 'directory' | 'file',
 	defaultItem: any
 ) {
@@ -115,14 +113,14 @@ function getPaths(
 
 	const preFilteredNodes = !excludeFilter
 		? nodeList
-		: nodeList.filter((node) => !excludeFilter(node))
+		: nodeList?.filter((node) => excludeFilter(node))
 
 	const fuzzOptions = {
 		pre: style.green.open,
 		post: style.green.close,
 	}
 	const filteredNodes = fuzzy
-		.filter(searchTerm || '', preFilteredNodes, fuzzOptions)
+		.filter(searchTerm || '', preFilteredNodes ?? [], fuzzOptions)
 		.map((e) => e.string)
 	if (!searchTerm && defaultItem) {
 		filteredNodes.unshift(defaultItem)

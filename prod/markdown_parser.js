@@ -38,7 +38,7 @@ function md_parser(to_md) {
     const arr = {};
     const gex = /^ *(\d+)\. .*$/gm;
     for (let res = gex.exec(src); res !== null; res = gex.exec(src)) {
-        arr[gex.lastIndex + 1] = parseInt(res[1]);
+        arr[gex.lastIndex + 1] = parseInt(res[1] ?? '1');
     }
     src = src.replace(/^ *(\d+)\. (.*)$/gm, (_, p1, p2, idx) => {
         const new_list_nb = typeof arr[idx] === 'number' ? (arr[idx] || 0) + 1 : parseInt(p1);
@@ -70,23 +70,22 @@ function md_parser(to_md) {
 }
 exports.md_parser = md_parser;
 function cli_width() {
-    var _a, _b, _c;
     const opts = {
         defaultWidth: 80,
         output: process.stdout,
         tty: require('tty'),
     };
-    if ((_a = opts.output) === null || _a === void 0 ? void 0 : _a.getWindowSize) {
+    if (opts.output?.getWindowSize) {
         return opts.output.getWindowSize()[0] || opts.defaultWidth;
     }
-    if ((_b = opts.tty) === null || _b === void 0 ? void 0 : _b.getWindowSize) {
+    if (opts.tty?.getWindowSize) {
         return opts.tty.getWindowSize()[1] || opts.defaultWidth;
     }
-    if ((_c = opts.output) === null || _c === void 0 ? void 0 : _c.columns) {
+    if (opts.output?.columns) {
         return opts.output.columns;
     }
-    if (process.env.CLI_WIDTH) {
-        const width = parseInt(process.env.CLI_WIDTH, 10);
+    if (process.env['CLI_WIDTH']) {
+        const width = parseInt(process.env['CLI_WIDTH'], 10);
         if (!isNaN(width) && width !== 0) {
             return width;
         }

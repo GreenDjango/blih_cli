@@ -2,7 +2,8 @@ import * as inquirer from 'inquirer'
 import chalk from 'chalk'
 import ora, { Options } from 'ora'
 import { VERBOSE, SPINNER } from './utils'
-import { Projects } from './timeline_api'
+import type { Projects } from './timeline_api'
+
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
 inquirer.registerPrompt('path', require('./inquirer_plugins/PathPrompt').default)
@@ -132,7 +133,7 @@ export async function ask_autocomplete(source: string[], message?: string, sugge
 				message: message || '>',
 				pageSize: 10,
 				suggestOnly: suggestOnly ? false : true,
-				source: async (answer: any, input: any) => {
+				source: async (_answer: any, input: any) => {
 					const regex_input = RegExp(input, 'i')
 					return source.filter((value) => regex_input.test(value))
 				},
@@ -224,7 +225,7 @@ export async function ask_timeline(choices: Projects[], message?: string) {
 	choices.forEach((choice) => {
 		const idx = new_choices.findIndex((value2) => value2.module === choice.module)
 		if (idx >= 0)
-			new_choices[idx].projects.push({
+			new_choices[idx]?.projects.push({
 				project: choice.project,
 				start: choice.start,
 				end: choice.end,

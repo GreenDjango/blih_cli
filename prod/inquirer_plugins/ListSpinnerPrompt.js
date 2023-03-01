@@ -12,14 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/* tslint:disable */
 const chalk_1 = __importDefault(require("chalk"));
 const operators_1 = require("rxjs/operators");
 const base_1 = __importDefault(require("inquirer/lib/prompts/base"));
 const events_1 = __importDefault(require("inquirer/lib/utils/events"));
 const paginator_1 = __importDefault(require("inquirer/lib/utils/paginator"));
 const cli_spinners_1 = __importDefault(require("cli-spinners"));
-// @ts-ignore
 const cli_cursor_1 = __importDefault(require("cli-cursor"));
 // @ts-ignore
 const run_async_1 = __importDefault(require("run-async"));
@@ -60,8 +58,6 @@ class ListSpinnerPrompt extends base_1.default {
         const events = (0, events_1.default)(this.rl);
         events.normalizedUpKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onUpKey.bind(this));
         events.normalizedDownKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onDownKey.bind(this));
-        // @ts-ignore
-        events.numberKey.pipe((0, operators_1.takeUntil)(events.line)).forEach(this.onNumberKey.bind(this));
         events.line
             .pipe((0, operators_1.take)(1), (0, operators_1.map)(this.getCurrentValue.bind(this)), (0, operators_1.flatMap)((value) => (0, run_async_1.default)(self.opt.filter)(value).catch((err) => err)))
             .forEach(this.onSubmit.bind(this));
@@ -87,10 +83,8 @@ class ListSpinnerPrompt extends base_1.default {
             const choicesStr = listRender(this.opt.choices, this.selected, this.frame_idx);
             if (!ignore_spinners)
                 this.frame_idx++;
-            // @ts-ignore
             const indexPosition = this.opt.choices.indexOf(this.opt.choices.getChoice(this.selected));
-            // @ts-ignore
-            message += '\n' + this.paginator.paginate(choicesStr, indexPosition, this.opt.pageSize);
+            message += '\n' + this.paginator.paginate(choicesStr, indexPosition);
         }
         this.screen.render(message, undefined);
     }
@@ -125,13 +119,6 @@ class ListSpinnerPrompt extends base_1.default {
     onDownKey() {
         const len = this.opt.choices.realLength;
         this.selected = this.selected < len - 1 ? this.selected + 1 : 0;
-        this.showHelp = false;
-        this.render(true);
-    }
-    onNumberKey(input) {
-        if (input <= this.opt.choices.realLength) {
-            this.selected = input - 1;
-        }
         this.showHelp = false;
         this.render(true);
     }

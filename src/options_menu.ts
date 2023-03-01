@@ -50,8 +50,7 @@ export async function options_menu(config: ConfigType) {
 				await cloning_options(config)
 				break
 			case choices[8]:
-				const valid = await ask_question(`Are you sure ?`)
-				if (valid) config.contact = []
+				if (await ask_question(`Are you sure ?`)) config.contact = []
 				break
 			case choices[0]:
 			default:
@@ -66,7 +65,7 @@ async function colors_option(config: ConfigType) {
 		return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${(chalk as any)[key]('test ■')}`
 	})
 
-	while (1) {
+	while (true) {
 		const choices = colorsKey.map((key) => {
 			return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${(clor as any)[key]('current ■')}`
 		})
@@ -81,7 +80,7 @@ async function colors_option(config: ConfigType) {
 		if (idx >= 0) {
 			switch (colorsKey[+option - 1]) {
 				case 'info':
-					config.colors.info = [...colorsValue][idx]
+					config.colors.info = [...colorsValue][idx]!
 					break
 				default:
 					continue
@@ -120,8 +119,8 @@ async function cloning_options(config: ConfigType) {
 			if (choice2 === '↵ Back') {
 				1
 			} else if (choice2 === 'Set by default' && choice) {
-				const def = config.cloning_options[0]
-				config.cloning_options[0] = config.cloning_options[choice]
+				const def = config.cloning_options[0]!
+				config.cloning_options[0] = config.cloning_options[choice]!
 				config.cloning_options[choice] = def
 			} else if (choice2 === 'Erase' && (await ask_question(`Are you sure ?`))) {
 				config.cloning_options.splice(choice, 1)

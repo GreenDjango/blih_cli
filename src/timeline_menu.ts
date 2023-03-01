@@ -7,10 +7,9 @@ export async function timeline_menu(config: ConfigType) {
 	if (!config.timelines.length) await fetch_timelines(config)
 
 	let should_quit = false
-	console.log(config.timelines.map(a => a.promo));
-	
+
 	const choices = config.timelines
-		.map((val) => ({...val, name: `Promo ${val.promo} S${val.semester}`}))
+		.map((val) => ({ ...val, name: `Promo ${val.promo} S${val.semester}` }))
 		.sort((a, b) => String(a.name).localeCompare(String(b.name)))
 		.map((val) => {
 			return { name: val.name, value: val, short: val.name }
@@ -35,7 +34,7 @@ async function fetch_timelines(config: ConfigType) {
 	const spinner = spin().start(chalk.green('Fetch timelines...'))
 
 	const timelineApi = new TimelineApi()
-	const errorList : string[] = []
+	const errorList: string[] = []
 
 	config.timelines = []
 	await Promise.all(

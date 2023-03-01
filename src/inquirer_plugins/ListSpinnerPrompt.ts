@@ -8,20 +8,21 @@
  * @author Theo <@GreenDjango>
  */
 
-/* tslint:disable */
 import chalk from 'chalk'
-import { Interface as ReadLineInterface } from 'readline'
+import type { Interface as ReadLineInterface } from 'readline'
 import { flatMap, map, take, takeUntil } from 'rxjs/operators'
 import Base from 'inquirer/lib/prompts/base'
 import observe from 'inquirer/lib/utils/events'
 import Paginator from 'inquirer/lib/utils/paginator'
-import Choices from 'inquirer/lib/objects/choices'
-import { Answers, ListQuestionOptions } from 'inquirer'
+import type Choices from 'inquirer/lib/objects/choices'
+import type Choice from 'inquirer/lib/objects/choice'
+import type { Answers, ListQuestionOptions } from 'inquirer'
 import cliSpinners from 'cli-spinners'
-// @ts-ignore
 import cliCursor from 'cli-cursor'
 // @ts-ignore
 import runAsync from 'run-async'
+
+type DoneCallback = (data: any) => void
 
 /**
  * message: string, top content
@@ -33,7 +34,7 @@ export default class ListSpinnerPrompt extends Base {
 	public showHelp: boolean
 	private selected: number
 	private readonly paginator: Paginator
-	private done: Function | undefined
+	private done: DoneCallback | undefined
 	private id: NodeJS.Timeout | undefined
 	private frame_idx: number
 
@@ -67,7 +68,7 @@ export default class ListSpinnerPrompt extends Base {
 	}
 
 	//Start the Inquiry session
-	public _run(cb: Function) {
+	public override _run(cb: DoneCallback) {
 		this.done = cb
 
 		const self = this
@@ -75,8 +76,6 @@ export default class ListSpinnerPrompt extends Base {
 		const events = observe(this.rl)
 		events.normalizedUpKey.pipe(takeUntil(events.line)).forEach(this.onUpKey.bind(this))
 		events.normalizedDownKey.pipe(takeUntil(events.line)).forEach(this.onDownKey.bind(this))
-		// @ts-ignore
-		events.numberKey.pipe(takeUntil(events.line)).forEach(this.onNumberKey.bind(this))
 		events.line
 			.pipe(
 				take(1),
@@ -109,10 +108,10 @@ export default class ListSpinnerPrompt extends Base {
 		} else {
 			const choicesStr = listRender(this.opt.choices, this.selected, this.frame_idx)
 			if (!ignore_spinners) this.frame_idx++
-			// @ts-ignore
-			const indexPosition = this.opt.choices.indexOf(this.opt.choices.getChoice(this.selected))
-			// @ts-ignore
-			message += '\n' + this.paginator.paginate(choicesStr, indexPosition, this.opt.pageSize)
+			const indexPosition = this.opt.choices.indexOf(
+				this.opt.choices.getChoice(this.selected) as Choice<Answers>
+			)
+			message += '\n' + this.paginator.paginate(choicesStr, indexPosition)
 		}
 
 		this.screen.render(message, undefined as any)
@@ -153,14 +152,6 @@ export default class ListSpinnerPrompt extends Base {
 	onDownKey() {
 		const len = this.opt.choices.realLength
 		this.selected = this.selected < len - 1 ? this.selected + 1 : 0
-		this.showHelp = false
-		this.render(true)
-	}
-
-	onNumberKey(input: number) {
-		if (input <= this.opt.choices.realLength) {
-			this.selected = input - 1
-		}
 		this.showHelp = false
 		this.render(true)
 	}

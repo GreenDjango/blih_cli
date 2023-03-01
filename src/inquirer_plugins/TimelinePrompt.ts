@@ -8,16 +8,15 @@
  * @author Theo <@GreenDjango>
  */
 
-/* tslint:disable */
 import chalk from 'chalk'
-import { Interface as ReadLineInterface } from 'readline'
+import type { Interface as ReadLineInterface } from 'readline'
 import { fromEvent } from 'rxjs'
 import { flatMap, map, take, takeUntil, filter, share } from 'rxjs/operators'
 import Base from 'inquirer/lib/prompts/base'
 import observe from 'inquirer/lib/utils/events'
 import Paginator from 'inquirer/lib/utils/paginator'
-import { Answers, ListQuestionOptions } from 'inquirer'
-// @ts-ignore
+import type Choice from 'inquirer/lib/objects/choice'
+import type { Answers, ListQuestionOptions } from 'inquirer'
 import cliCursor from 'cli-cursor'
 // @ts-ignore
 import runAsync from 'run-async'
@@ -29,6 +28,7 @@ const unitSize = '------------------------------------------------------'
 
 type Project = { project: string; start: string; end: string }
 type Extra = { project: string; start: Date; end: Date }
+type DoneCallback = (data: any) => void
 
 /**
  * @param message string, top content
@@ -41,25 +41,23 @@ export default class TimelinePrompt extends Base {
 	private selected: number
 	private offsetX: number
 	private readonly paginator: Paginator
-	private done: Function | undefined
+	private done: DoneCallback | null
 	private axeX: string
 	private unitsX: string
 	private longestName: number
-	private oldestDate: Date
-	private latestDate: Date
+	private oldestDate: Date | null
+	private latestDate: Date | null
 
 	constructor(questions: ListQuestionOptions, rl: ReadLineInterface, answers: Answers) {
 		questions.choices = [...(questions.choices as any)].map((value) => {
 			value.name = value.module
 			value.type = value.type || 'choice'
 			value.extra = (value.projects as Project[])
-				.map(
-					(v): Extra => {
-						const end_date = new Date(v.end)
-						end_date.setDate(end_date.getDate() + 1)
-						return { project: v.project, start: new Date(v.start), end: end_date }
-					}
-				)
+				.map((v): Extra => {
+					const end_date = new Date(v.end)
+					end_date.setDate(end_date.getDate() + 1)
+					return { project: v.project, start: new Date(v.start), end: end_date }
+				})
 				.sort((a, b) => a.start.getTime() - b.start.getTime())
 			delete value.module
 			delete value.projects
@@ -74,12 +72,12 @@ export default class TimelinePrompt extends Base {
 		this.showHelp = true
 		this.selected = 0
 		this.offsetX = 0
-		this.done = undefined
+		this.done = null
 		this.axeX = ''
 		this.unitsX = ''
 		this.longestName = 0
-		this.oldestDate = undefined as any
-		this.latestDate = undefined as any
+		this.oldestDate = null
+		this.latestDate = null
 
 		this.setup()
 
@@ -105,8 +103,8 @@ export default class TimelinePrompt extends Base {
 			if (choice.type !== 'choice') return
 			const extra = choice.extra as Extra[]
 			if (choice.name.length > this.longestName) this.longestName = choice.name.length
-			if (!this.oldestDate || this.oldestDate > extra[0]?.start) {
-				this.oldestDate = extra[0]?.start
+			if (!this.oldestDate || (extra[0]?.start && this.oldestDate > extra[0].start)) {
+				this.oldestDate = extra[0]?.start ?? null
 			}
 			const latest = extra.reduce((a, b) => (a.end > b.end ? a : b))
 			if (!this.latestDate || this.latestDate < latest?.end) this.latestDate = latest?.end
@@ -119,7 +117,7 @@ export default class TimelinePrompt extends Base {
 		const monthLength = getBetweenMonth(this.oldestDate, this.latestDate) + 1
 		this.axeX = '─'.repeat(this.longestName + 5) + '┤' + `${unitSize}|`.repeat(monthLength)
 		for (let i = 0; i <= monthLength; i++) {
-			const month = months[(this.oldestDate.getMonth() + i) % 12]
+			const month = months[(this.oldestDate.getMonth() + i) % 12] ?? ''
 			this.unitsX +=
 				' '.repeat(
 					unitSize.length -
@@ -131,7 +129,7 @@ export default class TimelinePrompt extends Base {
 	}
 
 	//Start the Inquiry session
-	public _run(cb: Function) {
+	public override _run(cb: DoneCallback) {
 		this.done = cb
 
 		const self = this
@@ -143,8 +141,6 @@ export default class TimelinePrompt extends Base {
 		eventsCustom.normalizedLeftKey.pipe(takeUntil(events.line)).forEach(this.onLeftKey.bind(this))
 		eventsCustom.normalizedRightKey.pipe(takeUntil(events.line)).forEach(this.onRightKey.bind(this))
 
-		// @ts-ignore
-		events.numberKey.pipe(takeUntil(events.line)).forEach(this.onNumberKey.bind(this))
 		events.line
 			.pipe(
 				take(1),
@@ -161,7 +157,7 @@ export default class TimelinePrompt extends Base {
 	}
 
 	getAbsPos(d: Date) {
-		const monthDiff = getBetweenMonth(this.oldestDate, d)
+		const monthDiff = getBetweenMonth(this.oldestDate ?? new Date(), d)
 		//Day 0 is the last day in the previous month
 		const dayInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
 		const monthOffset = Math.round((unitSize.length + 1) * (d.getDate() / dayInMonth))
@@ -184,11 +180,10 @@ export default class TimelinePrompt extends Base {
 			message += chalk.cyan(this.opt.choices.getChoice(this.selected).short)
 		} else {
 			const choicesStr = this.listRender()
-			// @ts-ignore
-			const indexPosition = this.opt.choices.indexOf(this.opt.choices.getChoice(this.selected))
-			// prettier-ignore
-			// @ts-ignore
-			message += '\n' + this.paginator.paginate(choicesStr, indexPosition * 3 +1, this.opt.pageSize)
+			const indexPosition = this.opt.choices.indexOf(
+				this.opt.choices.getChoice(this.selected) as Choice<Answers>
+			)
+			message += '\n' + this.paginator.paginate(choicesStr, indexPosition * 3 + 1)
 		}
 
 		const bottomContent = this.status === 'answered' ? undefined : this.bottomRender()
@@ -308,13 +303,6 @@ export default class TimelinePrompt extends Base {
 		this.offsetX -= 8
 		this.render()
 	}
-
-	onNumberKey(input: number) {
-		if (input <= this.opt.choices.realLength) {
-			this.selected = input - 1
-		}
-		this.render()
-	}
 }
 
 function getBetweenMonth(a: Date, b: Date) {
@@ -350,7 +338,7 @@ function applyOffset(line: string, offsetX: number, width: number) {
 }
 
 function observeCustom(rl: any) {
-	var keypress = fromEvent(rl.input, 'keypress', (value, key) => {
+	const keypress = fromEvent(rl.input, 'keypress', (value, key) => {
 		return { value: value, key: key || {} }
 	})
 		// Ignore `enter` key. On the readline, we only care about the `line` event.

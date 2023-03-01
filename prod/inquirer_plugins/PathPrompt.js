@@ -16,8 +16,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const choices_1 = __importDefault(require("inquirer/lib/objects/choices"));
-// @ts-ignore
 const inquirer_autocomplete_prompt_1 = __importDefault(require("inquirer-autocomplete-prompt"));
+// @ts-ignore
 const strip_ansi_1 = __importDefault(require("strip-ansi"));
 const ansi_styles_1 = __importDefault(require("ansi-styles"));
 const fuzzy_1 = __importDefault(require("fuzzy"));
@@ -34,16 +34,15 @@ const fuzzy_1 = __importDefault(require("fuzzy"));
 class PathPrompt extends inquirer_autocomplete_prompt_1.default {
     constructor(question, rl, answers) {
         const { itemType = 'any', rootPath = '.', excludePath = () => false, excludeFilter = false, } = question;
-        const questionBase = Object.assign({}, question, {
+        const questionBase = {
+            ...question,
             source: async (_, searchTerm) => getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, question.default),
-        });
+        };
         super(questionBase, rl, answers);
     }
     search(searchTerm) {
         return super.search(searchTerm).then(() => {
-            // @ts-ignore
             this.currentChoices.getChoice = (choiceIndex) => {
-                // @ts-ignore
                 const choice = choices_1.default.prototype.getChoice.call(this.currentChoices, choiceIndex);
                 return {
                     value: (0, strip_ansi_1.default)(choice.value),
@@ -62,7 +61,7 @@ class PathPrompt extends inquirer_autocomplete_prompt_1.default {
 }
 exports.default = PathPrompt;
 function getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, defaultItem) {
-    const pathDir = (searchTerm === null || searchTerm === void 0 ? void 0 : searchTerm.includes('/'))
+    const pathDir = searchTerm?.includes('/')
         ? searchTerm.substring(0, searchTerm.lastIndexOf('/') + 1)
         : rootPath;
     const nodeList = [pathDir].map((nodePath) => {
@@ -91,13 +90,13 @@ function getPaths(rootPath, searchTerm, excludePath, excludeFilter, itemType, de
     })[0];
     const preFilteredNodes = !excludeFilter
         ? nodeList
-        : nodeList.filter((node) => !excludeFilter(node));
+        : nodeList?.filter((node) => excludeFilter(node));
     const fuzzOptions = {
         pre: ansi_styles_1.default.green.open,
         post: ansi_styles_1.default.green.close,
     };
     const filteredNodes = fuzzy_1.default
-        .filter(searchTerm || '', preFilteredNodes, fuzzOptions)
+        .filter(searchTerm || '', preFilteredNodes ?? [], fuzzOptions)
         .map((e) => e.string);
     if (!searchTerm && defaultItem) {
         filteredNodes.unshift(defaultItem);

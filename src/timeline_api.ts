@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosResponse, Method } from 'axios'
 
 const options = {
 	baseURL: 'https://gitlab.com/epi-codes/Epitech-2023-Timeline/-/raw/master/data/',
@@ -10,11 +10,10 @@ const optionsPing = {
 }
 
 function responseErrorInterceptor(error: any) {
-	if (error.response && error.response.data.error) {
+	if (error?.response?.data?.error) {
 		return Promise.reject(error.response.data.error)
-	} else {
-		return Promise.reject(error.message)
 	}
+	return Promise.reject(error?.message ?? error)
 }
 
 export type Timeline = {
@@ -87,21 +86,9 @@ export class TimelineApi {
 	static async ping(): Promise<number> {
 		const api = axios.create(optionsPing)
 
-		// Add timestamps to requests and responses
-		api.interceptors.request.use(
-			(config) => {
-				;(config as any).startTimestamp = Date.now()
-				return config
-			},
-			(error) => Promise.reject(error)
-		)
-		api.interceptors.response.use((response) => {
-			;(response.config as any).endTimestamp = Date.now()
-			return response
-		}, responseErrorInterceptor)
-
-		const res = await api.get('/')
-		return (res.config as any).endTimestamp - (res.config as any).startTimestamp
+		const startTimestamp = Date.now()
+		await api.get('/')
+		return Date.now() - startTimestamp
 	}
 
 	/**
@@ -111,10 +98,7 @@ export class TimelineApi {
 	 * @param  {String} endpoint - remote endpoint to use
 	 * @return {Promise} the request
 	 */
-	private async call(
-		method: AxiosRequestConfig['method'],
-		endpoint: string
-	): Promise<AxiosResponse<any>> {
+	private async call(method: Method, endpoint: string): Promise<AxiosResponse<any>> {
 		return this._api.request({ method, url: endpoint })
 	}
 }

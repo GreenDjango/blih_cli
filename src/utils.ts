@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import fs from 'fs'
 import { exec } from 'child_process'
 import { homedir } from 'os'
-import { Timeline } from './timeline_api'
+import type { Timeline } from './timeline_api'
 
 const CONFIG_FOLDER = homedir() + '/.config/blih_cli'
 const CONFIG_FILE = '.cli_data.json'
@@ -50,8 +50,10 @@ export class clor {
 	}
 }
 
+type ConfigChangeCallback = (data: any) => void
+
 export class ConfigType {
-	private _listen: Function | undefined
+	private _listen: ConfigChangeCallback | null
 	private _email: string
 	private _token: string
 	private _spinner_name: string
@@ -62,12 +64,12 @@ export class ConfigType {
 	private _contact: string[]
 	private _cloning_options: string[]
 	private _colors: { info: string }
-	public args: string[] | undefined
+	public args: string[] | null
 	public timelines: Timeline[]
 	public repo: string[]
 
 	constructor() {
-		this._listen = undefined
+		this._listen = null
 		this._email = ''
 		this._token = ''
 		this._spinner_name = SPINNER
@@ -78,7 +80,7 @@ export class ConfigType {
 		this._contact = []
 		this._cloning_options = ['--depth=1']
 		this._colors = COLORS
-		this.args = undefined
+		this.args = null
 		this.timelines = []
 		this.repo = []
 	}
@@ -98,12 +100,12 @@ export class ConfigType {
 		}
 	}
 
-	addListener(callback: Function) {
+	addListener(callback: ConfigChangeCallback) {
 		this._listen = callback
 	}
 
 	removeListener() {
-		this._listen = undefined
+		this._listen = null
 	}
 
 	private _triggerListener() {
@@ -187,7 +189,7 @@ export class ConfigType {
 	set cloning_options(cloning_options: string[]) {
 		if (typeof cloning_options !== 'object') return
 		this._cloning_options = cloning_options.filter((val) => {
-			if (/[\$`|><;]/.test(val)) {
+			if (/[$`|><;]/.test(val)) {
 				// prettier-ignore
 				print_message('Config error: ' + JSON.stringify(val) + ' contains banned characters. eg: $`|><;', '', 'fail')
 				return false
@@ -242,6 +244,7 @@ function parse_config(config: any) {
 	if (config?.colors) {
 		clor.getColorsKey().forEach((key) => {
 			if (colorsValue.has(config.colors[key])) {
+				true
 				;(new_config.colors as any)[key] = config.colors[key]
 			}
 		})

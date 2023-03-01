@@ -84,6 +84,8 @@ async function delete_key(api) {
         if (choice === '↵ Back' || !(await (0, ui_1.ask_question)('Are you sure ?')))
             return;
         const key = choice.split(' ')[0];
+        if (key === undefined)
+            return;
         spinner.start(chalk_1.default.green(utils_1.WAIT_MSG));
         const res = await api.deleteKey(key);
         spinner.succeed(chalk_1.default.green(res));
@@ -101,7 +103,7 @@ async function show_key(api) {
         if (idx === '0')
             return;
         const key = key_list[+idx - 1];
-        spinner.info(utils_1.clor.info(`Name:		${key.name}` + `\n  Data:		${key.data}`));
+        spinner.info(utils_1.clor.info(`Name:		${key?.name}` + `\n  Data:		${key?.data}`));
     }
     catch (err) {
         spinner.fail(chalk_1.default.red(err));

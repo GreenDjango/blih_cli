@@ -51,7 +51,7 @@ class clor {
 exports.clor = clor;
 class ConfigType {
     constructor() {
-        this._listen = undefined;
+        this._listen = null;
         this._email = '';
         this._token = '';
         this._spinner_name = exports.SPINNER;
@@ -62,7 +62,7 @@ class ConfigType {
         this._contact = [];
         this._cloning_options = ['--depth=1'];
         this._colors = COLORS;
-        this.args = undefined;
+        this.args = null;
         this.timelines = [];
         this.repo = [];
     }
@@ -84,7 +84,7 @@ class ConfigType {
         this._listen = callback;
     }
     removeListener() {
-        this._listen = undefined;
+        this._listen = null;
     }
     _triggerListener() {
         if (this._listen) {
@@ -174,7 +174,7 @@ class ConfigType {
         if (typeof cloning_options !== 'object')
             return;
         this._cloning_options = cloning_options.filter((val) => {
-            if (/[\$`|><;]/.test(val)) {
+            if (/[$`|><;]/.test(val)) {
                 // prettier-ignore
                 print_message('Config error: ' + JSON.stringify(val) + ' contains banned characters. eg: $`|><;', '', 'fail');
                 return false;
@@ -217,21 +217,21 @@ function parse_config(config) {
     const regex_email = RegExp('([\\w.-]+@([\\w-]+)\\.+\\w{2,})');
     const new_config = new ConfigType();
     // TODO: move email & color parse in getter / setter
-    if ((config === null || config === void 0 ? void 0 : config.email) && regex_email.test(config.email)) {
+    if (config?.email && regex_email.test(config.email)) {
         new_config.email = config.email;
     }
-    new_config.token = config === null || config === void 0 ? void 0 : config.token;
-    new_config.spinner_name = config === null || config === void 0 ? void 0 : config.spinner_name;
-    new_config.save_token = config === null || config === void 0 ? void 0 : config.save_token;
-    new_config.auto_acl = config === null || config === void 0 ? void 0 : config.auto_acl;
-    new_config.verbose = config === null || config === void 0 ? void 0 : config.verbose;
-    new_config.check_update = config === null || config === void 0 ? void 0 : config.check_update;
-    new_config.contact = config === null || config === void 0 ? void 0 : config.contact;
-    new_config.cloning_options = config === null || config === void 0 ? void 0 : config.cloning_options;
-    if (config === null || config === void 0 ? void 0 : config.colors) {
+    new_config.token = config?.token;
+    new_config.spinner_name = config?.spinner_name;
+    new_config.save_token = config?.save_token;
+    new_config.auto_acl = config?.auto_acl;
+    new_config.verbose = config?.verbose;
+    new_config.check_update = config?.check_update;
+    new_config.contact = config?.contact;
+    new_config.cloning_options = config?.cloning_options;
+    if (config?.colors) {
         clor.getColorsKey().forEach((key) => {
             if (exports.colorsValue.has(config.colors[key])) {
-                ;
+                true;
                 new_config.colors[key] = config.colors[key];
             }
         });
@@ -293,36 +293,34 @@ async function sh(cmd) {
 exports.sh = sh;
 async function sh_live(cmd) {
     return new Promise(function (resolve, reject) {
-        var _a, _b;
         const child = (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
             if (err)
                 reject(err);
             else
                 resolve({ stdout, stderr });
         });
-        (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
-        (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.pipe(process.stderr);
+        child.stdout?.pipe(process.stdout);
+        child.stderr?.pipe(process.stderr);
     });
 }
 exports.sh_live = sh_live;
 async function sh_callback(cmd, callback) {
     return new Promise(function (resolve, reject) {
-        var _a, _b, _c;
         const child = (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
             if (err)
                 reject(err);
             else
                 resolve({ stdout, stderr });
         });
-        (_a = child.stdin) === null || _a === void 0 ? void 0 : _a.on('data', (data) => {
+        child.stdin?.on('data', (data) => {
             if (callback)
                 callback('stdin', data);
         });
-        (_b = child.stdout) === null || _b === void 0 ? void 0 : _b.on('data', (data) => {
+        child.stdout?.on('data', (data) => {
             if (callback)
                 callback('stdout', data);
         });
-        (_c = child.stderr) === null || _c === void 0 ? void 0 : _c.on('data', (data) => {
+        child.stderr?.on('data', (data) => {
             if (callback)
                 callback('stderr', data);
         });
@@ -346,7 +344,7 @@ async function get_app_version() {
         else {
             const package_file = fs_1.default.readFileSync(PACKAGE_PATH, 'utf8');
             const package_obj = JSON.parse(package_file);
-            return 'v' + (package_obj === null || package_obj === void 0 ? void 0 : package_obj.version);
+            return 'v' + package_obj?.version;
         }
     }
     catch (err) {

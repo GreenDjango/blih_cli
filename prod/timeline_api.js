@@ -14,12 +14,10 @@ const optionsPing = {
     timeout: 10000,
 };
 function responseErrorInterceptor(error) {
-    if (error.response && error.response.data.error) {
+    if (error?.response?.data?.error) {
         return Promise.reject(error.response.data.error);
     }
-    else {
-        return Promise.reject(error.message);
-    }
+    return Promise.reject(error?.message ?? error);
 }
 // Always use Node.js adapter
 axios_1.default.defaults.adapter = require('axios/lib/adapters/http');
@@ -61,19 +59,9 @@ class TimelineApi {
      */
     static async ping() {
         const api = axios_1.default.create(optionsPing);
-        // Add timestamps to requests and responses
-        api.interceptors.request.use((config) => {
-            ;
-            config.startTimestamp = Date.now();
-            return config;
-        }, (error) => Promise.reject(error));
-        api.interceptors.response.use((response) => {
-            ;
-            response.config.endTimestamp = Date.now();
-            return response;
-        }, responseErrorInterceptor);
-        const res = await api.get('/');
-        return res.config.endTimestamp - res.config.startTimestamp;
+        const startTimestamp = Date.now();
+        await api.get('/');
+        return Date.now() - startTimestamp;
     }
     /**
      * Make a generic call to the Gitlab API

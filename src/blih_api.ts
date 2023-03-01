@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosResponse, Method } from 'axios'
 
 // MIT https://www.npmjs.com/package/blih
 
@@ -110,9 +110,7 @@ export class BlihApi {
 	 * @param  {String} repository Name of the new repository
 	 * @return {Promise} information about the repository
 	 */
-	async repositoryInfo(
-		repository: string
-	): Promise<{
+	async repositoryInfo(repository: string): Promise<{
 		name: string
 		url: string
 		creation_time: number
@@ -236,21 +234,9 @@ export class BlihApi {
 	static async ping(): Promise<number> {
 		const api = axios.create(options)
 
-		// Add timestamps to requests and responses
-		api.interceptors.request.use(
-			(config) => {
-				;(config as any).startTimestamp = Date.now()
-				return config
-			},
-			(error) => Promise.reject(error)
-		)
-		api.interceptors.response.use((response) => {
-			;(response.config as any).endTimestamp = Date.now()
-			return response
-		}, responseErrorInterceptor)
-
-		const res = await api.get('/')
-		return (res.config as any).endTimestamp - (res.config as any).startTimestamp
+		const startTimestamp = Date.now()
+		await api.get('/')
+		return Date.now() - startTimestamp
 	}
 
 	/**
@@ -261,11 +247,7 @@ export class BlihApi {
 	 * @param  {Object} data - request body additionnal data
 	 * @return {Promise} the request
 	 */
-	private async call(
-		method: AxiosRequestConfig['method'],
-		endpoint: string,
-		data?: any
-	): Promise<AxiosResponse<any>> {
+	private async call(method: Method, endpoint: string, data?: any): Promise<AxiosResponse<any>> {
 		const body = { user: this._email, data, signature: '' }
 
 		body.signature = crypto

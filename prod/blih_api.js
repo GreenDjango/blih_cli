@@ -201,19 +201,9 @@ class BlihApi {
      */
     static async ping() {
         const api = axios_1.default.create(options);
-        // Add timestamps to requests and responses
-        api.interceptors.request.use((config) => {
-            ;
-            config.startTimestamp = Date.now();
-            return config;
-        }, (error) => Promise.reject(error));
-        api.interceptors.response.use((response) => {
-            ;
-            response.config.endTimestamp = Date.now();
-            return response;
-        }, responseErrorInterceptor);
-        const res = await api.get('/');
-        return res.config.endTimestamp - res.config.startTimestamp;
+        const startTimestamp = Date.now();
+        await api.get('/');
+        return Date.now() - startTimestamp;
     }
     /**
      * Make a generic call to the Blih API
