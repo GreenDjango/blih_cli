@@ -8,11 +8,11 @@ Blih CLI (say blikli) is the Blih (Bocal Lightweight Interface for Humans) Js CL
 
 ## 💾 Install & Setup
 
-⚠️ Install [node](https://nodejs.org/en/) & npm (use `sudo apt install nodejs npm` for ubuntu
-or `sudo dnf install nodejs` for fedora)
+⚠️ Install [node](https://nodejs.org/en/) & npm (use `apt install nodejs npm` for ubuntu
+or `dnf install nodejs` for fedora)
 
 #### 👶 Easy mode
-1. `sudo npm i blih_cli -g`
+1. `npm i blih_cli -g`
 
 #### 👨‍💻 Expert mode
 1. `git clone https://github.com/GreenDjango/blih_cli`
@@ -58,31 +58,27 @@ Use `blih_cli --uninstall` for uninstall blih_cli from
 git clone https://github.com/GreenDjango/blih_cli
 cd blih_cli
 npm i
-npm run build
-./build/index.js
+npm run build:dev
+npm run dev
 ```
 
 #### Lint
 
 ```
 npm run lint
+npm run typescript:check
+npm run prettier:diff
 ```
 
 #### Build
 
 ```
-npm run build
-```
-
-#### Production
-
-```
-npm run prod
+npm run build:prod
 ```
 
 [1]: https://img.shields.io/github/v/release/GreenDjango/blih_cli?maxAge=600
 [2]: https://github.com/GreenDjango/blih_cli/releases 'GitHub release (latest by date)'
-[3]: https://img.shields.io/github/workflow/status/GreenDjango/blih_cli/node-ci?maxAge=600
+[3]: https://img.shields.io/github/actions/workflow/status/GreenDjango/blih_cli/node-ci.yml?maxAge=600
 [4]: https://github.com/GreenDjango/blih_cli/actions 'GitHub Workflow Status'
 [5]: https://img.shields.io/github/issues-closed/GreenDjango/blih_cli?maxAge=600
 [6]: https://github.com/GreenDjango/blih_cli/issues 'GitHub closed issues'
