@@ -16,10 +16,10 @@ jobs:
     # outputs:
     #   status: ${{ steps.ID.conclusion }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
       - run: npm ci
       - run: npm test
       - name: Wait for CI action to succeed
@@ -46,7 +46,7 @@ jobs:
     outputs:
       status: ${{ steps.haschanged.outputs.status }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check if version has been updated
         id: check
         uses: EndBug/version-check@7d67b971df2c119e8dab599b302b311d5db2e8f7
@@ -63,10 +63,10 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.test-version.outputs.status == 'true'
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           registry-url: https://registry.npmjs.org/
       - name: Publish if version has been updated
         uses: pascalgn/npm-publish-action@06e0830ea83eea10ed4a62654eeaedafb8bf50fc
@@ -86,10 +86,10 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.test-version.outputs.status == 'true'
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           registry-url: https://npm.pkg.github.com/
       - name: Update package name
         run: |
@@ -107,7 +107,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup ssh key
