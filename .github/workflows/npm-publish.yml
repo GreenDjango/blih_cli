@@ -21,7 +21,6 @@ jobs:
         with:
           node-version: 16
       - run: npm ci
-      - run: npm test
       - name: Wait for CI action to succeed
         uses: fountainhead/action-wait-for-check@7ee38294c9e2ee911a1db471a8095ee7e00d4663
               # This is tagged version v1.0.0, but do not use version tags

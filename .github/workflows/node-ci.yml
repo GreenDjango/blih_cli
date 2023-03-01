@@ -15,12 +15,13 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - name: npm install dev, build, and lint
-      run: |
-        npm ci
-        npm run build:dev --if-present
-        npm run lint --if-present
-    - name: npm install prod, exec
+
+    - name: npm install dev dependencies
+      run: npm ci
+    - run: npm run build:dev --if-present
+    - run: npm run lint --if-present
+
+    - name: npm install prod dependencies, exec
       run: |
         rm -rf node_modules/
         npm i --production
