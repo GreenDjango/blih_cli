@@ -22,8 +22,8 @@ jobs:
           node-version: 16
       - run: npm ci
       - name: Wait for CI action to succeed
-        uses: fountainhead/action-wait-for-check@7ee38294c9e2ee911a1db471a8095ee7e00d4663
-              # This is tagged version v1.0.0, but do not use version tags
+        uses: fountainhead/action-wait-for-check@297be350cf8393728ea4d4b39435c7d7ae167c93
+              # This is tagged version v1.1.0, but do not use version tags
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         id: wait-for-build
         with:
@@ -43,19 +43,19 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     outputs:
-      status: ${{ steps.haschanged.outputs.status }}
+      status: ${{ steps.check.outputs.changed || false }}
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
       - name: Check if version has been updated
         id: check
-        uses: EndBug/version-check@7d67b971df2c119e8dab599b302b311d5db2e8f7
-              # This is tagged version v1.5.0, but do not use version tags
+        uses: EndBug/version-check@323ba664f1d777a793dd0e570bdb4116665808ad
+              # This is tagged version v2.1.1, but do not use version tags
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         with:
           diff-search: true
-      - name: Return if version has been updated
-        id: haschanged
-        run: echo "##[set-output name=status;]${{ steps.check.outputs.changed || false }}"
 
   publish-npm:
     needs: test-version
@@ -68,8 +68,8 @@ jobs:
           node-version: 16
           registry-url: https://registry.npmjs.org/
       - name: Publish if version has been updated
-        uses: pascalgn/npm-publish-action@06e0830ea83eea10ed4a62654eeaedafb8bf50fc
-              # This is tagged version v1.3.3, but do not use version tags
+        uses: pascalgn/npm-publish-action@374314eadce0ca5353387666469a949f69414752
+              # This is tagged version v1.3.9, but do not use version tags
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         with: # All of theses inputs are optional
           tag_name: "v%s"
