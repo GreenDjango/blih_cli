@@ -16,8 +16,8 @@ jobs:
     # outputs:
     #   status: ${{ steps.ID.conclusion }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
       - run: npm ci
@@ -45,14 +45,14 @@ jobs:
     outputs:
       status: ${{ steps.check.outputs.changed || false }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
       - name: Check if version has been updated
         id: check
-        uses: EndBug/version-check@323ba664f1d777a793dd0e570bdb4116665808ad
-              # This is tagged version v2.1.1, but do not use version tags
+        uses: EndBug/version-check@8240855b2dbd43fc1c3c628d7aa75cfa07b76ab4
+              # This is tagged version v2.1.2, but do not use version tags
               # https://julienrenaux.fr/2019/12/20/github-actions-security-risk/
         with:
           diff-search: true
@@ -62,8 +62,8 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.test-version.outputs.status == 'true'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
@@ -85,8 +85,8 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.test-version.outputs.status == 'true'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
@@ -106,7 +106,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup ssh key
