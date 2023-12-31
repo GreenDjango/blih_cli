@@ -33,13 +33,13 @@
     "dev": "env BLIH_CLI_CONFIG_SKIP=true ./build/index.js",
     "build:dev": "tsc && chmod a+x build/index.js",
     "build:prod": "rm -rf build prod && npm run build:dev -s && cp -r build prod",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint src --ext .js,.ts",
     "typescript:check": "tsc --noEmit --pretty",
-    "prettier:diff": "prettier --config package.json --list-different \"**/*.{js,ts,jsx,tsx,css}\"",
+    "prettier:diff": "prettier --config package.json --list-different src",
     "unzip:man": "gunzip -c man/manpage.1.gz > man/manpage.1"
   },
   "dependencies": {
-    "axios": "^0.26.1",
+    "axios": "^1.6.3",
     "chalk": "^4.1.2",
     "cli-cursor": "^2.1.0",
     "cli-spinners": "^2.5.0",
@@ -56,11 +56,18 @@
     "@types/cli-cursor": "^2.1.0",
     "@types/inquirer": "^6.5.0",
     "@types/inquirer-autocomplete-prompt": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
-    "eslint": "^8.35.0",
-    "eslint-config-prettier": "^8.6.0",
-    "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "useTabs": true,
+    "printWidth": 100
   }
 }
