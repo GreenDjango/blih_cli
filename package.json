@@ -16,7 +16,7 @@
   ],
   "main": "prod/index.js",
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "bin": {
     "blih_cli": "prod/index.js",
