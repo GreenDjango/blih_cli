@@ -30,9 +30,6 @@ export type Projects = {
 	bttf: boolean
 }
 
-// Always use Node.js adapter
-axios.defaults.adapter = require('axios/lib/adapters/http')
-
 export class TimelineApi {
 	private _api: AxiosInstance
 	private readonly _timelineFiles = Object.freeze([

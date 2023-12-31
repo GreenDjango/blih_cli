@@ -18,9 +18,9 @@ import Paginator from 'inquirer/lib/utils/paginator'
 import type Choice from 'inquirer/lib/objects/choice'
 import type { Answers, ListQuestionOptions } from 'inquirer'
 import cliCursor from 'cli-cursor'
-// @ts-ignore
+// @ts-expect-error no type invalide
 import runAsync from 'run-async'
-// @ts-ignore
+// @ts-expect-error no type invalide
 import cliWidth from 'cli-width'
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

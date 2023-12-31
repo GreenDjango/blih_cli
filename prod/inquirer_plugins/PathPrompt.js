@@ -17,7 +17,7 @@ const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const choices_1 = __importDefault(require("inquirer/lib/objects/choices"));
 const inquirer_autocomplete_prompt_1 = __importDefault(require("inquirer-autocomplete-prompt"));
-// @ts-ignore
+// @ts-expect-error no type invalide
 const strip_ansi_1 = __importDefault(require("strip-ansi"));
 const ansi_styles_1 = __importDefault(require("ansi-styles"));
 const fuzzy_1 = __importDefault(require("fuzzy"));

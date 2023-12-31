@@ -19,9 +19,9 @@ const base_1 = __importDefault(require("inquirer/lib/prompts/base"));
 const events_1 = __importDefault(require("inquirer/lib/utils/events"));
 const paginator_1 = __importDefault(require("inquirer/lib/utils/paginator"));
 const cli_cursor_1 = __importDefault(require("cli-cursor"));
-// @ts-ignore
+// @ts-expect-error no type invalide
 const run_async_1 = __importDefault(require("run-async"));
-// @ts-ignore
+// @ts-expect-error no type invalide
 const cli_width_1 = __importDefault(require("cli-width"));
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const unitSize = '------------------------------------------------------';

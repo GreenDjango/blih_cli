@@ -19,7 +19,7 @@ import type Choice from 'inquirer/lib/objects/choice'
 import type { Answers, ListQuestionOptions } from 'inquirer'
 import cliSpinners from 'cli-spinners'
 import cliCursor from 'cli-cursor'
-// @ts-ignore
+// @ts-expect-error no type invalide
 import runAsync from 'run-async'
 
 type DoneCallback = (data: any) => void

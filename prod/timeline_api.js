@@ -19,8 +19,6 @@ function responseErrorInterceptor(error) {
     }
     return Promise.reject(error?.message ?? error);
 }
-// Always use Node.js adapter
-axios_1.default.defaults.adapter = require('axios/lib/adapters/http');
 class TimelineApi {
     /**
      * Constructor

@@ -19,7 +19,7 @@ const events_1 = __importDefault(require("inquirer/lib/utils/events"));
 const paginator_1 = __importDefault(require("inquirer/lib/utils/paginator"));
 const cli_spinners_1 = __importDefault(require("cli-spinners"));
 const cli_cursor_1 = __importDefault(require("cli-cursor"));
-// @ts-ignore
+// @ts-expect-error no type invalide
 const run_async_1 = __importDefault(require("run-async"));
 /**
  * message: string, top content

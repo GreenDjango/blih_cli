@@ -23,8 +23,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "importsNotUsedAsValues": "error"
+    "noUnusedParameters": true
   },
   "compileOnSave": true,
   "include": ["src"]

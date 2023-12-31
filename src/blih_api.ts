@@ -29,9 +29,6 @@ export type Repository = {
 export type ACL = { name: string; rights: string }
 export type Key = { name: string; data: string }
 
-// Always use Node.js adapter
-axios.defaults.adapter = require('axios/lib/adapters/http')
-
 export class BlihApi {
 	private _email: string
 	private _token: string

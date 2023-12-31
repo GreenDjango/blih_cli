@@ -15,7 +15,7 @@ import { readdirSync, statSync } from 'fs'
 import path from 'path'
 import Choices from 'inquirer/lib/objects/choices'
 import InquirerAutocomplete from 'inquirer-autocomplete-prompt'
-// @ts-ignore
+// @ts-expect-error no type invalide
 import stripAnsi from 'strip-ansi'
 import style from 'ansi-styles'
 import fuzzy from 'fuzzy'
